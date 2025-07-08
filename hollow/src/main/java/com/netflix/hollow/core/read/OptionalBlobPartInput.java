@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read;
 
+import org.checkerframework.checker.collectionownership.qual.CollectionFieldDestructor;
+import org.checkerframework.checker.mustcall.qual.CreatesMustCallFor;
 import org.checkerframework.framework.qual.EnsuresQualifier;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -51,6 +53,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
 
     @Impure
+    @CreatesMustCallFor("this")
     public void addInput(String partName, InputStream in) {
         streamsToClose.add(in);
         inputsByPartName.put(partName, in);
@@ -65,6 +68,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
     
     @Impure
+    @CreatesMustCallFor("this")
     public InputStream getInputStream(String partName) throws IOException {
         Object o = inputsByPartName.get(partName);
         if(o instanceof File) {
@@ -104,7 +108,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
 
     @Impure
-    @EnsuresQualifier(expression="this.streamsToClose", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
+    @CollectionFieldDestructor("streamsToClose")
     @Override
     public void close() throws IOException {
         IOException thrownException = null;
