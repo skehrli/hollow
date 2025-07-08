@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.checker.mustcall.qual.Owning;
 import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowBlobHeader;
 import com.netflix.hollow.core.HollowBlobOptionalPartHeader;
@@ -40,11 +41,17 @@ public class HollowBlobHeaderReader {
 
     @Impure
     public HollowBlobHeader readHeader(InputStream is) throws IOException {
-        return readHeader(HollowBlobInput.serial(is));
+        HollowBlobInput in = HollowBlobInput.serial(is);
+        try {
+            return readHeader(in);
+        } catch (IOException e) {
+            in.close();
+            throw e;
+        }
     }
 
     @Impure
-    public HollowBlobHeader readHeader(HollowBlobInput in) throws IOException {
+    public HollowBlobHeader readHeader(@Owning HollowBlobInput in) throws IOException {
         HollowBlobHeader header = new HollowBlobHeader();
         int headerVersion = in.readInt();
         if(headerVersion != HollowBlobHeader.HOLLOW_BLOB_VERSION_HEADER) {
@@ -70,12 +77,19 @@ public class HollowBlobHeaderReader {
         Map<String, String> headerTags = readHeaderTags(in);
         header.setHeaderTags(headerTags);
 
+        in.close();
         return header;
     }
 
     @Impure
     public HollowBlobOptionalPartHeader readPartHeader(InputStream is) throws IOException {
-        return readPartHeader(HollowBlobInput.serial(is));
+        HollowBlobInput in = HollowBlobInput.serial(is);
+        try {
+            return readPartHeader(HollowBlobInput.serial(is));
+        } catch (IOException e) {
+            in.close();
+            throw e;
+        }
     }
 
     @Impure
