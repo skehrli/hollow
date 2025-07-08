@@ -1,5 +1,6 @@
 package com.netflix.hollow.core.read;
 
+import org.checkerframework.checker.mustcall.qual.CreatesMustCallFor;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -74,6 +75,7 @@ public class HollowBlobInput implements Closeable {
      * @throws IOException if the Hollow Blob Input couldn't be initialized
      */
     @Impure
+    @CreatesMustCallFor("#2")
     public static HollowBlobInput modeBasedSelector(MemoryMode mode, OptionalBlobPartInput input, String partName) throws IOException {
         if (mode.equals(ON_HEAP)) {
             return serial(input.getInputStream(partName));
