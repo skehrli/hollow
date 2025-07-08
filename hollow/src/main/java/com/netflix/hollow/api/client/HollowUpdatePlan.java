@@ -111,7 +111,6 @@ public class HollowUpdatePlan implements Iterable<HollowConsumer.Blob> {
         transitions.add(transition);
     }
 
-    @RequiresQualifier(expression="this.transitions", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
     @Impure
     public void appendPlan(HollowUpdatePlan plan) {
         transitions.addAll(plan.transitions);
