@@ -102,23 +102,16 @@ public class HollowBlobInput implements Closeable {
      */
     @Impure
     public static HollowBlobInput randomAccess(File f, int singleBufferCapacity) throws IOException {
-        HollowBlobInput hbi = null;
+        RandomAccessFile raf = new RandomAccessFile(f, "r");
+        HollowBlobInput hbi = new HollowBlobInput(SHARED_MEMORY_LAZY, raf);
+        FileChannel channel = raf.getChannel();
         try {
-            RandomAccessFile raf = new RandomAccessFile(f, "r");
-            hbi = new HollowBlobInput(SHARED_MEMORY_LAZY, raf);
-            FileChannel channel = raf.getChannel();
             hbi.buffer = BlobByteBuffer.mmapBlob(channel, singleBufferCapacity);
-            return hbi;
         } catch (IOException e) {
-            try {
-                if (hbi != null) {
-                    hbi.close();
-                }
-            } catch (IOException closeEx) {
-                e.addSuppressed(closeEx);
-            }
+            hbi.close();
             throw e;
         }
+        return hbi;
     }
 
     /**
