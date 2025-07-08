@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.checker.mustcall.qual.Owning;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
@@ -91,7 +92,12 @@ public class HollowBlobReader {
     @Impure
     public void readSnapshot(InputStream is) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
-        readSnapshot(hbi);
+        try {
+            readSnapshot(hbi);
+        } catch (IOException e) {
+            hbi.close();
+            throw e;
+        }
     }
 
     /**
