@@ -3,6 +3,10 @@ package com.netflix.hollow.core.read;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.checker.mustcall.qual.MustCall;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
+import org.checkerframework.checker.mustcall.qual.Owning;
+import org.checkerframework.checker.calledmethods.qual.EnsuresCalledMethods;
 import static com.netflix.hollow.core.memory.MemoryMode.ON_HEAP;
 import static com.netflix.hollow.core.memory.MemoryMode.SHARED_MEMORY_LAZY;
 import static com.netflix.hollow.core.memory.encoding.BlobByteBuffer.MAX_SINGLE_BUFFER_CAPACITY;
@@ -26,12 +30,13 @@ import java.nio.channels.FileChannel;
 public class HollowBlobInput implements Closeable {
     private final MemoryMode memoryMode;
 
-    private Object input;
+    private final @Owning @MustCall("close") Object input;
     private BlobByteBuffer buffer;
 
     @SideEffectFree
-    private HollowBlobInput(MemoryMode memoryMode) {
+    private HollowBlobInput(MemoryMode memoryMode, @Owning @MustCall("close") Object input) {
         this.memoryMode = memoryMode;
+        this.input = input;
     }
 
     @Pure
@@ -97,13 +102,24 @@ public class HollowBlobInput implements Closeable {
      * Useful for testing with custom buffer capacity
      */
     @Impure
-    public static HollowBlobInput randomAccess(File f,int singleBufferCapacity) throws IOException {
-        HollowBlobInput hbi = new HollowBlobInput(SHARED_MEMORY_LAZY);
-        RandomAccessFile raf = new RandomAccessFile(f, "r");
-        hbi.input = raf;
-        FileChannel channel = ((RandomAccessFile) hbi.input).getChannel();
-        hbi.buffer = BlobByteBuffer.mmapBlob(channel, singleBufferCapacity);
-        return hbi;
+    public static HollowBlobInput randomAccess(File f, int singleBufferCapacity) throws IOException {
+        HollowBlobInput hbi = null;
+        try {
+            RandomAccessFile raf = new RandomAccessFile(f, "r");
+            hbi = new HollowBlobInput(SHARED_MEMORY_LAZY, raf);
+            FileChannel channel = raf.getChannel();
+            hbi.buffer = BlobByteBuffer.mmapBlob(channel, singleBufferCapacity);
+            return hbi;
+        } catch (IOException e) {
+            try {
+                if (hbi != null) {
+                    hbi.close();
+                }
+            } catch (IOException closeEx) {
+                e.addSuppressed(closeEx);
+            }
+            throw e;
+        }
     }
 
     /**
@@ -123,9 +139,8 @@ public class HollowBlobInput implements Closeable {
      * @return a serial access HollowBlobInput object
      */
     @Impure
-    public static HollowBlobInput serial(InputStream is) {
-        HollowBlobInput hbi = new HollowBlobInput(ON_HEAP);
-        hbi.input = new DataInputStream(is);
+    public static HollowBlobInput serial(@Owning InputStream is) {
+        HollowBlobInput hbi = new HollowBlobInput(ON_HEAP, new DataInputStream(is));
         return hbi;
     }
 
@@ -313,6 +328,7 @@ public class HollowBlobInput implements Closeable {
      */
     @Impure
     @Override
+    @EnsuresCalledMethods(value="input", methods="close")
     public void close() throws IOException {
         if (input instanceof RandomAccessFile) {
             ((RandomAccessFile) input).close();
@@ -324,7 +340,7 @@ public class HollowBlobInput implements Closeable {
     }
 
     @Pure
-    public Object getInput() {
+    public @NotOwning Object getInput() {
         return input;
     }
 
