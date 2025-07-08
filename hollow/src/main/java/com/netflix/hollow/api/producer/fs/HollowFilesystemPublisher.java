@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.producer.fs;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.ProducerOptionalBlobPartConfig;
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class HollowFilesystemPublisher implements HollowProducer.Publisher {
      * @param blobStorePath the path to store blobs
      * @since 2.12.0
      */
+    @Impure
     public HollowFilesystemPublisher(Path blobStorePath) {
         this.blobStorePath = blobStorePath;
         try {
@@ -43,12 +45,14 @@ public class HollowFilesystemPublisher implements HollowProducer.Publisher {
         }
     }
 
+    @Impure
     @Override
     // For backwards compatability.
     public void publish(HollowProducer.Blob blob) {
         publishBlob(blob);
     }
 
+    @Impure
     @Override
     public void publish(HollowProducer.PublishArtifact publishArtifact) {
         if (publishArtifact instanceof HollowProducer.HeaderBlob) {
@@ -58,6 +62,7 @@ public class HollowFilesystemPublisher implements HollowProducer.Publisher {
         }
     }
 
+    @Impure
     private void publishContent(HollowProducer.PublishArtifact publishArtifact, Path destination) {
         try (
                 InputStream is = publishArtifact.newInputStream();
@@ -72,11 +77,13 @@ public class HollowFilesystemPublisher implements HollowProducer.Publisher {
         }
     }
 
+    @Impure
     private void publishHeader(HollowProducer.HeaderBlob headerBlob) {
         Path destination = blobStorePath.resolve(String.format("header-%d", headerBlob.getVersion()));
         publishContent(headerBlob, destination);
     }
 
+    @Impure
     private void publishBlob(HollowProducer.Blob blob) {
         Path destination = null;
         

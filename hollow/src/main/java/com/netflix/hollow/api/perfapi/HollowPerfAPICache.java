@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.PopulatedOrdinalListener;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -26,6 +28,7 @@ public class HollowPerfAPICache<T> {
     private final HollowTypePerfAPI typeAPI;
     private final Object[] cachedItems;
 
+    @Impure
     public HollowPerfAPICache(
             HollowTypePerfAPI typeAPI,
             POJOInstantiator<T> instantiator,
@@ -66,12 +69,14 @@ public class HollowPerfAPICache<T> {
         }
     }
 
+    @Impure
     public T get(long ref) {
         @SuppressWarnings("unchecked")
         T t = (T) cachedItems[typeAPI.ordinal(ref)];
         return t;
     }
     
+    @SideEffectFree
     public Object[] getCachedItems() {
         return Arrays.copyOf(cachedItems, cachedItems.length);
     }

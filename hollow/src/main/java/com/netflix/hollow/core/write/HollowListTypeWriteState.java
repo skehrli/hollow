@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.ByteData;
 import com.netflix.hollow.core.memory.ByteDataArray;
 import com.netflix.hollow.core.memory.ThreadSafeBitSet;
@@ -45,19 +47,23 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
     private ByteDataArray deltaAddedOrdinals[];
     private ByteDataArray deltaRemovedOrdinals[];
 
+    @Impure
     public HollowListTypeWriteState(HollowListSchema schema) {
         this(schema, -1);
     }
     
+    @Impure
     public HollowListTypeWriteState(HollowListSchema schema, int numShards) {
         super(schema, numShards);
     }
 
+    @Pure
     @Override
     public HollowListSchema getSchema() {
         return (HollowListSchema)schema;
     }
 
+    @Impure
     @Override
     public void prepareForWrite(boolean canReshard) {
         super.prepareForWrite(canReshard);
@@ -67,6 +73,7 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
         gatherStatistics(numShards != revNumShards);
     }
 
+    @Impure
     private void gatherStatistics(boolean numShardsChanged) {
 
         int maxElementOrdinal = 0;
@@ -116,6 +123,7 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     protected int typeStateNumShards(int maxOrdinal) {
         ByteData data = ordinalMap.getByteData().getUnderlyingArray();
@@ -153,6 +161,7 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
         return targetNumShards;
     }
     
+    @Impure
     @Override
     public void calculateSnapshot() {
         listPointerArray = new FixedLengthElementArray[numShards];
@@ -190,6 +199,7 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     public void writeSnapshot(DataOutputStream os) throws IOException {
         /// for unsharded blobs, support pre v2.1.0 clients
@@ -211,6 +221,7 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
         elementArray = null;
     }
         
+    @Impure
     private void writeSnapshotShard(DataOutputStream os, int shardNumber) throws IOException {
         /// 1) shard max ordinal
         VarInt.writeVInt(os, maxShardOrdinal[shardNumber]);
@@ -235,6 +246,7 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     public void calculateDelta(ThreadSafeBitSet fromCyclePopulated, ThreadSafeBitSet toCyclePopulated, boolean isReverse) {
         int numShards = this.numShards;
@@ -309,6 +321,7 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     public void writeCalculatedDelta(DataOutputStream os, boolean isReverse, int[] maxShardOrdinal) throws IOException {
         int numShards = this.numShards;
@@ -340,6 +353,7 @@ public class HollowListTypeWriteState extends HollowTypeWriteState {
     }
 
 
+    @Impure
     private void writeCalculatedDeltaShard(DataOutputStream os, int shardNumber, int[] maxShardOrdinal, int bitsPerListPointer, long[] totalOfListSizes) throws IOException {
         /// 1) max shard ordinal
         VarInt.writeVInt(os, maxShardOrdinal[shardNumber]);

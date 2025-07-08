@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.custom.HollowListTypeAPI;
 import com.netflix.hollow.api.objects.HollowList;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
@@ -31,35 +34,44 @@ public class HollowListLookupDelegate<T> implements HollowListDelegate<T> {
     private final HollowListTypeDataAccess dataAccess;
     protected final HollowListTypeAPI typeAPI;
 
+    @SideEffectFree
+    @Impure
     public HollowListLookupDelegate(HollowListTypeDataAccess dataAccess) {
         this(dataAccess, null);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowListLookupDelegate(HollowListTypeAPI typeAPI) {
         this(typeAPI.getTypeDataAccess(), typeAPI);
     }
 
+    @SideEffectFree
     private HollowListLookupDelegate(HollowListTypeDataAccess dataAccess, HollowListTypeAPI typeAPI) {
         this.dataAccess = dataAccess;
         this.typeAPI = typeAPI;
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         return dataAccess.size(ordinal);
     }
 
+    @Impure
     @Override
     public T get(HollowList<T> list, int ordinal, int index) {
         int elementOrdinal = dataAccess.getElementOrdinal(ordinal, index);
         return list.instantiateElement(elementOrdinal);
     }
 
+    @Impure
     @Override
     public final boolean contains(HollowList<T> list, int ordinal, Object o) {
         return indexOf(list, ordinal, o) != -1;
     }
 
+    @Impure
     @Override
     public final int indexOf(HollowList<T> list, int ordinal, Object o) {
         int size = size(ordinal);
@@ -71,6 +83,7 @@ public class HollowListLookupDelegate<T> implements HollowListDelegate<T> {
         return -1;
     }
 
+    @Impure
     @Override
     public final int lastIndexOf(HollowList<T> list, int ordinal, Object o) {
         int size = size(ordinal);
@@ -82,16 +95,19 @@ public class HollowListLookupDelegate<T> implements HollowListDelegate<T> {
         return -1;
     }
 
+    @Impure
     @Override
     public HollowListSchema getSchema() {
         return dataAccess.getSchema();
     }
 
+    @Pure
     @Override
     public HollowListTypeDataAccess getTypeDataAccess() {
         return dataAccess;
     }
 
+    @Pure
     @Override
     public HollowListTypeAPI getTypeAPI() {
         return typeAPI;

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.enforcer;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.AbstractHollowProducerListener;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -31,16 +33,21 @@ public abstract class AbstractSingleProducerEnforcer extends AbstractHollowProdu
 
     private final Lock lock = new ReentrantLock();
 
+    @Impure
     protected abstract void _enable();
 
+    @Impure
     protected abstract void _disable();
 
+    @Pure
     protected abstract boolean _isPrimary();
 
+    @Impure
     protected void _force() {
         throw new UnsupportedOperationException("forcing a producer to become primary is not supported");
     }
 
+    @Impure
     @Override
     public void enable() {
         if (_isPrimary()) {
@@ -54,6 +61,7 @@ public abstract class AbstractSingleProducerEnforcer extends AbstractHollowProdu
         }
     }
 
+    @Impure
     @Override
     public void disable() {
         if (!hasCycleStarted) {
@@ -63,6 +71,7 @@ public abstract class AbstractSingleProducerEnforcer extends AbstractHollowProdu
         }
     }
 
+    @Impure
     @Override
     public boolean isPrimary() {
         final boolean primary = _isPrimary();
@@ -76,6 +85,7 @@ public abstract class AbstractSingleProducerEnforcer extends AbstractHollowProdu
         return primary;
     }
 
+    @Impure
     @Override
     public void force() {
         if (_isPrimary()) {
@@ -84,20 +94,24 @@ public abstract class AbstractSingleProducerEnforcer extends AbstractHollowProdu
         _force();
     }
 
+    @Impure
     @Override
     public void lock() {
         lock.lock();
     }
 
+    @Impure
     @Override public void unlock() {
         lock.unlock();
 
     }
+    @Impure
     @Override
     public void onCycleStart(long version) {
         hasCycleStarted = true;
     }
 
+    @Impure
     @Override
     public void onCycleComplete(ProducerStatus status, long elapsed, TimeUnit unit) {
         hasCycleStarted = false;
@@ -106,6 +120,7 @@ public abstract class AbstractSingleProducerEnforcer extends AbstractHollowProdu
         }
     }
 
+    @Impure
     private void disableNow() {
         if (_isPrimary()) {
             lock.lock();
@@ -120,6 +135,7 @@ public abstract class AbstractSingleProducerEnforcer extends AbstractHollowProdu
     }
 
     // visible for testing
+    @Pure
     protected boolean getWasPrimary() {
         return wasPrimary;
     }

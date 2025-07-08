@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.dataaccess;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.list.HollowListTypeReadState;
 import com.netflix.hollow.core.schema.HollowListSchema;
 
@@ -27,6 +28,7 @@ import com.netflix.hollow.core.schema.HollowListSchema;
  */
 public interface HollowListTypeDataAccess extends HollowCollectionTypeDataAccess {
 
+    @Impure
     HollowListSchema getSchema();
 
     /**
@@ -34,6 +36,7 @@ public interface HollowListTypeDataAccess extends HollowCollectionTypeDataAccess
      * @param listIndex the list index
      * @return the element at the specified listIndex from the list record at the specified ordinal  
      */
+    @Impure
     int getElementOrdinal(int ordinal, int listIndex);
 
 }

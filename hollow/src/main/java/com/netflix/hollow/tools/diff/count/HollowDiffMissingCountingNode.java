@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.diff.count;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.util.IntList;
 import com.netflix.hollow.tools.diff.HollowDiff;
 import com.netflix.hollow.tools.diff.HollowDiffNodeIdentifier;
@@ -34,19 +37,24 @@ public class HollowDiffMissingCountingNode extends HollowDiffCountingNode {
 
     public static final HollowDiffMissingCountingNode INSTANCE = new HollowDiffMissingCountingNode(null, null, null);
 
+    @Impure
     public HollowDiffMissingCountingNode(HollowDiff diff, HollowTypeDiff topLevelTypeDiff, HollowDiffNodeIdentifier nodeId) {
         super(diff, topLevelTypeDiff, nodeId);
     }
 
+    @SideEffectFree
     @Override
     public void prepare(int topLevelFromOrdinal, int topLevelToOrdinal) { }
 
+    @Pure
     @Override
     public int traverseDiffs(IntList fromOrdinals, IntList toOrdinals) { return 0; }
 
+    @Pure
     @Override
     public int traverseMissingFields(IntList fromOrdinals, IntList toOrdinals) { return 0; }
 
+    @SideEffectFree
     @Override
     public List<HollowFieldDiff> getFieldDiffs() {
         return Collections.emptyList();

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
 import java.util.Arrays;
 
@@ -27,6 +29,7 @@ public class GrowingSegmentedLongArray {
     
     private final ArraySegmentRecycler memoryRecycler;
 
+    @Impure
     public GrowingSegmentedLongArray(ArraySegmentRecycler memoryRecycler) {
         this.memoryRecycler = memoryRecycler;
         this.log2OfSegmentSize = memoryRecycler.getLog2OfLongSegmentSize();
@@ -39,6 +42,7 @@ public class GrowingSegmentedLongArray {
      * @param index the index
      * @param value the byte
      */
+    @Impure
     public void set(long index, long value) {
         int segmentIndex = (int)(index >> log2OfSegmentSize);
         
@@ -60,6 +64,7 @@ public class GrowingSegmentedLongArray {
      * @param index the index
      * @return the byte value
      */
+    @Pure
     public long get(long index) {
         int segmentIndex = (int)(index >> log2OfSegmentSize);
 
@@ -71,6 +76,7 @@ public class GrowingSegmentedLongArray {
     }
     
     
+    @Impure
     public void destroy() {
         for(int i=0;i<segments.length;i++) {
             if(segments[i] != null)

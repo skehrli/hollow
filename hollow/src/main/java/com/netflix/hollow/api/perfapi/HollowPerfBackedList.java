@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
 import java.util.AbstractList;
 import java.util.RandomAccess;
@@ -27,6 +30,8 @@ public class HollowPerfBackedList<T> extends AbstractList<T> implements RandomAc
     private final long elementMaskedTypeIdx;
     private final POJOInstantiator<T> instantiator;
     
+    @SideEffectFree
+    @Impure
     public HollowPerfBackedList(HollowListTypePerfAPI typeAPI, int ordinal,
             POJOInstantiator<T> instantiator) {
         this.dataAccess = typeAPI.typeAccess();
@@ -35,13 +40,15 @@ public class HollowPerfBackedList<T> extends AbstractList<T> implements RandomAc
         this.elementMaskedTypeIdx = typeAPI.elementMaskedTypeIdx;
     }
 
+    @Impure
     @Override
-    public T get(int index) {
+    public T get(@NotOwningCollection HollowPerfBackedList<T> this, int index) {
         return instantiator.instantiate(elementMaskedTypeIdx | dataAccess.getElementOrdinal(ordinal, index));
     }
 
+    @Impure
     @Override
-    public int size() {
+    public int size(@NotOwningCollection HollowPerfBackedList<T> this) {
         return dataAccess.size(ordinal);
     }
 

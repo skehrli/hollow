@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.dataaccess.disabled;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -29,83 +31,100 @@ public class HollowMapDisabledDataAccess implements HollowMapTypeDataAccess {
 
     public static final HollowMapDisabledDataAccess INSTANCE = new HollowMapDisabledDataAccess();
 
+    @SideEffectFree
     private HollowMapDisabledDataAccess() { }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @SideEffectFree
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         throw new IllegalStateException("Data Access is Disabled");
     }
     
+    @SideEffectFree
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         throw new IllegalStateException("Data Access is Disabled");
     }
     
+    @SideEffectFree
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         throw new IllegalStateException("DataAccess is Disabled");
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowMapSchema getSchema() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int size(int ordinal) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int get(int ordinal, int keyOrdinal) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int get(int ordinal, int keyOrdinal, int hashCode) {
         throw new IllegalStateException("Data Access is Disabled");
     }
     
+    @Pure
     @Override
     public int findKey(int ordinal, Object... hashKey) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int findValue(int ordinal, Object... hashKey) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public long findEntry(int ordinal, Object... hashKey) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowMapEntryOrdinalIterator potentialMatchOrdinalIterator(int ordinal, int hashCode) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowMapEntryOrdinalIterator ordinalIterator(int ordinal) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public long relativeBucket(int ordinal, int bucketIndex) {
         throw new IllegalStateException("Data Access is Disabled");

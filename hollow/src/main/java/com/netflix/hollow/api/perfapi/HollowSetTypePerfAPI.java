@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowSetTypeDataAccess;
 import com.netflix.hollow.core.read.dataaccess.missing.HollowSetMissingDataAccess;
@@ -27,6 +29,7 @@ public class HollowSetTypePerfAPI extends HollowTypePerfAPI {
     private final HollowSetTypeDataAccess typeAccess;
     final long elementMaskedTypeIdx;
     
+    @Impure
     public HollowSetTypePerfAPI(HollowDataAccess dataAccess, String typeName, HollowPerformanceAPI api) {
         super(typeName, api);
         
@@ -40,24 +43,29 @@ public class HollowSetTypePerfAPI extends HollowTypePerfAPI {
         this.typeAccess = typeAccess;
     }
     
+    @Impure
     public int size(long ref) {
         return typeAccess.size(ordinal(ref));
     }
     
+    @Impure
     public HollowPerfReferenceIterator iterator(long ref) {
         HollowOrdinalIterator iter = typeAccess.ordinalIterator(ordinal(ref));
         return new HollowPerfReferenceIterator(iter, elementMaskedTypeIdx);
     }
     
+    @Impure
     public long findElement(long ref, Object... hashKey) {
         int ordinal = typeAccess.findElement(ordinal(ref), hashKey);
         return Ref.toRefWithTypeMasked(elementMaskedTypeIdx, ordinal);
     }
     
+    @Impure
     public <T> Set<T> backedSet(long ref, POJOInstantiator<T> instantiator, HashKeyExtractor hashKeyExtractor) {
         return new HollowPerfBackedSet<>(this, ref, instantiator, hashKeyExtractor);
     }
     
+    @Pure
     public HollowSetTypeDataAccess typeAccess() {
         return typeAccess;
     }

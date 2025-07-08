@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.type.accessor;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.api.consumer.HollowConsumerAPI;
 import com.netflix.hollow.api.consumer.data.AbstractHollowDataAccessor;
@@ -27,15 +28,18 @@ public class BooleanDataAccessor extends AbstractHollowDataAccessor<Boolean> {
     public static final String TYPE = "Boolean";
     private HollowConsumerAPI.BooleanRetriever api;
 
+    @Impure
     public BooleanDataAccessor(HollowConsumer consumer) {
         this(consumer.getStateEngine(), (HollowConsumerAPI.BooleanRetriever)consumer.getAPI());
     }
 
+    @Impure
     public BooleanDataAccessor(HollowReadStateEngine rStateEngine, HollowConsumerAPI.BooleanRetriever api) {
         super(rStateEngine, TYPE, "value");
         this.api = api;
     }
 
+    @Impure
     @Override public Boolean getRecord(int ordinal){
         HBoolean val = api.getHBoolean(ordinal);
         return val == null ? null : val.getValueBoxed();

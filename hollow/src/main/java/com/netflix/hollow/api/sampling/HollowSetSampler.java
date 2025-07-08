@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.sampling;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.filter.HollowFilterConfig;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,16 +36,19 @@ public class HollowSetSampler implements HollowSampler {
     private long getSamples;
     private long iteratorSamples;
 
+    @SideEffectFree
     public HollowSetSampler(String typeName, HollowSamplingDirector director) {
         this.typeName = typeName;
         this.director = director;
     }
 
+    @Impure
     public void setSamplingDirector(HollowSamplingDirector director) {
         if(!"".equals(typeName))
             this.director = director;
     }
 
+    @Impure
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         if(!"".equals(typeName) && fieldSpec.doesIncludeType(typeName))
@@ -50,31 +56,37 @@ public class HollowSetSampler implements HollowSampler {
     }
     
 
+    @Impure
     @Override
     public void setUpdateThread(Thread t) {
         director.setUpdateThread(t);
     }
 
+    @Impure
     public void recordGet() {
         if(director.shouldRecord())
             getSamples++;
     }
 
+    @Impure
     public void recordSize() {
         if(director.shouldRecord())
             sizeSamples++;
     }
 
+    @Impure
     public void recordIterator() {
         if(director.shouldRecord())
             iteratorSamples++;
     }
 
+    @Pure
     @Override
     public boolean hasSampleResults() {
         return sizeSamples > 0 || getSamples > 0 || iteratorSamples > 0;
     }
 
+    @Impure
     @Override
     public Collection<SampleResult> getSampleResults() {
         List<SampleResult> results = new ArrayList<SampleResult>(3);
@@ -84,6 +96,7 @@ public class HollowSetSampler implements HollowSampler {
         return results;
     }
 
+    @Impure
     @Override
     public void reset() {
         sizeSamples = 0;

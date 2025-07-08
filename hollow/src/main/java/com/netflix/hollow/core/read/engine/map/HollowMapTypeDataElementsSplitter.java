@@ -1,6 +1,8 @@
 package com.netflix.hollow.core.read.engine.map;
 
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.FixedLengthDataFactory;
 import com.netflix.hollow.core.read.engine.HollowTypeDataElementsSplitter;
 
@@ -12,10 +14,13 @@ import com.netflix.hollow.core.read.engine.HollowTypeDataElementsSplitter;
  */
 public class HollowMapTypeDataElementsSplitter extends HollowTypeDataElementsSplitter<HollowMapTypeDataElements> {
 
+    @SideEffectFree
+    @Impure
     public HollowMapTypeDataElementsSplitter(HollowMapTypeDataElements from, int numSplits) {
         super(from, numSplits);
     }
 
+    @Impure
     @Override
     public void initToElements() {
         this.to = new HollowMapTypeDataElements[numSplits];
@@ -24,6 +29,7 @@ public class HollowMapTypeDataElementsSplitter extends HollowTypeDataElementsSpl
         }
     }
 
+    @Impure
     @Override
     public void populateStats() {
         long[] shardTotalOfMapBuckets  = new long[numSplits];
@@ -60,6 +66,7 @@ public class HollowMapTypeDataElementsSplitter extends HollowTypeDataElementsSpl
         }
     }
 
+    @Impure
     @Override
     public void copyRecords() {
         int numSplits = to.length;

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write.copy;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.list.HollowListTypeReadState;
 import com.netflix.hollow.core.write.HollowListWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteRecord;
@@ -23,10 +26,13 @@ import com.netflix.hollow.tools.combine.OrdinalRemapper;
 
 public class HollowListCopier extends HollowRecordCopier {
 
+    @SideEffectFree
+    @Impure
     public HollowListCopier(HollowListTypeReadState readTypeState, OrdinalRemapper ordinalRemapper) {
         super(readTypeState, new HollowListWriteRecord(), ordinalRemapper, false);
     }
 
+    @Impure
     @Override
     public HollowWriteRecord copy(int ordinal) {
         HollowListWriteRecord rec = rec();
@@ -45,10 +51,12 @@ public class HollowListCopier extends HollowRecordCopier {
         return rec;
     }
 
+    @Pure
     private HollowListTypeReadState readState() {
         return (HollowListTypeReadState)readTypeState;
     }
     
+    @Pure
     private HollowListWriteRecord rec() {
         return (HollowListWriteRecord)writeRecord;
     }

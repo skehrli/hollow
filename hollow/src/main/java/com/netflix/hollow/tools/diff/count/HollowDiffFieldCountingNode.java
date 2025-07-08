@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff.count;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.read.HollowReadFieldUtils.fieldHashCode;
 import static com.netflix.hollow.core.read.HollowReadFieldUtils.fieldsAreEqual;
 
@@ -57,6 +59,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
 
     private final HollowFieldDiff fieldDiff;
 
+    @Impure
     public HollowDiffFieldCountingNode(HollowDiff diff, HollowTypeDiff topLevelTypeDiff, HollowDiffNodeIdentifier nodeId, HollowObjectTypeReadState fromState, HollowObjectTypeReadState toState, HollowObjectSchema unionSchema, int unionFieldIndex) {
         super(diff, topLevelTypeDiff, nodeId);
         this.fromState = fromState;
@@ -73,11 +76,13 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
         Arrays.fill(hashedOrdinals, -1);
     }
 
+    @Impure
     public void prepare(int topLevelFromOrdinal, int topLevelToOrdinal) {
         this.currentTopLevelFromOrdinal = topLevelFromOrdinal;
         this.currentTopLevelToOrdinal = topLevelToOrdinal;
     }
 
+    @Impure
     @Override
     public int traverseDiffs(IntList fromOrdinals, IntList toOrdinals) {
         if(fromFieldIndex == -1 || toFieldIndex == -1) {
@@ -106,6 +111,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
         return score;
     }
 
+    @Impure
     @Override
     public int traverseMissingFields(IntList fromOrdinals, IntList toOrdinals) {
         if(fromFieldIndex == -1) {
@@ -121,6 +127,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
         return 0;
     }
 
+    @Impure
     private void clearHashTable() {
         Arrays.fill(hashedOrdinals, -1);
         Arrays.fill(ordinalHashCounts, 0);
@@ -129,6 +136,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
     }
 
 
+    @Impure
     private void indexFromOrdinal(int ordinal) {
         if(hashSize == hashSizeBeforeGrow) {
             growHashTable();
@@ -139,6 +147,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
             hashSize++;
     }
 
+    @Impure
     private void compareToOrdinal(int ordinal) {
         int hashCode = fieldHashCode(toState, ordinal, toFieldIndex);
 
@@ -162,6 +171,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
         unmatchedToFields++;
     }
 
+    @Impure
     private void growHashTable() {
         int newHashedOrdinals[] = new int[hashedOrdinals.length * 2];
         int newOrdinalHashCodes[] = new int[ordinalHashCodes.length * 2];
@@ -183,6 +193,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
         hashSizeBeforeGrow = newHashedOrdinals.length * 7 / 10;
     }
 
+    @Impure
     private long[] ordinalsAndHashCodes() {
         long ordinalsAndHashCodes[] = new long[hashSize];
 
@@ -198,6 +209,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
         return ordinalsAndHashCodes;
     }
 
+    @Pure
     private int findOrdinalCount(int ordinal, int hashCode) {
         int bucket = hashCode & (hashedOrdinals.length - 1);
 
@@ -207,6 +219,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
         return ordinalHashCounts[bucket];
     }
 
+    @Impure
     private boolean hashIntoArray(int ordinal, int hashCode, int count, int hashedOrdinals[], int ordinalHashCodes[], int ordinalHashCounts[]) {
         int bucket = hashCode & (hashedOrdinals.length - 1);
 
@@ -226,6 +239,7 @@ public class HollowDiffFieldCountingNode extends HollowDiffCountingNode {
         return true;
     }
 
+    @Impure
     @Override
     public List<HollowFieldDiff> getFieldDiffs() {
         if(fieldDiff.getTotalDiffScore() > 0)

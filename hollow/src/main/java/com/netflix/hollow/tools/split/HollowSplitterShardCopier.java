@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.split;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.PopulatedOrdinalListener;
@@ -43,6 +44,7 @@ public class HollowSplitterShardCopier {
 
     private final Map<String, HollowRecordCopier> copiersPerType;
 
+    @Impure
     public HollowSplitterShardCopier(HollowReadStateEngine input, HollowWriteStateEngine shardOutput, HollowSplitterCopyDirector director, int shardNumber) {
         this.input = input;
         this.output = shardOutput;
@@ -52,6 +54,7 @@ public class HollowSplitterShardCopier {
         this.copiersPerType = new HashMap<String, HollowRecordCopier>();
     }
 
+    @Impure
     public void copy() {
         for(String topLevelType : director.getTopLevelTypes()) {
             HollowTypeReadState inputTypeState = input.getTypeState(topLevelType);
@@ -76,6 +79,7 @@ public class HollowSplitterShardCopier {
         }
     }
 
+    @Impure
     int copyRecord(String typeName, int ordinal) {
         HollowTypeReadState typeState = input.getTypeState(typeName);
         HollowRecordCopier copier = copiersPerType.get(typeName);
@@ -88,6 +92,7 @@ public class HollowSplitterShardCopier {
         return output.add(typeName, rec);
     }
 
+    @Impure
     private boolean isDefinedHashCode(HollowTypeReadState typeState) {
         if(typeState instanceof HollowSetTypeReadState)
             return input.getTypesWithDefinedHashCodes().contains(((HollowSetSchema)typeState.getSchema()).getElementType());

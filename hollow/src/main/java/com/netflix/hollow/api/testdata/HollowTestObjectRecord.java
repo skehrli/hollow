@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.api.testdata;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.mustcall.qual.Owning;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.write.HollowObjectWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteRecord;
@@ -27,11 +31,13 @@ public abstract class HollowTestObjectRecord<T> extends HollowTestRecord<T> {
     
     private final Map<String, Field> fields;
     
-    protected HollowTestObjectRecord(T parent) {
+    @Impure
+    protected HollowTestObjectRecord(@Owning T parent) {
         super(parent);
         this.fields = new HashMap<>();
     }
     
+    @Impure
     protected void addField(String fieldName, Object value) {
         if(value == null) {
             fields.remove(fieldName);
@@ -40,6 +46,7 @@ public abstract class HollowTestObjectRecord<T> extends HollowTestRecord<T> {
         }
     }
     
+    @Impure
     protected void addField(Field field) {
         if(field.value == null)
             this.fields.remove(field.name);
@@ -47,10 +54,12 @@ public abstract class HollowTestObjectRecord<T> extends HollowTestRecord<T> {
             this.fields.put(field.name, field);
     }
     
+    @Pure
     protected Field getField(String name) {
         return fields.get(name);
     }
     
+    @Impure
     @SuppressWarnings("rawtypes")
     @Override
     protected HollowWriteRecord toWriteRecord(HollowWriteStateEngine writeEngine) {
@@ -80,12 +89,14 @@ public abstract class HollowTestObjectRecord<T> extends HollowTestRecord<T> {
         return rec;
     }
     
+    @Pure
     protected abstract HollowObjectSchema getSchema();
     
     protected static class Field {
         public final String name;
         public final Object value;
         
+        @SideEffectFree
         public Field(String name, Object value) {
             this.name = name;
             this.value = value;

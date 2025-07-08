@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer.fs;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -31,10 +34,12 @@ public class HollowFilesystemBlobStorageCleaner extends HollowProducer.BlobStora
     private int numOfSnapshotsToKeep;
     private final File blobStoreDir;
 
+    @Impure
     public HollowFilesystemBlobStorageCleaner(File blobStoreDir) {
         this(blobStoreDir,5);
     }
 
+    @Impure
     public HollowFilesystemBlobStorageCleaner(File blobStoreDir, int numOfSnapshotsToKeep) {
         this.blobStoreDir = blobStoreDir;
         this.numOfSnapshotsToKeep = numOfSnapshotsToKeep;
@@ -43,6 +48,7 @@ public class HollowFilesystemBlobStorageCleaner extends HollowProducer.BlobStora
     /**
      * Cleans snapshot to keep the last 'n' snapshots. Defaults to 5.
      */
+    @Impure
     @Override
     public void cleanSnapshots() {
         File[] files = getFilesByType(HollowProducer.Blob.Type.SNAPSHOT.prefix);
@@ -62,14 +68,18 @@ public class HollowFilesystemBlobStorageCleaner extends HollowProducer.BlobStora
         }
     }
 
+    @SideEffectFree
     @Override
     public void cleanDeltas() { }
 
+    @SideEffectFree
     @Override
     public void cleanReverseDeltas() { }
 
+    @Impure
     private void sortByLastModified(File[] files) {
         Arrays.sort(files, new Comparator<File>() {
+            @SideEffectFree
             public int compare(File f1, File f2) {
                 Long lastModifiedF2 = f2.lastModified();
                 Long lastModifiedF1 = f1.lastModified();
@@ -79,8 +89,10 @@ public class HollowFilesystemBlobStorageCleaner extends HollowProducer.BlobStora
         Arrays.sort(files, Collections.reverseOrder());
     }
 
+    @Impure
     private File[] getFilesByType(final String blobType) {
         return blobStoreDir.listFiles(new FilenameFilter() {
+            @Pure
             @Override
             public boolean accept(File dir, String name) {
                 return name.contains(blobType);

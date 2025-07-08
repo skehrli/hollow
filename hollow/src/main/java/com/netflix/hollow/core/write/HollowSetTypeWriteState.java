@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.index.FieldPaths.FieldPathException.ErrorKind.NOT_BINDABLE;
 
 import com.netflix.hollow.core.index.FieldPaths;
@@ -53,19 +55,23 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
     private ByteDataArray deltaAddedOrdinals[];
     private ByteDataArray deltaRemovedOrdinals[];
 
+    @Impure
     public HollowSetTypeWriteState(HollowSetSchema schema) {
         this(schema, -1);
     }
 
+    @Impure
     public HollowSetTypeWriteState(HollowSetSchema schema, int numShards) {
         super(schema, numShards);
     }
 
+    @Pure
     @Override
     public HollowSetSchema getSchema() {
         return (HollowSetSchema)schema;
     }
 
+    @Impure
     @Override
     public void prepareForWrite(boolean canReshard) {
         super.prepareForWrite(canReshard);
@@ -75,6 +81,7 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
         gatherStatistics(numShards != revNumShards);
     }
 
+    @Impure
     private void gatherStatistics(boolean numShardsChanged) {
         int maxElementOrdinal = 0;
         int maxSetSize = 0;
@@ -134,6 +141,7 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     protected int typeStateNumShards(int maxOrdinal) {
         int maxSetSize = 0;
@@ -183,6 +191,7 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
         return targetNumShards;
     }
 
+    @Impure
     @Override
     public void calculateSnapshot() {
         int bitsPerSetFixedLengthPortion = bitsPerSetSizeValue + bitsPerSetPointer;
@@ -262,6 +271,7 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     public void writeSnapshot(DataOutputStream os) throws IOException {
         /// for unsharded blobs, support pre v2.1.0 clients
@@ -283,6 +293,7 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
         elementArray = null;
     }
 
+    @Impure
     private void writeSnapshotShard(DataOutputStream os, int shardNumber) throws IOException {
         int bitsPerSetFixedLengthPortion = bitsPerSetSizeValue + bitsPerSetPointer;
 
@@ -310,6 +321,7 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     public void calculateDelta(ThreadSafeBitSet fromCyclePopulated, ThreadSafeBitSet toCyclePopulated, boolean isReverse) {
         int numShards = this.numShards;
@@ -425,6 +437,7 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     public void writeCalculatedDelta(DataOutputStream os, boolean isReverse, int[] maxShardOrdinal) throws IOException {
         int numShards = this.numShards;
@@ -454,6 +467,7 @@ public class HollowSetTypeWriteState extends HollowTypeWriteState {
         deltaRemovedOrdinals = null;
     }
     
+    @Impure
     private void writeCalculatedDeltaShard(DataOutputStream os, int shardNumber, int[] maxShardOrdinal, int bitsPerSetPointer,
                                            long[] totalOfSetBuckets) throws IOException {
 

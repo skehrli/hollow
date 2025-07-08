@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen.perfapi;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.schema.HollowSchema;
@@ -38,59 +40,71 @@ public class HollowPerformanceAPIGenerator {
     private Path destinationPath;
     private Set<String> checkFieldExistsMethods = new HashSet<>();
     
+    @Impure
     public static Builder newBuilder() {
         HollowPerformanceAPIGenerator gen = new HollowPerformanceAPIGenerator();
         return gen.theBuilder();
     }
     
+    @Impure
     private Builder theBuilder() {
         return new Builder();
     }
 
     public class Builder {
+        @Impure
         public Builder withDataset(HollowDataset dataset) {
             HollowPerformanceAPIGenerator.this.dataset = dataset;
             return this;
         }
         
+        @Impure
         public Builder withAPIClassname(String apiClassname) {
             HollowPerformanceAPIGenerator.this.apiClassname = apiClassname;
             return this;
         }
         
+        @Impure
         public Builder withPackageName(String packageName) {
             HollowPerformanceAPIGenerator.this.packageName = packageName;
             return this;
         }
         
+        @Impure
         public Builder withDestination(String destinationPath) {
             return withDestination(Paths.get(destinationPath));
         }
 
+        @Impure
         public Builder withDestination(Path destinationPath) {
             HollowPerformanceAPIGenerator.this.destinationPath = destinationPath;
             return this;
         }
         
+        @Impure
         public Builder withCheckFieldExistsMethods(Set<String> checkFieldExistsMethods) {
             HollowPerformanceAPIGenerator.this.checkFieldExistsMethods.addAll(checkFieldExistsMethods);
             return this;
         }
         
+        @Impure
         public Builder withCheckFieldExistsMethods(String... checkFieldExistsMethods) {
             HollowPerformanceAPIGenerator.this.checkFieldExistsMethods.addAll(Arrays.asList(checkFieldExistsMethods));
             return this;
         }
         
+        @Pure
         public HollowPerformanceAPIGenerator build() {
             return HollowPerformanceAPIGenerator.this;
         }
     }
     
+    @Impure
     public void generateSourceFiles() throws IOException {
         generate(dataset, packageName, apiClassname, destinationPath, checkFieldExistsMethods);
     }
     
+    @Impure
     private void generate(HollowDataset dataset, String packageName, String apiClassName, Path destination, Set<String> checkFieldExistsMethods) throws IOException {
         Path packagePath = Paths.get(packageName.replace(".", File.separator));
         if (!destination.toAbsolutePath().endsWith(packagePath)) {

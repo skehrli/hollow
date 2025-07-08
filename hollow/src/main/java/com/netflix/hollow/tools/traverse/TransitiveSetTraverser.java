@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.traverse;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.tools.traverse.TransitiveSetTraverser.TransitiveSetTraverserAction.ADD_REFERENCING_OUTSIDE_CLOSURE;
 import static com.netflix.hollow.tools.traverse.TransitiveSetTraverser.TransitiveSetTraverserAction.REMOVE_REFERENCED_OUTSIDE_CLOSURE;
 
@@ -78,6 +79,7 @@ public class TransitiveSetTraverser {
      * @param stateEngine the state engine
      * @param matches the map to which matches are placed
      */
+    @Impure
     public static void addTransitiveMatches(HollowReadStateEngine stateEngine, Map<String, BitSet> matches) {
         List<HollowSchema> schemaList = HollowSchemaSorter.dependencyOrderedSchemaList(stateEngine);
         Collections.reverse(schemaList);
@@ -95,6 +97,7 @@ public class TransitiveSetTraverser {
      * @param stateEngine the state engine
      * @param matches the matches
      */
+    @Impure
     public static void removeReferencedOutsideClosure(HollowReadStateEngine stateEngine, Map<String, BitSet> matches) {
         List<HollowSchema> orderedSchemas = HollowSchemaSorter.dependencyOrderedSchemaList(stateEngine);
         Collections.reverse(orderedSchemas);
@@ -119,6 +122,7 @@ public class TransitiveSetTraverser {
      * @param stateEngine the state engine
      * @param matches the matches
      */
+    @Impure
     public static void addReferencingOutsideClosure(HollowReadStateEngine stateEngine, Map<String, BitSet> matches) {
         List<HollowSchema> orderedSchemas = HollowSchemaSorter.dependencyOrderedSchemaList(stateEngine);
 
@@ -133,6 +137,7 @@ public class TransitiveSetTraverser {
         }
     }
     
+    @Impure
     private static void addTransitiveMatches(HollowReadStateEngine stateEngine, String type, Map<String, BitSet> matches) {
         HollowTypeReadState typeState = stateEngine.getTypeState(type);
 
@@ -150,6 +155,7 @@ public class TransitiveSetTraverser {
         }
     }
 
+    @Impure
     private static void addTransitiveMatches(HollowReadStateEngine stateEngine, HollowObjectTypeReadState typeState, Map<String, BitSet> matches) {
         HollowObjectSchema schema = typeState.getSchema();
         BitSet matchingOrdinals = getOrCreateBitSet(matches, schema.getName(), typeState.maxOrdinal());
@@ -178,6 +184,7 @@ public class TransitiveSetTraverser {
         }
     }
 
+    @Impure
     private static void addTransitiveMatches(HollowReadStateEngine stateEngine, HollowCollectionTypeReadState typeState, Map<String, BitSet> matches) {
         HollowCollectionSchema schema = typeState.getSchema();
         BitSet matchingOrdinals = getOrCreateBitSet(matches, schema.getName(), typeState.maxOrdinal());
@@ -208,6 +215,7 @@ public class TransitiveSetTraverser {
         }
     }
 
+    @Impure
     private static void addTransitiveMatches(HollowReadStateEngine stateEngine, HollowMapTypeReadState typeState, Map<String, BitSet> matches) {
         HollowMapSchema schema = typeState.getSchema();
         BitSet matchingOrdinals = getOrCreateBitSet(matches, schema.getName(), typeState.maxOrdinal());
@@ -232,6 +240,7 @@ public class TransitiveSetTraverser {
         }
     }
 
+    @Impure
     private static void traverseReferencesOutsideClosure(HollowReadStateEngine stateEngine, String referencerType, String referencedType, Map<String, BitSet> matches, TransitiveSetTraverserAction action) {
         HollowTypeReadState referencerTypeState = stateEngine.getTypeState(referencerType);
 
@@ -249,6 +258,7 @@ public class TransitiveSetTraverser {
         }
     }
 
+    @Impure
     private static void traverseReferencesOutsideClosure(HollowReadStateEngine stateEngine, HollowObjectTypeReadState referencerTypeState, String referencedType, Map<String, BitSet> closureMatches, TransitiveSetTraverserAction action) {
         HollowObjectSchema schema = referencerTypeState.getSchema();
         BitSet referencedClosureMatches = getOrCreateBitSet(closureMatches, referencedType, stateEngine.getTypeState(referencedType).maxOrdinal());
@@ -275,6 +285,7 @@ public class TransitiveSetTraverser {
         }
     }
 
+    @Impure
     private static void traverseReferencesOutsideClosure(HollowReadStateEngine stateEngine, HollowCollectionTypeReadState referencerTypeState, String referencedType, Map<String, BitSet> closureMatches, TransitiveSetTraverserAction action) {
         HollowCollectionSchema schema = referencerTypeState.getSchema();
 
@@ -303,6 +314,7 @@ public class TransitiveSetTraverser {
         }
     }
 
+    @Impure
     private static void traverseReferencesOutsideClosure(HollowReadStateEngine stateEngine, HollowMapTypeReadState referencerTypeState, String referencedType, Map<String, BitSet> closureMatches, TransitiveSetTraverserAction action) {
         HollowMapSchema schema = referencerTypeState.getSchema();
 
@@ -340,10 +352,12 @@ public class TransitiveSetTraverser {
         }
     }
 
+    @Impure
     private static BitSet getPopulatedOrdinals(HollowTypeReadState typeState) {
         return typeState.getListener(PopulatedOrdinalListener.class).getPopulatedOrdinals();
     }
 
+    @Impure
     private static BitSet getOrCreateBitSet(Map<String, BitSet> bitSets, String typeName, int numBitsRequired) {
         if(numBitsRequired < 0)
             numBitsRequired = 0;
@@ -358,9 +372,11 @@ public class TransitiveSetTraverser {
     
     public static interface TransitiveSetTraverserAction {
         
+        @Impure
         public void foundReference(BitSet referencerClosureMatches, int referencerOrdinal, BitSet referencedClosureMatches, int referencedOrdinal);
         
         public static final TransitiveSetTraverserAction REMOVE_REFERENCED_OUTSIDE_CLOSURE = new TransitiveSetTraverserAction() {
+            @Impure
             @Override
             public void foundReference(BitSet referencerClosureMatches, int referencerOrdinal, BitSet referencedClosureMatches, int referencedOrdinal) {
                 referencedClosureMatches.clear(referencedOrdinal);
@@ -368,6 +384,7 @@ public class TransitiveSetTraverser {
         };
         
         public static final TransitiveSetTraverserAction ADD_REFERENCING_OUTSIDE_CLOSURE = new TransitiveSetTraverserAction() {
+            @Impure
             @Override
             public void foundReference(BitSet referencerClosureMatches, int referencerOrdinal, BitSet referencedClosureMatches, int referencedOrdinal) {
                 referencerClosureMatches.set(referencerOrdinal);

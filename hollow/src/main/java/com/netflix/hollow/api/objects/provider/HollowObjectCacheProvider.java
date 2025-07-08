@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects.provider;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.api.objects.delegate.HollowCachedDelegate;
@@ -42,10 +44,12 @@ public class HollowObjectCacheProvider<T> extends HollowObjectProvider<T> implem
     private volatile HollowTypeAPI typeAPI;
     private volatile HollowTypeReadState typeReadState;
 
+    @Impure
     public HollowObjectCacheProvider(HollowTypeDataAccess typeDataAccess, HollowTypeAPI typeAPI, HollowFactory<T> factory) {
         this(typeDataAccess, typeAPI, factory, null);
     }
 
+    @Impure
     public HollowObjectCacheProvider(HollowTypeDataAccess typeDataAccess, HollowTypeAPI typeAPI, HollowFactory<T> factory, HollowObjectCacheProvider<T> previous) {
         if(typeDataAccess != null) {
             PopulatedOrdinalListener listener = typeDataAccess.getTypeState().getListener(PopulatedOrdinalListener.class);
@@ -82,6 +86,7 @@ public class HollowObjectCacheProvider<T> extends HollowObjectProvider<T> implem
         }
     }
 
+    @Impure
     @Override
     public T getHollowObject(int ordinal) {
         List<T> refCachedItems = cachedItems;
@@ -94,6 +99,7 @@ public class HollowObjectCacheProvider<T> extends HollowObjectProvider<T> implem
         return refCachedItems.get(ordinal);
     }
 
+    @Impure
     public void detach() {
         cachedItems = null;
         factory = null;
@@ -101,6 +107,7 @@ public class HollowObjectCacheProvider<T> extends HollowObjectProvider<T> implem
         typeReadState = null;
     }
 
+    @Impure
     @Override
     public void addedOrdinal(int ordinal) {
         // guard against being detached (or constructed without a HollowTypeReadState)
@@ -113,6 +120,7 @@ public class HollowObjectCacheProvider<T> extends HollowObjectProvider<T> implem
         cachedItems.set(ordinal, instantiateCachedObject(factory, typeReadState, typeAPI, ordinal));
     }
 
+    @Impure
     private T instantiateCachedObject(HollowFactory<T> factory, HollowTypeDataAccess typeDataAccess, HollowTypeAPI typeAPI, int ordinal) {
         try {
             return factory.newCachedHollowObject(typeDataAccess, typeAPI, ordinal);
@@ -122,7 +130,10 @@ public class HollowObjectCacheProvider<T> extends HollowObjectProvider<T> implem
         }
     }
 
+    @SideEffectFree
     @Override public void beginUpdate() { }
+    @SideEffectFree
     @Override public void removedOrdinal(int ordinal) { }
+    @SideEffectFree
     @Override public void endUpdate() { }
 }

@@ -15,25 +15,31 @@
  *
  */
 package com.netflix.hollow.api.sampling;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 public class SampleResult implements Comparable<SampleResult> {
 
     private final String identifier;
     private final long numSamples;
 
+    @SideEffectFree
     public SampleResult(String identifier, long numSamples) {
         this.identifier = identifier;
         this.numSamples = numSamples;
     }
 
+    @Pure
     public String getIdentifier() {
         return identifier;
     }
 
+    @Pure
     public long getNumSamples() {
         return numSamples;
     }
 
+    @Pure
     @Override
     public int compareTo(SampleResult o) {
         if(o.numSamples == numSamples)
@@ -41,6 +47,7 @@ public class SampleResult implements Comparable<SampleResult> {
         return Long.compare(o.numSamples, numSamples);
     }
 
+    @Pure
     @Override
     public String toString() {
         return identifier + ": " + numSamples;

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine.object;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.memory.ByteData;
@@ -37,22 +40,26 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
     final HollowObjectTypeDataElements dataElements;
     final int shardOrdinalShift;
 
+    @Pure
     @Override
     public HollowObjectTypeDataElements getDataElements() {
         return dataElements;
     }
 
+    @Pure
     @Override
     public int getShardOrdinalShift() {
         return shardOrdinalShift;
     }
 
+    @SideEffectFree
     public HollowObjectTypeReadStateShard(HollowObjectSchema schema, HollowObjectTypeDataElements dataElements, int shardOrdinalShift) {
         this.schema = schema;
         this.shardOrdinalShift = shardOrdinalShift;
         this.dataElements = dataElements;
     }
 
+    @Impure
     public long readValue(int ordinal, int fieldIndex) {
         long bitOffset = fieldOffset(ordinal, fieldIndex);
         int numBitsForField = dataElements.bitsPerField[fieldIndex];
@@ -61,33 +68,40 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
                 : dataElements.fixedLengthData.getLargeElementValue(bitOffset, numBitsForField);
     }
 
+    @Impure
     public long readOrdinal(int ordinal, int fieldIndex) {
         return readFixedLengthFieldValue(ordinal, fieldIndex);
     }
 
+    @Impure
     public long readInt(int ordinal, int fieldIndex) {
         return readFixedLengthFieldValue(ordinal, fieldIndex);
     }
 
+    @Impure
     public int readFloat(int ordinal, int fieldIndex) {
         return (int)readFixedLengthFieldValue(ordinal, fieldIndex);
     }
 
+    @Impure
     public long readDouble(int ordinal, int fieldIndex) {
         long bitOffset = fieldOffset(ordinal, fieldIndex);
         return dataElements.fixedLengthData.getLargeElementValue(bitOffset, 64, -1L);
     }
 
+    @Impure
     public long readLong(int ordinal, int fieldIndex) {
         long bitOffset = fieldOffset(ordinal, fieldIndex);
         int numBitsForField = dataElements.bitsPerField[fieldIndex];
         return dataElements.fixedLengthData.getLargeElementValue(bitOffset, numBitsForField);
     }
 
+    @Impure
     public long readBoolean(int ordinal, int fieldIndex) {
         return readFixedLengthFieldValue(ordinal, fieldIndex);
     }
 
+    @Impure
     private long readFixedLengthFieldValue(int ordinal, int fieldIndex) {
         long bitOffset = fieldOffset(ordinal, fieldIndex);
         int numBitsForField = dataElements.bitsPerField[fieldIndex];
@@ -97,6 +111,7 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
         return value;
     }
 
+    @Impure
     public byte[] readBytes(long startByte, long endByte, int numBitsForField, int fieldIndex) {
         byte[] result;
 
@@ -114,6 +129,7 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
         return result;
     }
 
+    @Impure
     public String readString(long startByte, long endByte, int numBitsForField, int fieldIndex) {
         if((endByte & (1L << numBitsForField - 1)) != 0)
             return null;
@@ -125,6 +141,7 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
         return readString(dataElements.varLengthData[fieldIndex], startByte, length);
     }
 
+    @Impure
     public boolean isStringFieldEqual(long startByte, long endByte, int numBitsForField, int fieldIndex, String testValue) {
         if((endByte & (1L << numBitsForField - 1)) != 0)
             return testValue == null;
@@ -138,6 +155,7 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
         return testStringEquality(dataElements.varLengthData[fieldIndex], startByte, length, testValue);
     }
 
+    @Impure
     public int findVarLengthFieldHashCode(long startByte, long endByte, int numBitsForField, int fieldIndex) {
         if((endByte & (1L << numBitsForField - 1)) != 0)
             return -1;
@@ -152,11 +170,14 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
     /**
      * Warning:  Not thread-safe.  Should only be called within the update thread.
      */
+    @Pure
+    @Impure
     public int bitsRequiredForField(String fieldName) {
         int fieldIndex = schema.getPosition(fieldName);
         return fieldIndex == -1 ? 0 : dataElements.bitsPerField[fieldIndex];
     }
 
+    @Pure
     long fieldOffset(int ordinal, int fieldIndex) {
         return ((long)dataElements.bitsPerRecord * ordinal) + dataElements.bitOffsetPerField[fieldIndex];
     }
@@ -166,6 +187,7 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
      */
     private static final ThreadLocal<char[]> chararr = ThreadLocal.withInitial(() -> new char[100]);
 
+    @Impure
     private String readString(ByteData data, long position, int length) {
         char[] chararr = HollowObjectTypeReadStateShard.chararr.get();
         if (length > chararr.length) {
@@ -180,6 +202,7 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
         return new String(chararr, 0, count);
     }
 
+    @Impure
     private boolean testStringEquality(ByteData data, long position, int length, String testValue) {
         if(length < testValue.length()) // can't check exact length here; the length argument is in bytes, which is equal to or greater than the number of characters.
             return false;
@@ -199,6 +222,7 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
         return position == endPosition && count == testValue.length();
     }
 
+    @Impure
     protected void applyShardToChecksum(HollowChecksum checksum, HollowSchema withSchema, BitSet populatedOrdinals, int shardNumber, int shardNumberMask) {
         int numBitsForField;
         long bitOffset;
@@ -250,6 +274,8 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
         }
     }
 
+    @Pure
+    @Impure
     public long getApproximateHeapFootprintInBytes() {
         long bitsPerFixedLengthData = (long)dataElements.bitsPerRecord * (dataElements.maxOrdinal + 1);
         
@@ -263,6 +289,7 @@ class HollowObjectTypeReadStateShard implements HollowTypeReadStateShard {
         return requiredBytes;
     }
 
+    @Pure
     public long getApproximateHoleCostInBytes(BitSet populatedOrdinals, int shardNumber, int numShards) {
         long holeBits = 0;
         

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff.exact;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.util.IntList;
 import java.util.Arrays;
@@ -35,6 +37,7 @@ public class DiffEqualOrdinalFilter {
     private int hashedIdentityOrdinalsCounts[];
     private int matchedOrdinalsCounts[];
 
+    @Impure
     public DiffEqualOrdinalFilter(DiffEqualOrdinalMap equalityMapping) {
         this.equalOrdinalMap = equalityMapping;
         this.matchedFromOrdinals = new IntList();
@@ -46,6 +49,7 @@ public class DiffEqualOrdinalFilter {
         this.matchedOrdinalsCounts = new int[0];
     }
 
+    @Impure
     public void filter(IntList fromOrdinals, IntList toOrdinals) {
         matchedFromOrdinals.clear();
         matchedToOrdinals.clear();
@@ -121,18 +125,22 @@ public class DiffEqualOrdinalFilter {
         }
     }
 
+    @Pure
     public IntList getMatchedFromOrdinals() {
         return matchedFromOrdinals;
     }
 
+    @Pure
     public IntList getMatchedToOrdinals() {
         return matchedToOrdinals;
     }
 
+    @Pure
     public IntList getUnmatchedFromOrdinals() {
         return unmatchedFromOrdinals;
     }
 
+    @Pure
     public IntList getUnmatchedToOrdinals() {
         return unmatchedToOrdinals;
     }

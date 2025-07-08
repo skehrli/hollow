@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.engine.HollowBlobReader;
@@ -66,10 +68,13 @@ public class HollowHistoricalStateCreator {
 
     private final HollowHistory totalHistory;
 
+    @SideEffectFree
+    @Impure
     public HollowHistoricalStateCreator() {
         this(null);
     }
 
+    @SideEffectFree
     public HollowHistoricalStateCreator(HollowHistory totalHistory) {
         this.totalHistory = totalHistory;
     }
@@ -82,10 +87,12 @@ public class HollowHistoricalStateCreator {
      * @param stateEngine The current {@link HollowReadStateEngine} to which a delta has been applied.
      * @return a data access for history
      */
+    @Impure
     public HollowHistoricalStateDataAccess createBasedOnNewDelta(long version, HollowReadStateEngine stateEngine) {
         return createBasedOnNewDelta(version, stateEngine, false);
     }
 
+    @Impure
     public HollowHistoricalStateDataAccess createBasedOnNewDelta(long version, HollowReadStateEngine stateEngine, boolean reverse) {
         IntMapOrdinalRemapper typeRemovedOrdinalMapping = new IntMapOrdinalRemapper();
 
@@ -101,6 +108,7 @@ public class HollowHistoricalStateCreator {
         return dataAccess;
     }
 
+    @Impure
     private void createDeltaHistoricalTypeState(IntMapOrdinalRemapper typeRemovedOrdinalMapping, List<HollowTypeReadState> historicalTypeStates, HollowTypeReadState typeState, boolean reverse) {
         if(typeState instanceof HollowObjectTypeReadState) {
             HollowObjectDeltaHistoricalStateCreator deltaHistoryCreator = new HollowObjectDeltaHistoricalStateCreator((HollowObjectTypeReadState)typeState, reverse);
@@ -138,6 +146,7 @@ public class HollowHistoricalStateCreator {
      * @param previous the prior read state
      * @return the data access for a history
      */
+    @Impure
     public HollowHistoricalStateDataAccess createConsistentOrdinalHistoricalStateFromDoubleSnapshot(long version, HollowReadStateEngine previous) {
         return new HollowHistoricalStateDataAccess(totalHistory, version, previous, IdentityOrdinalRemapper.INSTANCE, Collections.<String, HollowHistoricalSchemaChange>emptyMap());
     }
@@ -151,6 +160,7 @@ public class HollowHistoricalStateCreator {
      * @param ordinalRemapper the ordinal remapper
      * @return the data access for a history
      */
+    @Impure
     public HollowHistoricalStateDataAccess createHistoricalStateFromDoubleSnapshot(long version, HollowReadStateEngine previous, HollowReadStateEngine current, DiffEqualityMappingOrdinalRemapper ordinalRemapper) {
         HollowWriteStateEngine writeEngine = HollowWriteStateCreator.createWithSchemas(schemasWithoutKeys(previous.getSchemas()));
         IntMapOrdinalRemapper typeRemovedOrdinalLookupMaps = new IntMapOrdinalRemapper();
@@ -175,6 +185,7 @@ public class HollowHistoricalStateCreator {
         return new HollowHistoricalStateDataAccess(totalHistory, version, roundTripStateEngine(writeEngine), typeRemovedOrdinalLookupMaps, schemaChanges);
     }
     
+    @Impure
     private Map<String, HollowHistoricalSchemaChange> calculateSchemaChanges(HollowReadStateEngine previous, HollowReadStateEngine current, DiffEqualityMapping equalityMapping) {
         Map<String, HollowHistoricalSchemaChange> schemaChanges = new HashMap<String, HollowHistoricalSchemaChange>();
         for(HollowTypeReadState previousTypeState : previous.getTypeStates()) {
@@ -198,6 +209,7 @@ public class HollowHistoricalStateCreator {
         return schemaChanges;
     }
 
+    @Impure
     private IntMap copyUnmatchedRecords(HollowTypeReadState previousTypeState, DiffEqualityMappingOrdinalRemapper ordinalRemapper, BitSet currentlyPopulatedOrdinals, HollowWriteStateEngine writeEngine) {
         String typeName = previousTypeState.getSchema().getName();
         PopulatedOrdinalListener previousListener = previousTypeState.getListener(PopulatedOrdinalListener.class);
@@ -258,6 +270,7 @@ public class HollowHistoricalStateCreator {
         return ordinalLookupMap;
     }
 
+    @Impure
     private int countMatchedRecords(BitSet populatedOrdinals, DiffEqualOrdinalMap equalityMap) {
         int matchedRecordCount = 0;
         int ordinal = populatedOrdinals.nextSetBit(0);
@@ -269,6 +282,7 @@ public class HollowHistoricalStateCreator {
         return matchedRecordCount;
     }
 
+    @Impure
     private int countUnmatchedRecords(BitSet populatedOrdinals, DiffEqualOrdinalMap equalityMap) {
         int unmatchedRecordCount = 0;
         int ordinal = populatedOrdinals.nextSetBit(0);
@@ -280,6 +294,7 @@ public class HollowHistoricalStateCreator {
         return unmatchedRecordCount;
     }
 
+    @Impure
     private IntMap copyAllRecords(HollowTypeReadState typeState, DiffEqualityMappingOrdinalRemapper ordinalRemapper, HollowWriteStateEngine writeEngine) {
         String typeName = typeState.getSchema().getName();
         HollowRecordCopier recordCopier = HollowRecordCopier.createCopier(typeState, ordinalRemapper, false);  ///NOTE: This will invalidate custom hash codes
@@ -296,6 +311,7 @@ public class HollowHistoricalStateCreator {
     }
 
 
+    @Impure
     public HollowHistoricalStateDataAccess copyButRemapOrdinals(HollowHistoricalStateDataAccess previous, OrdinalRemapper ordinalRemapper) {
         HollowWriteStateEngine writeEngine = HollowWriteStateCreator.createWithSchemas(schemasWithoutKeys(previous.getSchemas()));
 
@@ -312,6 +328,7 @@ public class HollowHistoricalStateCreator {
         return new HollowHistoricalStateDataAccess(totalHistory, previous.getVersion(), roundTripStateEngine(writeEngine), typeRemovedOrdinalRemapping, previous.getSchemaChanges());
     }
 
+    @Impure
     private void copyRemappedRecords(HollowTypeReadState readTypeState, OrdinalRemapper ordinalRemapper, HollowWriteStateEngine writeEngine) {
         String typeName = readTypeState.getSchema().getName();
         HollowTypeWriteState typeState = writeEngine.getTypeState(typeName);
@@ -323,6 +340,7 @@ public class HollowHistoricalStateCreator {
         }
     }
 
+    @Impure
     private IntMap remapPreviousOrdinalMapping(IntMap previousOrdinalMapping, String typeName, OrdinalRemapper ordinalRemapper) {
         IntMapEntryIterator ordinalMappingIter = previousOrdinalMapping.iterator();
         IntMap ordinalLookupMap = new IntMap(previousOrdinalMapping.size());
@@ -332,6 +350,7 @@ public class HollowHistoricalStateCreator {
         return ordinalLookupMap;
     }
 
+    @Impure
     private static HollowReadStateEngine roundTripStateEngine(HollowWriteStateEngine writeEngine) {
         HollowBlobWriter writer = new HollowBlobWriter(writeEngine);
         HollowReadStateEngine removedRecordCopies = new HollowReadStateEngine();
@@ -377,6 +396,7 @@ public class HollowHistoricalStateCreator {
         return removedRecordCopies;
     }
 
+    @Impure
     private List<HollowSchema> schemasWithoutKeys(List<HollowSchema> schemas) {
         List<HollowSchema> baldSchemas = new ArrayList<HollowSchema>();
         for(HollowSchema prevSchema : schemas)

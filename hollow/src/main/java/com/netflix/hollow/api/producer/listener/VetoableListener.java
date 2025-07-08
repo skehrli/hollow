@@ -1,4 +1,5 @@
 package com.netflix.hollow.api.producer.listener;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * A marker interface to be implemented by a listener which indicates that any runtime exception
@@ -22,6 +23,7 @@ public interface VetoableListener {
          * detail message.  The cause is not initialized, and may subsequently be
          * initialized by a call to {@link #initCause}.
          */
+        @SideEffectFree
         public ListenerVetoException() {
             super();
         }
@@ -34,6 +36,7 @@ public interface VetoableListener {
          * @param message the detail message. The detail message is saved for
          * later retrieval by the {@link #getMessage()} method.
          */
+        @SideEffectFree
         public ListenerVetoException(String message) {
             super(message);
         }
@@ -53,6 +56,7 @@ public interface VetoableListener {
          * permitted, and indicates that the cause is nonexistent or
          * unknown.)
          */
+        @SideEffectFree
         public ListenerVetoException(String message, Throwable cause) {
             super(message, cause);
         }
@@ -69,6 +73,7 @@ public interface VetoableListener {
          * permitted, and indicates that the cause is nonexistent or
          * unknown.)
          */
+        @SideEffectFree
         public ListenerVetoException(Throwable cause) {
             super(cause);
         }

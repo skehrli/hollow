@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.objects.generic;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.api.objects.delegate.HollowListLookupDelegate;
 import com.netflix.hollow.api.objects.delegate.HollowMapLookupDelegate;
@@ -42,6 +43,7 @@ import com.netflix.hollow.core.schema.HollowSetSchema;
  */
 public class GenericHollowRecordHelper {
 
+    @Impure
     public static HollowRecord instantiate(HollowDataAccess dataAccess, String typeName, int ordinal) {
         HollowTypeDataAccess typeState = dataAccess.getTypeDataAccess(typeName, ordinal);
 
@@ -70,6 +72,7 @@ public class GenericHollowRecordHelper {
         throw new UnsupportedOperationException("I don't know how to instantiate a generic object given a " + typeState.getClass().getSimpleName());
     }
 
+    @Impure
     public static boolean equalObject(String typeName, int ordinal, Object testObject) {
         if(testObject instanceof HollowRecord) {
             HollowRecord testRec = (HollowRecord)testObject;

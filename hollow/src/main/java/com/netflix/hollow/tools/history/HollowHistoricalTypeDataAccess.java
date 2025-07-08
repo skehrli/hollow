@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.client.StackTraceRecorder;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
@@ -33,6 +35,7 @@ public abstract class HollowHistoricalTypeDataAccess implements HollowTypeDataAc
 
     protected final HollowSampler sampler;
 
+    @Impure
     public HollowHistoricalTypeDataAccess(HollowHistoricalStateDataAccess dataAccess, HollowTypeReadState removedRecords, HollowSampler sampler) {
         IntMap ordinalRemap = null;
         if(dataAccess.getOrdinalMapping() instanceof IntMapOrdinalRemapper) {
@@ -44,59 +47,71 @@ public abstract class HollowHistoricalTypeDataAccess implements HollowTypeDataAc
         this.sampler = sampler;
     }
 
+    @Pure
     @Override
     public HollowHistoricalStateDataAccess getDataAccess() {
         return dataAccess;
     }
 
+    @Impure
     @Override
     public HollowSchema getSchema() {
         return removedRecords.getSchema();
     }
 
+    @Impure
     protected boolean ordinalIsPresent(int ordinal) {
         return ordinalRemap == null || ordinalRemap.get(ordinal) != -1;
     }
 
+    @Impure
     protected int getMappedOrdinal(int ordinal) {
         return ordinalRemap == null ? ordinal : ordinalRemap.get(ordinal);
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         throw new UnsupportedOperationException();
     }
 
+    @Impure
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         sampler.setSamplingDirector(director);
     }
 
+    @Impure
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         sampler.setFieldSpecificSamplingDirector(fieldSpec, director);
     }
     
+    @Impure
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         sampler.setUpdateThread(t);
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         return sampler;
     }
 
+    @Impure
     protected void recordStackTrace() {
         StackTraceRecorder recorder = dataAccess.getStackTraceRecorder();
         if(recorder != null)
             recorder.recordStackTrace(2);
     }
 
+    @Pure
     HollowTypeReadState getRemovedRecords() {
         return removedRecords;
     }
 
+    @Pure
     IntMap getOrdinalRemap() {
         return ordinalRemap;
     }

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.stringifier;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 import static com.netflix.hollow.core.read.HollowReadFieldUtils.compareFieldValues;
 
@@ -55,14 +57,17 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
     private final boolean prettyPrint;
     private final boolean sortSingleFieldSetElements;
 
+    @Impure
     public HollowRecordJsonStringifier() {
         this(true, true, false);
     }
 
+    @Impure
     public HollowRecordJsonStringifier(boolean prettyPrint, boolean collapseAllSingleFieldObjects) {
         this(prettyPrint, collapseAllSingleFieldObjects, false);
     }
 
+    @SideEffectFree
     public HollowRecordJsonStringifier(boolean prettyPrint, boolean collapseAllSingleFieldObjects, boolean sortSingleFieldSetElements) {
         this.prettyPrint = prettyPrint;
         this.collapseAllSingleFieldObjects = collapseAllSingleFieldObjects;
@@ -71,6 +76,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
     }
 
 
+    @Impure
     public HollowRecordJsonStringifier(boolean indent, String... collapseObjectTypes) {
         this.prettyPrint = indent;
         this.collapseAllSingleFieldObjects = false;
@@ -82,6 +88,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         }
     }
 
+    @Impure
     @Override
     public HollowRecordJsonStringifier addExcludeObjectTypes(String... types) {
         for (String type : types) {
@@ -90,16 +97,19 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         return this;
     }
 
+    @Impure
     @Override
     public String stringify(HollowRecord record) {
         return stringify(record.getTypeDataAccess().getDataAccess(), record.getSchema().getName(), record.getOrdinal());
     }
 
+    @Impure
     @Override
     public void stringify(Writer writer, HollowRecord record) throws IOException {
         stringify(writer, record.getTypeDataAccess().getDataAccess(), record.getSchema().getName(), record.getOrdinal());
     }
 
+    @Impure
     @Override
     public void stringify(Writer writer, Iterable<HollowRecord> records) throws IOException {
         writer.write("[");
@@ -113,6 +123,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         writer.write("]");
     }
 
+    @Impure
     @Override
     public String stringify(HollowDataAccess dataAccess, String type, int ordinal) {
         try {
@@ -124,11 +135,13 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         }
     }
 
+    @Impure
     @Override
     public void stringify(Writer writer, HollowDataAccess dataAccess, String type, int ordinal) throws IOException {
         appendStringify(writer, dataAccess, type, ordinal, 0);
     }
 
+    @Impure
     private void appendStringify(Writer writer, HollowDataAccess dataAccess, String type, int ordinal, int indentation) throws IOException {
         if (excludeObjectTypes.contains(type)) {
             writer.append("null");
@@ -155,6 +168,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
 
     }
 
+    @Impure
     private void appendMapStringify(Writer writer, HollowDataAccess dataAccess, HollowMapTypeDataAccess typeDataAccess, int ordinal, int indentation) throws IOException {
         indentation++;
 
@@ -187,6 +201,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
 
     }
 
+    @Impure
     private void keyValueAsObject(Writer writer, HollowDataAccess dataAccess, int indentation, HollowObjectTypeDataAccess keyTypeDataAccess, String valueType, HollowMapEntryOrdinalIterator ordinalIterator) throws IOException {
         HollowObjectSchema keySchema = keyTypeDataAccess.getSchema();
 
@@ -234,6 +249,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         writer.append("}");
     }
 
+    @Impure
     private void keyValueAsList(Writer writer, HollowDataAccess dataAccess, int indentation, String keyType, String valueType, HollowMapEntryOrdinalIterator ordinalIterator) throws IOException {
         writer.append("[");
         if (prettyPrint)
@@ -282,6 +298,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         writer.append("]");
     }
 
+    @Impure
     private void appendSetStringify(Writer writer, HollowDataAccess dataAccess, HollowSetTypeDataAccess typeDataAccess, int ordinal, int indentation) throws IOException {
         HollowSetSchema schema = typeDataAccess.getSchema();
 
@@ -337,6 +354,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         }
     }
 
+    @Impure
     private void appendListStringify(Writer writer, HollowDataAccess dataAccess, HollowListTypeDataAccess typeDataAccess, int ordinal, int indentation) throws IOException {
         HollowListSchema schema = typeDataAccess.getSchema();
 
@@ -379,6 +397,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         }
     }
 
+    @Impure
     private void appendObjectStringify(Writer writer, HollowDataAccess dataAccess, HollowObjectTypeDataAccess typeDataAccess, int ordinal, int indentation) throws IOException {
         HollowObjectSchema schema = typeDataAccess.getSchema();
 
@@ -418,6 +437,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         }
     }
 
+    @Impure
     private void appendFieldStringify(Writer writer, HollowDataAccess dataAccess, int indentation, HollowObjectSchema schema, HollowObjectTypeDataAccess typeDataAccess, int ordinal, int fieldIdx) throws IOException {
         switch(schema.getFieldType(fieldIdx)) {
             case BOOLEAN:
@@ -448,6 +468,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         }
     }
 
+    @Impure
     private String escapeString(String str) {
         StringBuilder sb = new StringBuilder();
         for (char c : str.toCharArray()) {
@@ -483,6 +504,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         }
         return sb.toString();
     }
+    @Impure
     private void appendIndentation(Writer writer, int indentation) throws IOException {
         switch(indentation) {
             case 0:
@@ -521,6 +543,7 @@ public class HollowRecordJsonStringifier implements HollowStringifier<HollowReco
         }
     }
 
+    @Impure
     private static boolean isPrimitiveWrapper(
             HollowSchema schema) {
         if (schema.getSchemaType() != HollowSchema.SchemaType.OBJECT) {

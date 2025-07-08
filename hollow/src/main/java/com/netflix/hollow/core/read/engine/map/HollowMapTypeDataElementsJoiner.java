@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine.map;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.FixedLengthDataFactory;
 import com.netflix.hollow.core.read.engine.HollowTypeDataElementsJoiner;
 
@@ -12,15 +14,19 @@ import com.netflix.hollow.core.read.engine.HollowTypeDataElementsJoiner;
  */
 class HollowMapTypeDataElementsJoiner extends HollowTypeDataElementsJoiner<HollowMapTypeDataElements> {
 
+    @SideEffectFree
+    @Impure
     public HollowMapTypeDataElementsJoiner(HollowMapTypeDataElements[] from) {
         super(from);
     }
 
+    @Impure
     @Override
     public void initToElements() {
         this.to = new HollowMapTypeDataElements(from[0].memoryMode, from[0].memoryRecycler);
     }
 
+    @Impure
     @Override
     public void populateStats() {
         for(int fromIndex=0;fromIndex<from.length;fromIndex++) {
@@ -64,6 +70,7 @@ class HollowMapTypeDataElementsJoiner extends HollowTypeDataElementsJoiner<Hollo
         to.bitsPerMapEntry = to.bitsPerKeyElement + to.bitsPerValueElement;
     }
 
+    @Impure
     @Override
     public void copyRecords() {
         long bucketCounter = 0;

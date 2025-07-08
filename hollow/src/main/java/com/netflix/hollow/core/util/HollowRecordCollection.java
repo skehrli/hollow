@@ -16,6 +16,11 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
 import java.util.AbstractCollection;
 import java.util.BitSet;
 import java.util.Iterator;
@@ -24,19 +29,23 @@ public abstract class HollowRecordCollection<T> extends AbstractCollection<T> {
 
     private final BitSet populatedOrdinals;
 
+    @SideEffectFree
     public HollowRecordCollection(BitSet populatedOrdinals) {
         this.populatedOrdinals = populatedOrdinals;
     }
 
+    @Impure
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<T> iterator(@PolyOwningCollection HollowRecordCollection<T> this) {
         return new Iterator<T>() {
             private int ordinal = populatedOrdinals.nextSetBit(0);
 
+            @Pure
             public boolean hasNext() {
                 return ordinal != -1;
             }
 
+            @Impure
             @Override
             public T next() {
                 T t = getForOrdinal(ordinal);
@@ -44,6 +53,7 @@ public abstract class HollowRecordCollection<T> extends AbstractCollection<T> {
                 return t;
             }
 
+            @SideEffectFree
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();
@@ -51,11 +61,13 @@ public abstract class HollowRecordCollection<T> extends AbstractCollection<T> {
         };
     }
 
+    @Pure
     @Override
-    public int size() {
+    public int size(@NotOwningCollection HollowRecordCollection<T> this) {
         return populatedOrdinals.cardinality();
     }
     
+    @Pure
     protected abstract T getForOrdinal(int ordinal);
 
 }

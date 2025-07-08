@@ -1,5 +1,6 @@
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.EncodedLongBuffer;
 import com.netflix.hollow.core.memory.encoding.FixedLengthElementArray;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
@@ -11,6 +12,7 @@ public class FixedLengthDataFactory {
 
     private static final Logger LOG = Logger.getLogger(FixedLengthDataFactory.class.getName());
 
+    @Impure
     public static FixedLengthData get(HollowBlobInput in, MemoryMode memoryMode, ArraySegmentRecycler memoryRecycler) throws IOException {
 
         if (memoryMode.equals(MemoryMode.ON_HEAP)) {
@@ -22,6 +24,7 @@ public class FixedLengthDataFactory {
         }
     }
 
+    @Impure
     public static FixedLengthData get(long numBits, MemoryMode memoryMode, ArraySegmentRecycler memoryRecycler) {
         if (memoryMode.equals(MemoryMode.ON_HEAP)) {
             return new FixedLengthElementArray(memoryRecycler, numBits);
@@ -30,6 +33,7 @@ public class FixedLengthDataFactory {
         }
     }
 
+    @Impure
     public static void destroy(FixedLengthData fld, ArraySegmentRecycler memoryRecycler) {
         if (fld instanceof FixedLengthElementArray) {
             ((FixedLengthElementArray) fld).destroy(memoryRecycler);

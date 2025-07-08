@@ -1,5 +1,6 @@
 package com.netflix.hollow.tools.util;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.index.HollowPrimaryKeyIndex;
@@ -27,6 +28,7 @@ public class SearchUtils {
      * If the the value of the field itself contains the delimiter character, the value can be escaped using backslash
      * in order to perform search.
      */
+    @Impure
     public static Object[] parseKey(HollowReadStateEngine readStateEngine, PrimaryKey primaryKey, String keyString) {
         /**
          * Split by the number of fields of the primary key. This ensures correct extraction of an empty value for the last field.
@@ -67,6 +69,7 @@ public class SearchUtils {
     /**
      * Return field index in object schema for each field comprising primary key.
      */
+    @Impure
     public static int[][] getFieldPathIndexes(HollowReadStateEngine readStateEngine, PrimaryKey primaryKey) {
         if(primaryKey != null) {
             int fieldPathIndexes[][] = new int[primaryKey.numFields()][];
@@ -82,6 +85,7 @@ public class SearchUtils {
     /**
      * Returns primary key index for a given type if it exists.
      */
+    @Impure
     public static HollowPrimaryKeyIndex findPrimaryKeyIndex(HollowTypeReadState typeState) {
         PrimaryKey pkey = getPrimaryKey(typeState.getSchema());
         if(pkey == null)
@@ -100,6 +104,7 @@ public class SearchUtils {
     /**
      * Get the primary key for an object schema.
      */
+    @Impure
     public static PrimaryKey getPrimaryKey(HollowSchema schema) {
         if(schema.getSchemaType() == HollowSchema.SchemaType.OBJECT)
             return ((HollowObjectSchema)schema).getPrimaryKey();
@@ -109,6 +114,7 @@ public class SearchUtils {
     /**
      * Returns the ordinal corresponding to the search result of searching by primary key.
      */
+    @Impure
     public static Integer getOrdinalToDisplay(HollowReadStateEngine readStateEngine, String query, Object[] parsedKey,
             int ordinal, BitSet selectedOrdinals, int[][] fieldPathIndexes, HollowTypeReadState keyTypeState) {
 
@@ -139,6 +145,7 @@ public class SearchUtils {
         return ORDINAL_NONE;
     }
 
+    @Impure
     private static boolean recordKeyEquals(HollowTypeReadState typeState, int ordinal, Object[] key, int[][] fieldPathIndexes) {
         HollowObjectTypeReadState objState = (HollowObjectTypeReadState)typeState;
 

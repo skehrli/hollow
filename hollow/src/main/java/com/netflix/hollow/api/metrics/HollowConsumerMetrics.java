@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.metrics;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,18 +28,22 @@ public class HollowConsumerMetrics extends HollowMetrics {
     private final AtomicLong lastRefreshStartNs = new AtomicLong(); //last time a refresh started
     private final AtomicLong lastRefreshEndNs = new AtomicLong();
 
+    @Impure
     public void setLastRefreshStartNs(long startNs) {
         lastRefreshStartNs.set(startNs);
     }
 
+    @Pure
     public AtomicLong getLastRefreshStartNs() {
         return lastRefreshStartNs;
     }
 
+    @Impure
     public void setLastRefreshEndNs(long endNs) {
         lastRefreshEndNs.set(endNs);
     }
 
+    @Pure
     public AtomicLong getLastRefreshEndNs() {
        return lastRefreshEndNs;
     }
@@ -50,19 +56,23 @@ public class HollowConsumerMetrics extends HollowMetrics {
      * @param hollowReadStateEngine the state engine
      * @param version the version
      */
+    @Impure
     public void updateTypeStateMetrics(HollowReadStateEngine hollowReadStateEngine, long version) {
         this.refreshSucceeded++;
         super.update(hollowReadStateEngine, version);
     }
 
+    @Impure
     public void updateRefreshFailed() {
         this.refreshFailed++;
     }
 
+    @Pure
     public int getRefreshFailed() {
         return this.refreshFailed;
     }
 
+    @Pure
     public int getRefreshSucceded() {
         return this.refreshSucceeded;
     }

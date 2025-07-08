@@ -15,6 +15,10 @@
  */
 package com.netflix.hollow.api.consumer.data;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.util.Objects.requireNonNull;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -47,18 +51,22 @@ public abstract class AbstractHollowDataAccessor<T> {
 
     private boolean isDataChangeComputed = false;
 
+    @Impure
     public AbstractHollowDataAccessor(HollowConsumer consumer, String type) {
         this(consumer.getStateEngine(), type);
     }
 
+    @Impure
     public AbstractHollowDataAccessor(HollowReadStateEngine rStateEngine, String type) {
         this(rStateEngine, type, (PrimaryKey) null);
     }
 
+    @Impure
     public AbstractHollowDataAccessor(HollowReadStateEngine rStateEngine, String type, String... fieldPaths) {
         this(rStateEngine, type, new PrimaryKey(type, fieldPaths));
     }
 
+    @Impure
     public AbstractHollowDataAccessor(HollowReadStateEngine rStateEngine, String type, PrimaryKey primaryKey) {
         this.rStateEngine = requireNonNull(rStateEngine, "read state required");
         this.typeState = requireNonNull(rStateEngine.getTypeState(type),
@@ -88,6 +96,7 @@ public abstract class AbstractHollowDataAccessor<T> {
      *
      * @return true indicate it contains prior state
      */
+    @Impure
     public boolean hasPriorState() {
         return !typeState.getPreviousOrdinals().isEmpty();
     }
@@ -95,6 +104,7 @@ public abstract class AbstractHollowDataAccessor<T> {
     /**
      * Compute Data Change
      */
+    @Impure
     public synchronized void computeDataChange() {
         if (isDataChangeComputed) return;
 
@@ -105,10 +115,12 @@ public abstract class AbstractHollowDataAccessor<T> {
     /**
      * @return true if data change has been computed
      */
+    @Pure
     public boolean isDataChangeComputed() {
         return isDataChangeComputed;
     }
 
+    @Impure
     protected void computeDataChange(String type, HollowReadStateEngine stateEngine, PrimaryKey primaryKey) {
         HollowTypeReadState typeState = stateEngine.getTypeDataAccess(type).getTypeState();
 
@@ -152,6 +164,7 @@ public abstract class AbstractHollowDataAccessor<T> {
     /**
      * @return the associated Type
      */
+    @Pure
     public String getType() {
         return type;
     }
@@ -159,6 +172,7 @@ public abstract class AbstractHollowDataAccessor<T> {
     /**
      * @return the PrimaryKey that can uniquely identify a single record
      */
+    @Pure
     public PrimaryKey getPrimaryKey() {
         return primaryKey;
     }
@@ -167,13 +181,16 @@ public abstract class AbstractHollowDataAccessor<T> {
      * @param ordinal the ordinal
      * @return the Record at specified Ordinal
      */
+    @Impure
     public abstract T getRecord(int ordinal);
 
     /**
      * @return all the available Record
      */
+    @Impure
     public Collection<T> getAllRecords() {
         return new AllHollowRecordCollection<T>(rStateEngine.getTypeState(type)) {
+            @Impure
             @Override
             protected T getForOrdinal(int ordinal) {
                 return getRecord(ordinal);
@@ -185,10 +202,11 @@ public abstract class AbstractHollowDataAccessor<T> {
      * @return only the Records that are Added
      * @see #getUpdatedRecords()
      */
+    @Impure
     public Collection<T> getAddedRecords() {
         if (!isDataChangeComputed) computeDataChange();
 
-        return new HollowRecordCollection<T>(addedOrdinals) { @Override protected T getForOrdinal(int ordinal) {
+        return new HollowRecordCollection<T>(addedOrdinals) { @Impure @Override protected T getForOrdinal(int ordinal) {
                 return getRecord(ordinal);
             }};
     }
@@ -197,9 +215,10 @@ public abstract class AbstractHollowDataAccessor<T> {
      * @return only the Records that are Removed
      * @see #getUpdatedRecords()
      */
+    @Impure
     public Collection<T> getRemovedRecords() {
         if (!isDataChangeComputed) computeDataChange();
-        return new HollowRecordCollection<T>(removedOrdinals) { @Override protected T getForOrdinal(int ordinal) {
+        return new HollowRecordCollection<T>(removedOrdinals) { @Impure @Override protected T getForOrdinal(int ordinal) {
             return getRecord(ordinal);
         }};
     }
@@ -208,6 +227,7 @@ public abstract class AbstractHollowDataAccessor<T> {
      * @return the Records that are Updated with both Before and After
      * @see UpdatedRecord
      */
+    @Impure
     public Collection<UpdatedRecord<T>> getUpdatedRecords() {
         if (!isDataChangeComputed) computeDataChange();
         return updatedRecords;
@@ -217,18 +237,23 @@ public abstract class AbstractHollowDataAccessor<T> {
         private final int before;
         private final int after;
 
+        @SideEffectFree
+        @Impure
         private UpdatedRecordOrdinal(int before, int after) {
             super(null, null);
             this.before = before;
             this.after = after;
         }
 
+        @Impure
         public T getBefore() {
             return getRecord(before);
         }
 
+        @Impure
         public T getAfter() { return getRecord(after);}
 
+        @Pure
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -239,6 +264,7 @@ public abstract class AbstractHollowDataAccessor<T> {
                     after == that.after;
         }
 
+        @Pure
         @Override
         public int hashCode() {
             return Objects.hash(super.hashCode(), before, after);
@@ -252,19 +278,25 @@ public abstract class AbstractHollowDataAccessor<T> {
         private final T before;
         private final T after;
 
+        @SideEffectFree
         public UpdatedRecord(T before, T after) {
             this.before = before;
             this.after = after;
         }
 
+        @NotOwning
+        @Impure
         public T getBefore() {
             return before;
         }
 
+        @NotOwning
+        @Impure
         public T getAfter() {
             return after;
         }
 
+        @Pure
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -274,6 +306,7 @@ public abstract class AbstractHollowDataAccessor<T> {
             return result;
         }
 
+        @Pure
         @Override
         public boolean equals(Object obj) {
             if (this == obj)
@@ -296,6 +329,7 @@ public abstract class AbstractHollowDataAccessor<T> {
             return true;
         }
 
+        @Impure
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();

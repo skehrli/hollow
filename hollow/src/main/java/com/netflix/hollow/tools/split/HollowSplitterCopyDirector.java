@@ -16,14 +16,20 @@
  */
 package com.netflix.hollow.tools.split;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 
 public interface HollowSplitterCopyDirector {
 
+    @SideEffectFree
     public String[] getTopLevelTypes();
 
+    @Pure
     public int getNumShards();
 
+    @Impure
     public int getShard(HollowTypeReadState topLevelType, int ordinal);
 
 }

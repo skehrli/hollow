@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.ProducerOptionalBlobPartConfig;
 import com.netflix.hollow.api.producer.ProducerOptionalBlobPartConfig.ConfiguredOutputStream;
 import com.netflix.hollow.core.HollowBlobHeader;
@@ -41,6 +43,7 @@ public class HollowBlobWriter {
     private final HollowWriteStateEngine stateEngine;
     private final HollowBlobHeaderWriter headerWriter;
 
+    @Impure
     public HollowBlobWriter(HollowWriteStateEngine stateEngine) {
         this.stateEngine = stateEngine;
         this.headerWriter = new HollowBlobHeaderWriter();
@@ -51,10 +54,12 @@ public class HollowBlobWriter {
      * @param os the output stream to write the snapshot blob
      * @throws IOException if the snapshot blob could not be written
      */
+    @Impure
     public void writeSnapshot(OutputStream os) throws IOException {
         writeSnapshot(os, null);
     }
 
+    @Impure
     public void writeHeader(OutputStream os, ProducerOptionalBlobPartConfig.OptionalBlobPartOutputStreams partStreams) throws IOException {
         stateEngine.prepareForWrite(true);
 
@@ -67,6 +72,7 @@ public class HollowBlobWriter {
             partStreams.flush();
     }
 
+    @Impure
     public void writeSnapshot(OutputStream os, ProducerOptionalBlobPartConfig.OptionalBlobPartOutputStreams partStreams) throws IOException {
         Map<String, DataOutputStream> partStreamsByType = Collections.emptyMap();
         if(partStreams != null)
@@ -82,6 +88,7 @@ public class HollowBlobWriter {
 
         for(final HollowTypeWriteState typeState : stateEngine.getOrderedTypeStates()) {
             executor.execute(new Runnable() {
+                @Impure
                 public void run() {
                     typeState.calculateSnapshot();
                 }
@@ -123,10 +130,12 @@ public class HollowBlobWriter {
      * types have not been declared to the producer as part it's initialized data model.
      * @see com.netflix.hollow.api.producer.HollowProducer#initializeDataModel(Class[])
      */
+    @Impure
     public void writeDelta(OutputStream os) throws IOException {
         writeDelta(os, null);
     }
 
+    @Impure
     public void writeDelta(OutputStream os, ProducerOptionalBlobPartConfig.OptionalBlobPartOutputStreams partStreams) throws IOException {
         Map<String, DataOutputStream> partStreamsByType = Collections.emptyMap();
         if(partStreams != null)
@@ -147,6 +156,7 @@ public class HollowBlobWriter {
 
         for(final HollowTypeWriteState typeState : stateEngine.getOrderedTypeStates()) {
             executor.execute(new Runnable() {
+                @Impure
                 public void run() {
                     if(typeState.hasChangedSinceLastCycle())
                         typeState.calculateDelta();
@@ -191,10 +201,12 @@ public class HollowBlobWriter {
      * types have not been declared to the producer as part it's initialized data model.
      * @see com.netflix.hollow.api.producer.HollowProducer#initializeDataModel(Class[])
      */
+    @Impure
     public void writeReverseDelta(OutputStream os) throws IOException {
         writeReverseDelta(os, null);
     }
 
+    @Impure
     public void writeReverseDelta(OutputStream os, ProducerOptionalBlobPartConfig.OptionalBlobPartOutputStreams partStreams) throws IOException {
         Map<String, DataOutputStream> partStreamsByType = Collections.emptyMap();
         if(partStreams != null)
@@ -215,6 +227,7 @@ public class HollowBlobWriter {
 
         for(final HollowTypeWriteState typeState : stateEngine.getOrderedTypeStates()) {
             executor.execute(new Runnable() {
+                @Impure
                 public void run() {
                     if(typeState.hasChangedSinceLastCycle())
                         typeState.calculateReverseDelta();
@@ -248,6 +261,7 @@ public class HollowBlobWriter {
             partStreams.flush();
     }
 
+    @Impure
     private List<HollowSchema> changedTypes() {
         List<HollowSchema> changedTypes = new ArrayList<HollowSchema>();
         
@@ -261,6 +275,7 @@ public class HollowBlobWriter {
         return changedTypes;
     }
     
+    @Impure
     private void writeNumShards(DataOutputStream dos, int numShards) throws IOException {
         VarInt.writeVInt(dos, 1 + VarInt.sizeOfVInt(numShards)); /// pre 2.1.0 forwards compatibility:
                                                                  /// skip new forwards-compatibility and num shards
@@ -270,6 +285,7 @@ public class HollowBlobWriter {
         VarInt.writeVInt(dos, numShards);
     }
 
+    @Impure
     public HollowBlobHeaderWrapper buildHeader(ProducerOptionalBlobPartConfig.OptionalBlobPartOutputStreams partStreams, List<HollowSchema> schemasToInclude, boolean isReverseDelta) {
         HollowBlobHeader header = new HollowBlobHeader();
         /// bucket schemas by part
@@ -305,6 +321,7 @@ public class HollowBlobWriter {
         return new HollowBlobHeaderWrapper(header, schemasByPartName);
     }
 
+    @Impure
     private void writeHeaders(DataOutputStream os, ProducerOptionalBlobPartConfig.OptionalBlobPartOutputStreams partStreams, boolean isReverseDelta, HollowBlobHeaderWrapper hollowBlobHeaderWrapper) throws IOException {
         headerWriter.writeHeader(hollowBlobHeaderWrapper.header, os);
         VarInt.writeVInt(os, hollowBlobHeaderWrapper.header.getSchemas().size());
@@ -339,6 +356,7 @@ public class HollowBlobWriter {
         private final HollowBlobHeader header;
         private final Map<String, List<HollowSchema>> schemasByPartName;
 
+        @SideEffectFree
         HollowBlobHeaderWrapper(HollowBlobHeader header, Map<String, List<HollowSchema>> schemasByPartName) {
             this.header = header;
             this.schemasByPartName = schemasByPartName;

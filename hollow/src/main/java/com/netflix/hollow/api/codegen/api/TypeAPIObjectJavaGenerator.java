@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.api;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.delegateLookupClassname;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.substituteInvalidChars;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.typeAPIClassname;
@@ -52,6 +53,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         }
     });
 
+    @Impure
     public TypeAPIObjectJavaGenerator(String apiClassname, String packageName, HollowObjectSchema schema,
             HollowDataset dataset, CodeGeneratorConfig config) {
         super(apiClassname, packageName, schema, dataset, config);
@@ -61,6 +63,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         this.importClasses.add(HollowObjectTypeDataAccess.class);
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder classBodyBuilder = new StringBuilder();
@@ -131,6 +134,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return classBuilder.toString();
     }
 
+    @Impure
     private String generateConstructor() {
         StringBuilder builder = new StringBuilder();
 
@@ -151,6 +155,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateByteArrayFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -166,6 +171,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateStringFieldAccessors(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -187,6 +193,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateReferenceFieldAccessors(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -206,6 +213,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateDoubleFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -233,6 +241,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateFloatFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -260,6 +269,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateLongFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -287,6 +297,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateIntFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -314,6 +325,7 @@ public class TypeAPIObjectJavaGenerator extends HollowTypeAPIGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateBooleanFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 

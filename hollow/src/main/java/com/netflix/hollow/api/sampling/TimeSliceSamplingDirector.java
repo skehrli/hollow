@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.sampling;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.util.Threads.daemonThread;
 
 import java.util.ArrayList;
@@ -32,20 +34,24 @@ public class TimeSliceSamplingDirector extends HollowSamplingDirector {
 
     private boolean record = false;
 
+    @Impure
     public TimeSliceSamplingDirector() {
         this(1000, 1);
     }
 
+    @Impure
     public TimeSliceSamplingDirector(int msOff, int msOn) {
         this.msOff = msOff;
         this.msOn = msOn;
     }
 
+    @Impure
     @Override
     public boolean shouldRecord() {
         return record && !isUpdateThread();
     }
 
+    @Impure
     public void startSampling() {
         if(!isInPlay) {
             isInPlay = true;
@@ -54,16 +60,19 @@ public class TimeSliceSamplingDirector extends HollowSamplingDirector {
         }
     }
 
+    @Impure
     public void setTiming(int msOff, int msOn) {
         this.msOff = msOff;
         this.msOn = msOn;
     }
 
+    @Impure
     public void stopSampling() {
         isInPlay = false;
     }
 
     private class SampleToggler implements Runnable {
+        @Impure
         @Override
         public void run() {
             while(isInPlay) {
@@ -79,6 +88,7 @@ public class TimeSliceSamplingDirector extends HollowSamplingDirector {
             notifyListeners();
         }
 
+        @Impure
         private void sleep(int ms) {
             try {
                 Thread.sleep(ms);
@@ -86,12 +96,15 @@ public class TimeSliceSamplingDirector extends HollowSamplingDirector {
         }
     }
 
+    @SideEffectFree
+    @Impure
     private void notifyListeners() {
         for(int i=0;i<listeners.size();i++) {
             listeners.get(i).samplingStatusChanged(record);
         }
     }
 
+    @Impure
     public void addSamplingStatusListener(SamplingStatusListener listener) {
         listener.samplingStatusChanged(record);
         listeners.add(listener);

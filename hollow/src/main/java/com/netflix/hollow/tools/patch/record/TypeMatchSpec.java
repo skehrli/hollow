@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.patch.record;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,24 +28,29 @@ public class TypeMatchSpec {
     private final String keyPaths[];
     private final List<Object[]> keyMatchingValues;
 
+    @SideEffectFree
     public TypeMatchSpec(String typeName, String... keyPaths) {
         this.typeName = typeName;
         this.keyPaths = keyPaths;
         this.keyMatchingValues = new ArrayList<Object[]>();
     }
 
+    @Impure
     public void addMatchingValue(Object... matchValues) {
         this.keyMatchingValues.add(matchValues);
     }
 
+    @Pure
     public String getTypeName() {
         return typeName;
     }
 
+    @Pure
     public String[] getKeyPaths() {
         return keyPaths;
     }
 
+    @Pure
     public List<Object[]> getKeyMatchingValues() {
         return keyMatchingValues;
     }

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.api.objects.HollowObject;
 import com.netflix.hollow.api.producer.HollowProducer.ReadState;
@@ -56,6 +58,7 @@ public class ObjectModificationValidator<A extends HollowAPI, T extends HollowOb
     private final BiFunction<A, Integer, T> hollowObjectFunction;
     private final BiPredicate<T, T> filter;
 
+    @SideEffectFree
     @SuppressWarnings("WeakerAccess")
     public ObjectModificationValidator(
             String typeName, BiPredicate<T, T> filter,
@@ -67,11 +70,13 @@ public class ObjectModificationValidator<A extends HollowAPI, T extends HollowOb
         this.hollowObjectFunction = hollowObjectFunction;
     }
 
+    @Impure
     @Override
     public String getName() {
         return getClass().getSimpleName() + "_" + typeName;
     }
 
+    @Impure
     @Override
     public ValidationResult onValidate(ReadState readState) {
         ValidationResult.ValidationResultBuilder vrb = ValidationResult.from(this)
@@ -124,6 +129,7 @@ public class ObjectModificationValidator<A extends HollowAPI, T extends HollowOb
         return vrb.passed();
     }
 
+    @Impure
     private static BitSet calculateRemovedAndModifiedOrdinals(BitSet latestOrdinals, BitSet previousOrdinals) {
         // make sure we don't modify previousOrdinals or latestOrdinals
         BitSet removedAndModified = new BitSet();

@@ -15,19 +15,23 @@
  *
  */
 package com.netflix.hollow.api.error;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * A generic exception thrown by hollow. In most cases, a subclass of this exception is thrown.
  */
 public class HollowException extends RuntimeException {
+    @SideEffectFree
     public HollowException(String message) {
         super(message);
     }
 
+    @SideEffectFree
     public HollowException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    @SideEffectFree
     public HollowException(Throwable cause) {
         super(cause);
     }

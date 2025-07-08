@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.indexes;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.codegen.CodeGeneratorConfig;
 import com.netflix.hollow.api.codegen.HollowAPIGenerator;
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -42,6 +43,7 @@ public class HollowUniqueKeyIndexGenerator extends HollowIndexGenerator {
     protected boolean isAutoListenToDataRefresh = false;
     protected boolean isImplementsUniqueKeyIndex = true;
 
+    @Impure
     public HollowUniqueKeyIndexGenerator(String packageName, String apiClassname, HollowObjectSchema schema,
             HollowDataset dataset, CodeGeneratorConfig config) {
         super(packageName, apiClassname, dataset, config);
@@ -51,10 +53,12 @@ public class HollowUniqueKeyIndexGenerator extends HollowIndexGenerator {
         this.schema = schema;
     }
 
+    @Impure
     protected String getClassName(HollowObjectSchema schema) {
         return schema.getName() + "UniqueKeyIndex";
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder builder = new StringBuilder();
@@ -86,6 +90,7 @@ public class HollowUniqueKeyIndexGenerator extends HollowIndexGenerator {
         return builder.toString();
     }
 
+    @Impure
     protected void genConstructors(StringBuilder builder) {
         if (isGenSimpleConstructor)
             genSimpleConstructor(builder);
@@ -93,6 +98,7 @@ public class HollowUniqueKeyIndexGenerator extends HollowIndexGenerator {
         genParameterizedConstructor(builder);
     }
 
+    @Impure
     protected void genSimpleConstructor(StringBuilder builder) {
         builder.append("    public " + className + "(HollowConsumer consumer) {\n");
         builder.append("        this(consumer, "+ isAutoListenToDataRefresh + ");\n");
@@ -104,6 +110,7 @@ public class HollowUniqueKeyIndexGenerator extends HollowIndexGenerator {
 
     }
 
+    @Impure
     protected void genParameterizedConstructor(StringBuilder builder) {
         builder.append("    " + (isParameterizedConstructorPublic ? "public " : "private ") + className + "(HollowConsumer consumer, String... fieldPaths) {\n");
         builder.append("        this(consumer, "+ isAutoListenToDataRefresh + ", fieldPaths);\n");
@@ -115,10 +122,12 @@ public class HollowUniqueKeyIndexGenerator extends HollowIndexGenerator {
 
     }
 
+    @Impure
     protected void genPublicAPIs(StringBuilder builder) {
         genFindMatchAPI(builder);
     }
 
+    @Impure
     protected void genFindMatchAPI(StringBuilder builder) {
         if (isImplementsUniqueKeyIndex)
             builder.append("    @Override\n");
@@ -130,6 +139,7 @@ public class HollowUniqueKeyIndexGenerator extends HollowIndexGenerator {
         builder.append("    }\n\n");
     }
 
+    @Impure
     protected void genDeprecatedJavaDoc(StringBuilder builder) {
         String typeName = hollowImplClassname(type);
         builder.append(" * @deprecated see {@link com.netflix.hollow.api.consumer.index.UniqueKeyIndex} which can be built as follows:\n");

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.sampling.DisabledSamplingDirector;
 import com.netflix.hollow.api.sampling.HollowListSampler;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
@@ -26,15 +28,18 @@ import com.netflix.hollow.core.schema.HollowListSchema;
 
 public class HollowHistoricalListDataAccess extends HollowHistoricalTypeDataAccess implements HollowListTypeDataAccess {
 
+    @Impure
     public HollowHistoricalListDataAccess(HollowHistoricalStateDataAccess dataAccess, HollowTypeReadState typeState) {
         super(dataAccess, typeState, new HollowListSampler(typeState.getSchema().getName(), DisabledSamplingDirector.INSTANCE));
     }
 
+    @Impure
     @Override
     public HollowListSchema getSchema() {
         return removedRecords().getSchema();
     }
 
+    @Impure
     @Override
     public int getElementOrdinal(int ordinal, int listIndex) {
         sampler().recordGet();
@@ -46,6 +51,7 @@ public class HollowHistoricalListDataAccess extends HollowHistoricalTypeDataAcce
         return removedRecords().getElementOrdinal(getMappedOrdinal(ordinal), listIndex);
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         sampler().recordSize();
@@ -57,6 +63,7 @@ public class HollowHistoricalListDataAccess extends HollowHistoricalTypeDataAcce
         return removedRecords().size(getMappedOrdinal(ordinal));
     }
 
+    @Impure
     @Override
     public HollowOrdinalIterator ordinalIterator(int ordinal) {
         sampler().recordIterator();
@@ -68,10 +75,12 @@ public class HollowHistoricalListDataAccess extends HollowHistoricalTypeDataAcce
         return removedRecords().ordinalIterator(getMappedOrdinal(ordinal));
     }
 
+    @Pure
     private HollowListTypeReadState removedRecords() {
         return (HollowListTypeReadState) removedRecords;
     }
 
+    @Pure
     private HollowListSampler sampler() {
         return (HollowListSampler) sampler;
     }

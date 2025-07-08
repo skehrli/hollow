@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history.keyindex;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -38,31 +40,39 @@ public class HollowHistoryKeyIndex {
     private final Map<String, HollowHistoryTypeKeyIndex> typeKeyIndexes;
     private boolean isInitialized;
 
+    @Impure
     public HollowHistoryKeyIndex(HollowHistory history) {
         this.history = history;
         this.typeKeyIndexes = new HashMap<>();
     }
 
+    @Pure
+    @Impure
     public int numUniqueKeys(String type) {
         return typeKeyIndexes.get(type).getMaxIndexedOrdinal();
     }
 
+    @Impure
     public String getKeyDisplayString(String type, int keyOrdinal) {
         return typeKeyIndexes.get(type).getKeyDisplayString(keyOrdinal);
     }
 
+    @Impure
     public int getRecordKeyOrdinal(HollowObjectTypeReadState typeState, int ordinal) {
         return typeKeyIndexes.get(typeState.getSchema().getName()).findKeyIndexOrdinal(typeState, ordinal);
     }
 
+    @Impure
     public void addTypeIndex(String type, String... keyFieldPaths) {
         addTypeIndex(new PrimaryKey(type, keyFieldPaths));
     }
 
+    @Impure
     public void addTypeIndex(PrimaryKey primaryKey) {
         addTypeIndex(primaryKey, history.getLatestState());
     }
 
+    @Impure
     public HollowHistoryTypeKeyIndex addTypeIndex(PrimaryKey primaryKey, HollowDataset dataModel) {
         HollowHistoryTypeKeyIndex prevKeyIdx = typeKeyIndexes.get(primaryKey.getType());
         HollowHistoryTypeKeyIndex keyIdx = new HollowHistoryTypeKeyIndex(primaryKey, dataModel);
@@ -78,15 +88,18 @@ public class HollowHistoryKeyIndex {
         return keyIdx;
     }
 
+    @Impure
     public void indexTypeField(String type, String keyFieldPath) {
         typeKeyIndexes.get(type).addFieldIndex(keyFieldPath, history.getLatestState());
     }
 
 
+    @Impure
     public void indexTypeField(PrimaryKey primaryKey) {
         indexTypeField(primaryKey, history.getLatestState());
     }
 
+    @Impure
     public void indexTypeField(PrimaryKey primaryKey, HollowDataset dataModel) {
         String type = primaryKey.getType();
         HollowHistoryTypeKeyIndex typeIndex = typeKeyIndexes.get(type);
@@ -99,10 +112,12 @@ public class HollowHistoryKeyIndex {
         }
     }
 
+    @Pure
     public Map<String, HollowHistoryTypeKeyIndex> getTypeKeyIndexes() {
         return typeKeyIndexes;
     }
 
+    @Impure
     public void update(HollowReadStateEngine latestStateEngine, boolean isDelta) {
         boolean isInitialUpdate = !isInitialized();
 
@@ -117,10 +132,12 @@ public class HollowHistoryKeyIndex {
         isInitialized = true;
     }
 
+    @Pure
     public boolean isInitialized() {
         return isInitialized;
     }
 
+    @Impure
     private void initializeTypeIndexes(HollowReadStateEngine latestStateEngine) {
         for(Map.Entry<String, HollowHistoryTypeKeyIndex> entry : typeKeyIndexes.entrySet()) {
             String type = entry.getKey();
@@ -134,6 +151,7 @@ public class HollowHistoryKeyIndex {
         }
     }
 
+    @Impure
     private void updateTypeIndexes(final HollowReadStateEngine latestStateEngine, final boolean isDelta) {
         SimultaneousExecutor executor = new SimultaneousExecutor(getClass(), "update-type-indexes");
 

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import com.netflix.hollow.core.read.engine.HollowBlobReader;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -37,6 +38,7 @@ public class StateEngineRoundTripper {
      * @return a brand-new {@link HollowReadStateEngine} with the dataset populated in the provided {@link HollowWriteStateEngine}
      * @throws IOException if the round trip from write to read state failed
      */
+    @Impure
     public static HollowReadStateEngine roundTripSnapshot(HollowWriteStateEngine writeEngine) throws IOException {
         HollowReadStateEngine readEngine = new HollowReadStateEngine();
         roundTripSnapshot(writeEngine, readEngine);
@@ -50,6 +52,7 @@ public class StateEngineRoundTripper {
      * @param readEngine the read state engine
      * @throws IOException if the round trip from write to read state failed
      */
+    @Impure
     public static void roundTripSnapshot(HollowWriteStateEngine writeEngine, HollowReadStateEngine readEngine) throws IOException {
         roundTripSnapshot(writeEngine, readEngine, null);
     }
@@ -64,6 +67,7 @@ public class StateEngineRoundTripper {
      * @param filter the filter configuration
      * @throws IOException if the round trip from write to read state failed
      */
+    @Impure
     public static void roundTripSnapshot(HollowWriteStateEngine writeEngine, HollowReadStateEngine readEngine, HollowFilterConfig filter) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HollowBlobWriter writer = new HollowBlobWriter(writeEngine);
@@ -89,6 +93,7 @@ public class StateEngineRoundTripper {
      * @param readEngine the read state engine
      * @throws IOException if the round trip from write to read state failed
      */
+    @Impure
     public static void roundTripDelta(HollowWriteStateEngine writeEngine, HollowReadStateEngine readEngine) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         HollowBlobWriter writer = new HollowBlobWriter(writeEngine);

@@ -16,24 +16,30 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.util.Objects.requireNonNull;
 
 /**
  * Internal API.
  */
 public final class Threads {
+    @SideEffectFree
     private Threads() {}
 
+    @Impure
     public static Thread daemonThread(Runnable r, Class<?> context, String description) {
         return daemonThread(r, "hollow", context, description);
     }
 
+    @Impure
     public static Thread daemonThread(Runnable r, Class<?> context, String description, int priority) {
         Thread thread = daemonThread(r, "hollow", context, description);
         thread.setPriority(priority);
         return thread;
     }
 
+    @Impure
     public static Thread daemonThread(Runnable r, String platform, Class<?> context, String description) {
         requireNonNull(platform, "platform required");
         requireNonNull(context, "context required");
@@ -42,6 +48,7 @@ public final class Threads {
         return daemonThread(r, name(platform, context, description));
     }
 
+    @Impure
     public static Thread daemonThread(Runnable r, String name) {
         requireNonNull(r, "runnable required");
         requireNonNull(name, "name required");
@@ -51,6 +58,7 @@ public final class Threads {
         return t;
     }
 
+    @Impure
     private static String name(String platform, Class<?> context, String description) {
         StringBuilder sb = new StringBuilder();
         sb.append(platform);

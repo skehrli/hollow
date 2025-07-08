@@ -16,21 +16,29 @@
  */
 package com.netflix.hollow.api.sampling;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.filter.HollowFilterConfig;
 import java.util.Collection;
 
 public interface HollowSampler {
 
+    @Impure
     public void setSamplingDirector(HollowSamplingDirector director);
     
+    @Impure
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director);
     
+    @Impure
     public void setUpdateThread(Thread t);
 
+    @Pure
     public boolean hasSampleResults();
 
+    @Impure
     public Collection<SampleResult> getSampleResults();
 
+    @Impure
     public void reset();
 
 }

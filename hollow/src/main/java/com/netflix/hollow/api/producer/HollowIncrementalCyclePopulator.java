@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.index.HollowPrimaryKeyIndex;
 import com.netflix.hollow.core.memory.ThreadSafeBitSet;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -53,11 +55,13 @@ public class HollowIncrementalCyclePopulator implements HollowProducer.Populator
     private final Map<RecordPrimaryKey, Object> mutations;
     
 
+    @SideEffectFree
     HollowIncrementalCyclePopulator(Map<RecordPrimaryKey, Object> mutations, double threadsPerCpu) {
         this.mutations = mutations;
         this.threadsPerCpu = threadsPerCpu;
     }
 
+    @Impure
     @Override
     public void populate(HollowProducer.WriteState newState) throws Exception {
         newState.getStateEngine().addAllObjectsFromPreviousCycle();
@@ -65,6 +69,7 @@ public class HollowIncrementalCyclePopulator implements HollowProducer.Populator
         addRecords(newState);
     }
 
+    @Impure
     private void removeRecords(HollowProducer.WriteState newState) {
         if (newState.getPriorState() != null) {
             Collection<String> types = findTypesWithRemovedRecords(newState.getPriorState());
@@ -73,6 +78,7 @@ public class HollowIncrementalCyclePopulator implements HollowProducer.Populator
         }
     }
 
+    @Impure
     private Set<String> findTypesWithRemovedRecords(HollowProducer.ReadState readState) {
         Set<String> typesWithRemovedRecords = new HashSet<>();
         for(RecordPrimaryKey key : mutations.keySet()) {
@@ -86,6 +92,7 @@ public class HollowIncrementalCyclePopulator implements HollowProducer.Populator
         return typesWithRemovedRecords;
     }
 
+    @Impure
     private Map<String, BitSet> markRecordsToRemove(HollowProducer.ReadState priorState, Collection<String> types) {
         HollowReadStateEngine priorStateEngine = priorState.getStateEngine();
 
@@ -100,6 +107,7 @@ public class HollowIncrementalCyclePopulator implements HollowProducer.Populator
         return recordsToRemove;
     }
 
+    @Impure
     private BitSet markTypeRecordsToRemove(HollowReadStateEngine priorStateEngine, final String type) {
         HollowTypeReadState priorReadState = priorStateEngine.getTypeState(type);
         HollowSchema schema = priorReadState.getSchema();
@@ -141,6 +149,7 @@ public class HollowIncrementalCyclePopulator implements HollowProducer.Populator
         return new BitSet(populatedOrdinals);
     }
 
+    @Impure
     private void removeRecordsFromNewState(HollowProducer.WriteState newState, Map<String, BitSet> recordsToRemove) {
         for(Map.Entry<String, BitSet> removalEntry : recordsToRemove.entrySet()) {
             HollowTypeWriteState writeState = newState.getStateEngine().getTypeState(removalEntry.getKey());
@@ -155,6 +164,7 @@ public class HollowIncrementalCyclePopulator implements HollowProducer.Populator
         }
     }
 
+    @Impure
     private void addRecords(final HollowProducer.WriteState newState) {
         List<Map.Entry<RecordPrimaryKey, Object>> entryList = new ArrayList<>(mutations.entrySet());
         
@@ -205,6 +215,7 @@ public class HollowIncrementalCyclePopulator implements HollowProducer.Populator
         private final Object obj;
         private boolean wasFound;
 
+        @SideEffectFree
         public AddIfAbsent(Object obj) {
             this.obj = obj;
             this.wasFound = false;

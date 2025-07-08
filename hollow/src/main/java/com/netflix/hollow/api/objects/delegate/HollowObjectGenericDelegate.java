@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowObjectTypeAPI;
 import com.netflix.hollow.api.objects.generic.GenericHollowObject;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
@@ -30,20 +32,24 @@ public class HollowObjectGenericDelegate extends HollowObjectAbstractDelegate {
 
     private final HollowObjectTypeDataAccess dataAccess;
 
+    @Impure
     public HollowObjectGenericDelegate(HollowObjectTypeDataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
 
+    @Impure
     @Override
     public HollowObjectSchema getSchema() {
         return dataAccess.getSchema();
     }
 
+    @Pure
     @Override
     public HollowObjectTypeDataAccess getTypeDataAccess() {
         return dataAccess;
     }
 
+    @Pure
     @Override
     public HollowObjectTypeAPI getTypeAPI() {
         return null;

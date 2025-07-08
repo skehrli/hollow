@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine.object;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.copyRecord;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.varLengthSize;
@@ -46,6 +49,8 @@ public class HollowObjectDeltaHistoricalStateCreator {
     private int nextOrdinal;
     private final long currentWriteVarLengthDataPointers[];
 
+    @SideEffectFree
+    @Impure
     public HollowObjectDeltaHistoricalStateCreator(HollowObjectTypeReadState typeState, boolean reverse) {
         this.typeState = typeState;
         this.historicalDataElements = new HollowObjectTypeDataElements(typeState.getSchema(), WastefulRecycler.DEFAULT_INSTANCE);
@@ -54,6 +59,7 @@ public class HollowObjectDeltaHistoricalStateCreator {
         this.shardsHolder = typeState.shardsVolatile;
     }
 
+    @Impure
     public void populateHistory() {
         populateStats();
 
@@ -84,21 +90,25 @@ public class HollowObjectDeltaHistoricalStateCreator {
      * Once a historical state has been created, the references into the original read state can be released so that
      * the original read state can be GC'ed.
      */
+    @Impure
     public void dereferenceTypeState() {
         this.typeState = null;
         this.shardsHolder = null;
         this.iter = null;
     }
 
+    @Pure
     public IntMap getOrdinalMapping() {
         return ordinalMapping;
     }
 
+    @Impure
     public HollowObjectTypeReadState createHistoricalTypeReadState() {
         HollowObjectTypeReadState historicalTypeState = new HollowObjectTypeReadState(typeState.getSchema(), historicalDataElements);
         return historicalTypeState;
     }
 
+    @Impure
     private void populateStats() {
         iter.reset();
         int removedEntryCount = 0;
@@ -140,6 +150,7 @@ public class HollowObjectDeltaHistoricalStateCreator {
         ordinalMapping = new IntMap(removedEntryCount);
     }
 
+    @Pure
     private boolean isVarLengthField(HollowObjectSchema.FieldType fieldType) {
         return fieldType == HollowObjectSchema.FieldType.STRING || fieldType == HollowObjectSchema.FieldType.BYTES;
     }

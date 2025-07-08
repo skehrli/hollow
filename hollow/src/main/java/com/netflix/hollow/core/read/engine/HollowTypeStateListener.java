@@ -15,6 +15,7 @@
  *
  */
 package com.netflix.hollow.core.read.engine;
+import org.checkerframework.dataflow.qual.Impure;
 
 
 /**
@@ -26,23 +27,27 @@ public interface HollowTypeStateListener {
     /**
      * Called immediately before a delta update is applied to the state engine
      */
+    @Impure
     void beginUpdate();
 
     /**
      * Called once for each record which is added to the registered type.
      * @param ordinal the ordinal of an object that was added
      */
+    @Impure
     void addedOrdinal(int ordinal);
 
     /**
      * Called once for each record which is removed from the registered type.
      * @param ordinal the ordinal of an object that was removed
      */
+    @Impure
     void removedOrdinal(int ordinal);
 
     /**
      * Called immediately after a delta update is applied to the state engine.
      */
+    @Impure
     void endUpdate();
 
 }

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.util.Threads.daemonThread;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -47,6 +50,7 @@ public abstract class HollowAnnouncementWatcher {
     /**
      * Construct a HollowAnnouncementWatcher with a default ExecutorService.
      */
+    @Impure
     public HollowAnnouncementWatcher() {
         refreshExecutor = Executors.newFixedThreadPool(1,
                 r -> daemonThread(r, getClass(), "watch"));
@@ -57,6 +61,7 @@ public abstract class HollowAnnouncementWatcher {
      *
      * @param refreshExecutor the ExecutorService to use for asynchronous state refresh.
      */
+    @SideEffectFree
     public HollowAnnouncementWatcher(ExecutorService refreshExecutor) {
         this.refreshExecutor = refreshExecutor;
     }
@@ -64,12 +69,14 @@ public abstract class HollowAnnouncementWatcher {
     /**
      * @return the latest announced version info comprising announced version, metadata and pinned status of this version.
      */
+    @Impure
     public HollowConsumer.VersionInfo getLatestVersionInfo() {
         return new HollowConsumer.VersionInfo(getLatestVersion());}
 
     /**
      * @return the latest announced version.
      */
+    @Pure
     public abstract long getLatestVersion();
 
     /**
@@ -78,6 +85,7 @@ public abstract class HollowAnnouncementWatcher {
      *
      * When announcements are received, or polling reveals a new version, a call should be placed to triggerRefresh().
      */
+    @SideEffectFree
     public abstract void subscribeToEvents();
 
     /**
@@ -85,6 +93,7 @@ public abstract class HollowAnnouncementWatcher {
      *
      * @param latestVersion the latest version
      */
+    @Impure
     public void setLatestVersion(long latestVersion) {
         throw new UnsupportedOperationException("Cannot explicitly set latest version on a " + this.getClass());
     }
@@ -92,6 +101,7 @@ public abstract class HollowAnnouncementWatcher {
     /**
      * Will force a double snapshot refresh on the next update.
      */
+    @Impure
     protected void forceDoubleSnapshotNextUpdate() {
         client.forceDoubleSnapshotNextUpdate();
     }
@@ -99,6 +109,7 @@ public abstract class HollowAnnouncementWatcher {
     /**
      * Triggers a refresh in a new thread immediately.
      */
+    @Impure
     public void triggerAsyncRefresh() {
         triggerAsyncRefreshWithDelay(0);
     }
@@ -112,6 +123,7 @@ public abstract class HollowAnnouncementWatcher {
      *
      * @param maxDelayMillis the maximum delay in milliseconds
      */
+    @Impure
     public void triggerAsyncRefreshWithRandomDelay(int maxDelayMillis) {
         Random rand = new Random();
         int delayMillis = maxDelayMillis > 0 ? rand.nextInt(maxDelayMillis) : 0;
@@ -126,11 +138,13 @@ public abstract class HollowAnnouncementWatcher {
      *
      * @param delayMillis the delay in milliseconds
      */
+    @Impure
     public void triggerAsyncRefreshWithDelay(int delayMillis) {
         final HollowClient client = this.client;
         final long targetBeginTime = System.currentTimeMillis() + delayMillis;
 
         refreshExecutor.execute(new Runnable() {
+            @Impure
             public void run() {
                 try {
                     long delay = targetBeginTime - System.currentTimeMillis();
@@ -147,8 +161,10 @@ public abstract class HollowAnnouncementWatcher {
 
     private HollowClient client;
     
+    @Pure
     protected HollowClient getClientToNotify() { return client; } 
 
+    @Impure
     void setClientToNotify(HollowClient client) {
         this.client = client;
         subscribeToEvents();
@@ -158,25 +174,31 @@ public abstract class HollowAnnouncementWatcher {
 
         private long latestVersion = HollowConstants.VERSION_LATEST;
 
+        @Impure
         public DefaultWatcher() {
             super();
         }
 
+        @SideEffectFree
+        @Impure
         public DefaultWatcher(ExecutorService refreshExecutor) {
             super(refreshExecutor);
         }
 
+        @Pure
         @Override
         public long getLatestVersion() {
             /// by default, just try to fetch the maximum available version
             return latestVersion;
         }
 
+        @SideEffectFree
         @Override
         public void subscribeToEvents() {
             // by default, update events not available.
         }
 
+        @Impure
         @Override
         public void setLatestVersion(long latestVersion) {
             this.latestVersion = latestVersion;

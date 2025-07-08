@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.diff.count;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -49,6 +50,7 @@ public class HollowDiffObjectCountingNode extends HollowDiffCountingNode {
     private final boolean fieldRequiresMissingFieldTraversal[];
     private final DiffEqualOrdinalFilter fieldEqualOrdinalFilters[];
 
+    @Impure
     public HollowDiffObjectCountingNode(HollowDiff diff, HollowTypeDiff topLevelTypeDiff, HollowDiffNodeIdentifier nodeId, HollowObjectTypeReadState fromState, HollowObjectTypeReadState toState) {
         super(diff, topLevelTypeDiff, nodeId);
         this.fromState = fromState;
@@ -86,10 +88,12 @@ public class HollowDiffObjectCountingNode extends HollowDiffCountingNode {
         }
     }
 
+    @Impure
     private HollowObjectSchema emptySchema(HollowObjectSchema other) {
         return new HollowObjectSchema(other.getName(), 0);
     }
 
+    @Impure
     public void prepare(int topLevelFromOrdinal, int topLevelToOrdinal) {
         for(int i=0;i<fieldNodes.length;i++) {
             fieldNodes[i].prepare(topLevelFromOrdinal, topLevelToOrdinal);
@@ -99,6 +103,7 @@ public class HollowDiffObjectCountingNode extends HollowDiffCountingNode {
     private final IntList traversalFromOrdinals = new IntList();
     private final IntList traversalToOrdinals = new IntList();
 
+    @Impure
     @Override
     public int traverseDiffs(IntList fromOrdinals, IntList toOrdinals) {
         int score = 0;
@@ -152,6 +157,7 @@ public class HollowDiffObjectCountingNode extends HollowDiffCountingNode {
         return score;
     }
 
+    @Impure
     public int traverseMissingFields(IntList fromOrdinals, IntList toOrdinals) {
         int score = 0;
         
@@ -185,6 +191,7 @@ public class HollowDiffObjectCountingNode extends HollowDiffCountingNode {
         return score;
     }
 
+    @Impure
     private int[] createFieldMapping(HollowObjectSchema unionSchema, HollowObjectSchema individualSchema) {
         int mapping[] = new int[unionSchema.numFields()];
         for(int i=0;i<unionSchema.numFields();i++) {
@@ -194,6 +201,7 @@ public class HollowDiffObjectCountingNode extends HollowDiffCountingNode {
         return mapping;
     }
 
+    @Impure
     @Override
     public List<HollowFieldDiff> getFieldDiffs() {
         List<HollowFieldDiff> list = new ArrayList<HollowFieldDiff>();

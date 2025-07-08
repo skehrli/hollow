@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.isPrimitiveType;
 
 import com.netflix.hollow.core.HollowDataset;
@@ -77,6 +79,7 @@ public class HollowPOJOGenerator {
     private final String pojoClassNameSuffix;
     private final HollowDataset dataset;
 
+    @SideEffectFree
     public HollowPOJOGenerator(String packageName, String pojoClassNameSuffix, HollowDataset dataset) {
         this.packageName = packageName;
         this.pojoClassNameSuffix = pojoClassNameSuffix;
@@ -90,6 +93,7 @@ public class HollowPOJOGenerator {
      * @throws IOException if the POJOs cannot be created
      * @throws ClassNotFoundException if the class for a data type cannot be loaded
      */
+    @Impure
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         if (args.length == 0) {
             System.out.println("Usage:\n"
@@ -127,10 +131,12 @@ public class HollowPOJOGenerator {
         new HollowPOJOGenerator(packageName, pojoClassNameSuffix, engine).generateFiles(pathToGeneratedFiles);
     }
 
+    @Impure
     public void generateFiles(String directory) throws IOException {
         generateFiles(new File(directory));
     }
 
+    @Impure
     public void generateFiles(File directory) throws IOException {
         Path destinationPath = directory.toPath();
         Path packagePath = Paths.get(packageName.replace(".", File.separator));

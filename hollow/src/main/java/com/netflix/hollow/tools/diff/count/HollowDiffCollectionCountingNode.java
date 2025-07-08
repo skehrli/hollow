@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.diff.count;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowCollectionTypeReadState;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
@@ -42,6 +43,7 @@ public class HollowDiffCollectionCountingNode extends HollowDiffCountingNode {
     private final DiffEqualOrdinalFilter referenceFilter;
     private final boolean requiresTraversalForMissingFields;
 
+    @Impure
     public HollowDiffCollectionCountingNode(HollowDiff diff, HollowTypeDiff topLevelTypeDiff, HollowDiffNodeIdentifier nodeId, HollowCollectionTypeReadState fromState, HollowCollectionTypeReadState toState) {
         super(diff, topLevelTypeDiff, nodeId);
         this.fromState = fromState;
@@ -57,11 +59,13 @@ public class HollowDiffCollectionCountingNode extends HollowDiffCountingNode {
         this.requiresTraversalForMissingFields = equalityMapping.requiresMissingFieldTraversal(referencedType);
     }
 
+    @Impure
     @Override
     public void prepare(int topLevelFromOrdinal, int topLevelToOrdinal) {
         elementNode.prepare(topLevelFromOrdinal, topLevelToOrdinal);
     }
 
+    @Impure
     @Override
     public List<HollowFieldDiff> getFieldDiffs() {
         return elementNode.getFieldDiffs();
@@ -70,6 +74,7 @@ public class HollowDiffCollectionCountingNode extends HollowDiffCountingNode {
     private final IntList traversalFromOrdinals = new IntList();
     private final IntList traversalToOrdinals = new IntList();
 
+    @Impure
     @Override
     public int traverseDiffs(IntList fromOrdinals, IntList toOrdinals) {
         fillTraversalLists(fromOrdinals, toOrdinals);
@@ -87,12 +92,14 @@ public class HollowDiffCollectionCountingNode extends HollowDiffCountingNode {
         return score;
     }
 
+    @Impure
     @Override
     public int traverseMissingFields(IntList fromOrdinals, IntList toOrdinals) {
         fillTraversalLists(fromOrdinals, toOrdinals);
         return elementNode.traverseMissingFields(traversalFromOrdinals, traversalToOrdinals);
     }
 
+    @Impure
     private void fillTraversalLists(IntList fromOrdinals, IntList toOrdinals) {
         traversalFromOrdinals.clear();
         traversalToOrdinals.clear();
@@ -111,6 +118,7 @@ public class HollowDiffCollectionCountingNode extends HollowDiffCountingNode {
 
     }
 
+    @Impure
     private void fillListWithReferencedOrdinals(HollowCollectionTypeReadState typeState, int ordinal, IntList fillList) {
         HollowOrdinalIterator iter = typeState.ordinalIterator(ordinal);
         int refOrdinal = iter.next();

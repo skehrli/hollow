@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import java.io.IOException;
 
@@ -29,6 +30,7 @@ public class SnapshotPopulatedOrdinalsReader {
      * @throws IOException if the ordinals cannot be read
      * @author dkoszewnik
      */
+    @Impure
     public static void readOrdinals(HollowBlobInput in, HollowTypeStateListener[] listeners) throws IOException {
         int numLongs = in.readInt();
 
@@ -41,6 +43,7 @@ public class SnapshotPopulatedOrdinalsReader {
         }
     }
 
+    @Impure
     private static void notifyPopulatedOrdinals(long l, int ordinal, HollowTypeStateListener[] listeners) {
         if(l == 0)
             return;
@@ -58,6 +61,7 @@ public class SnapshotPopulatedOrdinalsReader {
         }
     }
 
+    @Impure
     public static void discardOrdinals(HollowBlobInput in) throws IOException {
         long numLongs = in.readInt();
         long bytesToSkip = numLongs * 8;

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 
 /**
@@ -36,6 +38,7 @@ public interface HollowClientMemoryConfig extends HollowConsumer.ObjectLongevity
     /**
      * @return whether or not a double snapshot will ever be attempted by the {@link HollowClient}
      */
+    @Pure
     boolean allowDoubleSnapshot();
 
 
@@ -46,6 +49,7 @@ public interface HollowClientMemoryConfig extends HollowConsumer.ObjectLongevity
         private final long gracePeriodMillis;
         private final long usageDetectionPeriodMillis;
 
+        @SideEffectFree
         public SpecifiedConfig(boolean enableLongLivedObjectSupport, boolean dropDataAutomatically,
                                            long gracePeriodMillis, long usageDetectionPeriodMillis) {
             this.enableLongLivedObjectSupport = enableLongLivedObjectSupport;
@@ -54,18 +58,25 @@ public interface HollowClientMemoryConfig extends HollowConsumer.ObjectLongevity
             this.usageDetectionPeriodMillis = usageDetectionPeriodMillis;
         }
 
+        @Pure
         public boolean enableLongLivedObjectSupport() { return enableLongLivedObjectSupport; }
 
+        @Pure
         public boolean dropDataAutomatically() { return dropDataAutomatically; }
 
+        @Pure
         public long gracePeriodMillis() { return gracePeriodMillis; }
 
+        @Pure
         public long usageDetectionPeriodMillis() { return usageDetectionPeriodMillis; }
 
+        @Pure
         public boolean enableExpiredUsageStackTraces() { return false; }
 
+        @Pure
         public boolean forceDropData() { return false; }
         
+        @Pure
         public boolean allowDoubleSnapshot() { return true; }
 
     }

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.listener;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.Status;
 import java.time.Duration;
@@ -34,6 +36,7 @@ public interface IntegrityCheckListener extends HollowProducerEventListener {
      *
      * @param version version to be checked
      */
+    @SideEffectFree
     void onIntegrityCheckStart(long version);
 
     /**
@@ -46,5 +49,6 @@ public interface IntegrityCheckListener extends HollowProducerEventListener {
      * @param version version that was checked
      * @param elapsed duration of the integrity check stage in {@code unit} units
      */
+    @Impure
     void onIntegrityCheckComplete(Status status, HollowProducer.ReadState readState, long version, Duration elapsed);
 }

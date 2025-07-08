@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.error.SchemaNotFoundException;
 import com.netflix.hollow.core.HollowStateEngine;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
@@ -65,27 +68,33 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
 
     private MissingDataHandler missingDataHandler = new DefaultMissingDataHandler();
 
+    @Impure
     public HollowReadStateEngine() {
         this(DefaultHashCodeFinder.INSTANCE, true, new GarbageCollectorAwareRecycler());
     }
 
+    @Impure
     public HollowReadStateEngine(boolean listenToAllPopulatedOrdinals) {
         this(DefaultHashCodeFinder.INSTANCE, listenToAllPopulatedOrdinals, new GarbageCollectorAwareRecycler());
     }
 
+    @Impure
     public HollowReadStateEngine(ArraySegmentRecycler recycler) {
         this(DefaultHashCodeFinder.INSTANCE, true, recycler);
     }
 
+    @Impure
     public HollowReadStateEngine(boolean listenToAllPopulatedOrdinals, ArraySegmentRecycler recycler) {
         this(DefaultHashCodeFinder.INSTANCE, listenToAllPopulatedOrdinals, recycler);
     }
 
+    @Impure
     @Deprecated
     public HollowReadStateEngine(HollowObjectHashCodeFinder hashCodeFinder) {
         this(hashCodeFinder, true, new GarbageCollectorAwareRecycler());
     }
 
+    @Impure
     @Deprecated
     public HollowReadStateEngine(HollowObjectHashCodeFinder hashCodeFinder, boolean listenToAllPopulatedOrdinals, ArraySegmentRecycler recycler) {
         this.typeStates = new HashMap<String, HollowTypeReadState>();
@@ -95,11 +104,13 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
         this.listenToAllPopulatedOrdinals = listenToAllPopulatedOrdinals;
     }
 
+    @Pure
     @Override
     public HollowObjectHashCodeFinder getHashCodeFinder() {
         return hashCodeFinder;
     }
 
+    @Impure
     protected void addTypeState(HollowTypeReadState typeState) {
         typeStates.put(typeState.getSchema().getName(), typeState);
 
@@ -120,6 +131,7 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
      * @param typeName the type name
      * @param listener the listener to add
      */
+    @Impure
     public void addTypeListener(String typeName, HollowTypeStateListener listener) {
         List<HollowTypeStateListener> list = listeners.get(typeName);
         if(list == null) {
@@ -134,6 +146,7 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
             typeState.addListener(listener);
     }
 
+    @Impure
     void wireTypeStatesToSchemas() {
         for(HollowTypeReadState state : typeStates.values()) {
             switch(state.getSchema().getSchemaType()) {
@@ -168,6 +181,7 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
      * over the read state shards in each type state
      * @return the heap footprint of the read state engine
      */
+    @Impure
     public long calcApproxDataSize() {
         return this.getAllTypes()
                 .stream()
@@ -179,6 +193,7 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
     /**
      * @return the no. of shards for each type in the read state
      */
+    @Impure
     public Map<String, Integer> numShardsPerType() {
         Map<String, Integer> typeShards = new HashMap<>();
         for (String type : this.getAllTypes()) {
@@ -191,6 +206,7 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
     /**
      * @return the approx heap footprint of a single shard in bytes, for each type in the read state
      */
+    @Impure
     public Map<String, Long> calcApproxShardSizePerType() {
         Map<String, Long> typeShardSizes = new HashMap<>();
         for (String type : this.getAllTypes()) {
@@ -200,33 +216,40 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
         return typeShardSizes;
     }
 
+    @Pure
     @Override
     public HollowTypeDataAccess getTypeDataAccess(String type) {
         return typeStates.get(type);
     }
 
+    @Pure
     @Override
     public HollowTypeDataAccess getTypeDataAccess(String type, int ordinal) {
         return typeStates.get(type);
     }
 
+    @SideEffectFree
     @Override
     public Collection<String> getAllTypes() {
         return typeStates.keySet();
     }
 
+    @Pure
     public HollowTypeReadState getTypeState(String type) {
         return typeStates.get(type);
     }
 
+    @SideEffectFree
     public Collection<HollowTypeReadState> getTypeStates() {
         return typeStates.values();
     }
 
+    @Pure
     public ArraySegmentRecycler getMemoryRecycler() {
         return memoryRecycler;
     }
 
+    @Pure
     public boolean isListenToAllPopulatedOrdinals() {
         return listenToAllPopulatedOrdinals;
     }
@@ -234,14 +257,17 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
     /**
      * Experimental: When there are no updates for a type shard in a delta, skip updating that type shard.
      */
+    @Impure
     public void setSkipTypeShardUpdateWithNoAdditions(boolean skipTypeShardUpdateWithNoAdditions) {
         this.skipTypeShardUpdateWithNoAdditions = skipTypeShardUpdateWithNoAdditions;
     }
 
+    @Pure
     public boolean isSkipTypeShardUpdateWithNoAdditions() {
         return skipTypeShardUpdateWithNoAdditions;
     }
 
+    @Impure
     @Override
     public List<HollowSchema> getSchemas() {
         List<HollowSchema> schemas = new ArrayList<HollowSchema>();
@@ -253,12 +279,15 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
         return schemas;
     }
     
+    @Pure
+    @Impure
     @Override
     public HollowSchema getSchema(String type) {
         HollowTypeReadState typeState = getTypeState(type);
         return typeState == null ? null : typeState.getSchema();
     }
 
+    @Impure
     @Override
     public HollowSchema getNonNullSchema(String type) {
         HollowSchema schema = getSchema(type);
@@ -268,32 +297,39 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
         return schema;
     }
 
+    @SideEffectFree
     protected void afterInitialization() { }
 
+    @Impure
     public void setMissingDataHandler(MissingDataHandler handler) {
         this.missingDataHandler = handler;
     }
 
+    @Pure
     @Override
     public MissingDataHandler getMissingDataHandler() {
         return missingDataHandler;
     }
 
+    @Impure
     public void setHeaderTags(Map<String, String> headerTags) {
         this.headerTags = headerTags;
         populatedDefinedHashCodesTypesIfHeaderTagIsPresent();
     }
 
+    @Pure
     @Override
     public Map<String, String> getHeaderTags() {
         return headerTags;
     }
 
+    @Pure
     @Override
     public String getHeaderTag(String name) {
         return headerTags.get(name);
     }
 
+    @Impure
     public void invalidate() {
         listeners.clear();
 
@@ -303,12 +339,14 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
         memoryRecycler = null;
     }
 
+    @Impure
     @Override
     public void resetSampling() {
         for(Map.Entry<String, HollowTypeReadState> entry : typeStates.entrySet())
             entry.getValue().getSampler().reset();
     }
 
+    @Impure
     @Override
     public boolean hasSampleResults() {
         for(Map.Entry<String, HollowTypeReadState> entry : typeStates.entrySet())
@@ -317,6 +355,8 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
         return false;
     }
 
+    @SideEffectFree
+    @Impure
     public boolean updatedLastCycle() {
         for(Map.Entry<String, HollowTypeReadState> entry : typeStates.entrySet()) {
             if(entry.getValue().getListener(PopulatedOrdinalListener.class).updatedLastCycle())
@@ -325,26 +365,32 @@ public class HollowReadStateEngine implements HollowStateEngine, HollowDataAcces
         return false;
     }
 
+    @Pure
     public Set<String> getTypesWithDefinedHashCodes() {
         return typesWithDefinedHashCodes;
     }
 
+    @Pure
     public long getCurrentRandomizedTag() {
         return currentRandomizedTag;
     }
 
+    @Pure
     public long getOriginRandomizedTag() {
         return originRandomizedTag;
     }
 
+    @Impure
     public void setCurrentRandomizedTag(long currentRandomizedTag) {
         this.currentRandomizedTag = currentRandomizedTag;
     }
 
+    @Impure
     public void setOriginRandomizedTag(long originRandomizedTag) {
         this.originRandomizedTag = originRandomizedTag;
     }
 
+    @Impure
     private void populatedDefinedHashCodesTypesIfHeaderTagIsPresent() {
         String definedHashCodesTag = headerTags.get(HollowObjectHashCodeFinder.DEFINED_HASH_CODES_HEADER_NAME);
         if(definedHashCodesTag == null || "".equals(definedHashCodesTag)) {

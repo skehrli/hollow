@@ -15,6 +15,8 @@
  */
 package com.netflix.hollow.api.codegen.delegate;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.codegen.CodeGeneratorConfig;
 import com.netflix.hollow.api.codegen.HollowConsumerJavaFileGenerator;
 import com.netflix.hollow.api.codegen.HollowErgonomicAPIShortcuts;
@@ -27,6 +29,8 @@ public abstract class HollowObjectDelegateGenerator extends HollowConsumerJavaFi
     protected final HollowObjectSchema schema;
     protected final HollowErgonomicAPIShortcuts ergonomicShortcuts;
 
+    @SideEffectFree
+    @Impure
     public HollowObjectDelegateGenerator(String packageName, HollowObjectSchema schema,
             HollowErgonomicAPIShortcuts ergonomicShortcuts, HollowDataset dataset, CodeGeneratorConfig config) {
         super(packageName, SUB_PACKAGE_NAME, dataset, config);

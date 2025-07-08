@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory.encoding;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.ByteData;
 import com.netflix.hollow.core.memory.ByteDataArray;
 import com.netflix.hollow.core.read.HollowBlobInput;
@@ -37,6 +39,7 @@ public class VarInt {
      *
      * @param buf the buffer to write to
      */
+    @Impure
     public static void writeVNull(ByteDataArray buf) {
         buf.write((byte)0x80);
         return;
@@ -49,6 +52,7 @@ public class VarInt {
      * @param pos the position in the byte array
      * @return the next position in the byte array after the null has been written
      */
+    @Impure
     public static int writeVNull(byte data[], int pos) {
         data[pos++] = ((byte)0x80);
         return pos;
@@ -60,6 +64,7 @@ public class VarInt {
      * @param buf the buffer to write to
      * @param value the long value
      */
+    @Impure
     public static void writeVLong(ByteDataArray buf, long value) {
         if(value < 0)                                buf.write((byte)0x81);
         if(value > 0xFFFFFFFFFFFFFFL || value < 0)   buf.write((byte)(0x80 | ((value >>> 56) & 0x7FL)));
@@ -81,6 +86,7 @@ public class VarInt {
      * @param value the long value
      * @throws IOException if the value cannot be written to the output stream
      */
+    @Impure
     public static void writeVLong(OutputStream out, long value) throws IOException {
         if(value < 0)                                out.write((byte)0x81);
         if(value > 0xFFFFFFFFFFFFFFL || value < 0)   out.write((byte)(0x80 | ((value >>> 56) & 0x7FL)));
@@ -103,6 +109,7 @@ public class VarInt {
      * @param value the long value
      * @return the next position after the VarLong has been written.
      */
+    @Impure
     public static int writeVLong(byte data[], int pos, long value) {
         if(value < 0)                                data[pos++] = ((byte)0x81);
         if(value > 0xFFFFFFFFFFFFFFL || value < 0)   data[pos++] = ((byte)(0x80 | ((value >>> 56) & 0x7FL)));
@@ -125,6 +132,7 @@ public class VarInt {
      * @param buf the buffer to write to
      * @param value the int value
      */
+    @Impure
     public static void writeVInt(ByteDataArray buf, int value) {
         if(value > 0x0FFFFFFF || value < 0) buf.write((byte)(0x80 | ((value >>> 28))));
         if(value > 0x1FFFFF || value < 0)   buf.write((byte)(0x80 | ((value >>> 21) & 0x7F)));
@@ -141,6 +149,7 @@ public class VarInt {
      * @param value the int value
      * @throws IOException if the value cannot be written to the output stream
      */
+    @Impure
     public static void writeVInt(OutputStream out, int value) throws IOException {
         if(value > 0x0FFFFFFF || value < 0) out.write((byte)(0x80 | ((value >>> 28))));
         if(value > 0x1FFFFF || value < 0)   out.write((byte)(0x80 | ((value >>> 21) & 0x7F)));
@@ -158,6 +167,7 @@ public class VarInt {
      * @param value the int value
      * @return the next position after the VarInt has been written.
      */
+    @Impure
     public static int writeVInt(byte data[], int pos, int value) {
         if(value > 0x0FFFFFFF || value < 0) data[pos++] = ((byte)(0x80 | ((value >>> 28))));
         if(value > 0x1FFFFF || value < 0)   data[pos++] = ((byte)(0x80 | ((value >>> 21) & 0x7F)));
@@ -177,6 +187,7 @@ public class VarInt {
      * @param position the position in the byte data to read from
      * @return true if the value is null
      */
+    @Impure
     public static boolean readVNull(ByteData arr, long position) {
         return arr.get(position) == (byte)0x80;
     }
@@ -189,6 +200,7 @@ public class VarInt {
      * @param position the position in the byte data to read from
      * @return true if the value is null
      */
+    @Pure
     public static boolean readVNull(byte[] arr, int position) {
         return arr[position] == (byte)0x80;
     }
@@ -199,6 +211,7 @@ public class VarInt {
      * @param position the position in the byte data to read from
      * @return the int value
      */
+    @Impure
     public static int readVInt(ByteData arr, long position) {
         byte b = arr.get(position++);
 
@@ -222,6 +235,7 @@ public class VarInt {
      * @param position the position in the byte data to read from
      * @return the int value
      */
+    @Pure
     public static int readVInt(byte[] arr, int position) {
         byte b = arr[position++];
 
@@ -246,6 +260,7 @@ public class VarInt {
      * @param output an array where outputs will be placed, which should be at least {@code length} long and zero.
      * @return the number of values written
      */
+    @Impure
     public static int readVIntsInto(ByteData arr, long position, int length, int[] output) {
         // two loops, first for single-byte encodes, falling back to second full-featured loop
         int i = 0;
@@ -275,6 +290,7 @@ public class VarInt {
      * @param output an array where outputs will be placed, which should be at least {@code length} long and zero.
      * @return the number of values written
      */
+    @Impure
     public static int readVIntsInto(ByteData arr, long position, int length, char[] output) {
         // two loops, first for single-byte encodes, falling back to second full-featured loop
         int i = 0;
@@ -302,6 +318,7 @@ public class VarInt {
      * @return the int value
      * @throws IOException if the value cannot be read from the input
      */
+    @Impure
     public static int readVInt(InputStream in) throws IOException {
         byte b = readByteSafely(in);
 
@@ -324,6 +341,7 @@ public class VarInt {
      * @return the int value
      * @throws IOException if the value cannot be read from the input
      */
+    @Impure
     public static int readVInt(HollowBlobInput in) throws IOException {
         byte b = readByteSafely(in);
 
@@ -346,6 +364,7 @@ public class VarInt {
      * @param position the position in the byte data to read from
      * @return the long value
      */
+    @Impure
     public static long readVLong(ByteData arr, long position) {
         byte b = arr.get(position++);
 
@@ -369,6 +388,7 @@ public class VarInt {
      * @param position the position in the byte data to read from
      * @return the long value
      */
+    @Pure
     public static long readVLong(byte[] arr, int position) {
         byte b = arr[position++];
 
@@ -391,6 +411,7 @@ public class VarInt {
      * @param position the position in the byte data to read from
      * @return the long value
      */
+    @Impure
     public static int nextVLongSize(ByteData arr, long position) {
         byte b = arr.get(position++);
 
@@ -414,6 +435,7 @@ public class VarInt {
      * @param position the position in the byte data to read from
      * @return the size of long value
      */
+    @Pure
     public static int nextVLongSize(byte[] arr, int position) {
         byte b = arr[position++];
 
@@ -436,6 +458,7 @@ public class VarInt {
      * @return the long value
      * @throws IOException if the value cannot be read from the input stream
      */
+    @Impure
     public static long readVLong(InputStream in) throws IOException {
         byte b = readByteSafely(in);
 
@@ -458,6 +481,7 @@ public class VarInt {
      * @return the long value
      * @throws IOException if the value cannot be read from the input
      */
+    @Impure
     public static long readVLong(HollowBlobInput in) throws IOException {
         byte b = readByteSafely(in);
 
@@ -480,6 +504,7 @@ public class VarInt {
      * @param value the int value
      * @return the size (int bytes) of the value when encoded
      */
+    @Pure
     public static int sizeOfVInt(int value) {
         if(value < 0)
             return 5;
@@ -499,6 +524,7 @@ public class VarInt {
      * @param value the long value
      * @return the size (int bytes) of the value when encoded
      */
+    @Pure
     public static int sizeOfVLong(long value) {
         if(value < 0L)
             return 10;
@@ -528,6 +554,7 @@ public class VarInt {
      * @param length the length
      * @return number of variable length integers encoded over a range in the byte data
      */
+    @Impure
     public static int countVarIntsInRange(ByteData byteData, long fieldPosition, int length) {
         int numInts = 0;
 
@@ -549,6 +576,7 @@ public class VarInt {
         return numInts;
     }
 
+    @Impure
     public static byte readByteSafely(InputStream is) throws IOException {
         int i = is.read();
         if(i == -1) {
@@ -557,6 +585,7 @@ public class VarInt {
         return (byte)i;
     }
 
+    @Impure
     public static byte readByteSafely(HollowBlobInput in) throws IOException {
         int i = in.read();
         if(i == -1) {

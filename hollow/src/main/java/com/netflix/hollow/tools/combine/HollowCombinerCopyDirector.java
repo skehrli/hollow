@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.combine;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 
 /**
@@ -36,9 +38,11 @@ public interface HollowCombinerCopyDirector {
      * If this method returns false, then the copier will not attempt to directly copy the matching record.  However, if 
      * the matching record is referenced via <i>another</i> record for which this method returns true, then it will still be copied.  
      */
+    @Impure
     boolean shouldCopy(HollowTypeReadState typeState, int ordinal);
 
     HollowCombinerCopyDirector DEFAULT_DIRECTOR = new HollowCombinerCopyDirector() {
+        @Pure
         public boolean shouldCopy(HollowTypeReadState typeName, int ordinal) {
             return true;
         }

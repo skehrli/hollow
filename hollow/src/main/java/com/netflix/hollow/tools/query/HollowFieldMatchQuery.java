@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.query;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.HollowReadFieldUtils;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -51,6 +53,7 @@ public class HollowFieldMatchQuery {
     
     private final HollowReadStateEngine readEngine;
     
+    @SideEffectFree
     public HollowFieldMatchQuery(HollowReadStateEngine readEngine) {
         this.readEngine = readEngine;
     }
@@ -62,6 +65,7 @@ public class HollowFieldMatchQuery {
      * @param fieldValue the field value as a string that will be parsed as the type of the field to match.
      * @return the matching records
      */
+    @Impure
     public Map<String, BitSet> findMatchingRecords(String fieldName, String fieldValue) {
         Map<String, BitSet> matches = new HashMap<String, BitSet>();
         
@@ -80,6 +84,7 @@ public class HollowFieldMatchQuery {
      * @param fieldValue the field value as a string that will be parsed as the type of the field to match.
      * @return the matching records
      */
+    @Impure
     public Map<String, BitSet> findMatchingRecords(String typeName, String fieldName, String fieldValue) {
         Map<String, BitSet> matches = new HashMap<String, BitSet>();
 
@@ -90,6 +95,7 @@ public class HollowFieldMatchQuery {
         return matches;
     }
 
+    @Impure
     private void augmentMatchingRecords(HollowTypeReadState typeState, String fieldName, String fieldValue, Map<String, BitSet> matches) {
         if(typeState.getSchema().getSchemaType() == SchemaType.OBJECT) {
             HollowObjectSchema schema = (HollowObjectSchema)typeState.getSchema();
@@ -117,6 +123,7 @@ public class HollowFieldMatchQuery {
         }
     }
     
+    @Impure
     private BitSet attemptReferenceTraversalQuery(HollowObjectTypeReadState typeState, int fieldIdx, String fieldValue) {
         HollowTypeReadState referencedTypeState = typeState.getSchema().getReferencedTypeState(fieldIdx);
         
@@ -144,6 +151,7 @@ public class HollowFieldMatchQuery {
         return null;
     }
     
+    @Impure
     private BitSet queryBasedOnMatchedReferences(HollowObjectTypeReadState typeState, int referenceFieldPosition, BitSet matchedReferences) {
         BitSet populatedOrdinals = typeState.getPopulatedOrdinals();
         BitSet typeQueryMatches = new BitSet(populatedOrdinals.length());
@@ -158,6 +166,7 @@ public class HollowFieldMatchQuery {
         return typeQueryMatches;
     }
     
+    @Impure
     private BitSet queryBasedOnValueMatches(HollowObjectTypeReadState typeState, int fieldPosition, Object queryValue) {
         BitSet populatedOrdinals = typeState.getPopulatedOrdinals();
         BitSet typeQueryMatches = new BitSet(populatedOrdinals.length());
@@ -171,6 +180,7 @@ public class HollowFieldMatchQuery {
         return typeQueryMatches;
     }
 
+    @SideEffectFree
     private Object castQueryValue(String fieldValue, FieldType fieldType) {
         
         try {

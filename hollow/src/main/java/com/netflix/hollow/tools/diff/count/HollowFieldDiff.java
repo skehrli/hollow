@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff.count;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.util.IntList;
 import com.netflix.hollow.tools.diff.HollowDiff;
 import com.netflix.hollow.tools.diff.HollowDiffNodeIdentifier;
@@ -33,6 +35,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
 
     private long totalDiffScore;
 
+    @Impure
     public HollowFieldDiff(HollowDiffNodeIdentifier fieldIdentifier) {
         this.diffFromOrdinals = new IntList();
         this.diffToOrdinals = new IntList();
@@ -47,6 +50,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
      * @param toOrdinal the to ordinal
      * @param score the score
      */
+    @Impure
     public void addDiff(int fromOrdinal, int toOrdinal, int score) {
         if(isSameDiffAsLastAdd(fromOrdinal, toOrdinal)) {
             int scoreIdx = diffPairScores.size() - 1;
@@ -60,6 +64,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
         totalDiffScore += score;
     }
 
+    @Impure
     private boolean isSameDiffAsLastAdd(int fromOrdinal, int toOrdinal) {
         return diffFromOrdinals.size() > 0
                 && diffFromOrdinals.get(diffFromOrdinals.size() - 1) == fromOrdinal
@@ -69,6 +74,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
     /**
      * @return The identifier for the field on which this diff reports.
      */
+    @Pure
     public HollowDiffNodeIdentifier getFieldIdentifier() {
         return fieldIdentifier;
     }
@@ -76,6 +82,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
     /**
      * @return the total score, used to judge relative magnitude of the diff. 
      */
+    @Pure
     public long getTotalDiffScore() {
         return totalDiffScore;
     }
@@ -83,6 +90,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
     /**
      * @return the number of records which had at least one diff for this field.
      */
+    @Impure
     public int getNumDiffs() {
         return diffToOrdinals.size();
     }
@@ -91,6 +99,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
      * @param diffPairIdx a number from 0-n, where n is the value returned from numDiffs
      * @return the from ordinal for the (diffPairIdx)th record pair in which there were differences for this field.
      */
+    @Impure
     public int getFromOrdinal(int diffPairIdx) {
         return diffFromOrdinals.get(diffPairIdx);
     }
@@ -99,6 +108,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
      * @param diffPairIdx a number from 0-n, where n is the value returned from numDiffs
      * @return the to ordinal for the (diffPairIdx)th record pair in which there were differences for this field.
      */
+    @Impure
     public int getToOrdinal(int diffPairIdx) {
         return diffToOrdinals.get(diffPairIdx);
     }
@@ -107,6 +117,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
      * @param diffPairIdx a number from 0-n, where n is the value returned from numDiffs
      * @return the score of the diff for this field in the (diffPairIdx)th record pair in which there were differences for this field.
      */
+    @Impure
     public int getPairScore(int diffPairIdx) {
         return diffPairScores.get(diffPairIdx);
     }
@@ -115,6 +126,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
      * This should be called exclusively from the {@link HollowDiff}.  Not for external consumption.
      * @param otherFieldDiff the field diff to add
      */
+    @Impure
     public void addResults(HollowFieldDiff otherFieldDiff) {
         for(int i=0;i<otherFieldDiff.getNumDiffs();i++) {
             addDiff(otherFieldDiff.getFromOrdinal(i), otherFieldDiff.getToOrdinal(i), otherFieldDiff.getPairScore(i));
@@ -124,6 +136,7 @@ public class HollowFieldDiff implements Comparable<HollowFieldDiff> {
     /**
      * Comparison is based on the totalDiffScore().
      */
+    @Impure
     @Override
     public int compareTo(HollowFieldDiff o) {
         if(o.getTotalDiffScore() > totalDiffScore)

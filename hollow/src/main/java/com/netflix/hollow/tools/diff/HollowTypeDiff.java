@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
 import com.netflix.hollow.core.util.IntList;
 import com.netflix.hollow.core.util.LongList;
@@ -47,6 +49,7 @@ public class HollowTypeDiff {
 
     private List<HollowFieldDiff> calculatedFieldDiffs;
 
+    @Impure
     HollowTypeDiff(HollowDiff rootDiff, String type, String... matchPaths) {
         this.rootDiff = rootDiff;
         this.type = type;
@@ -66,6 +69,7 @@ public class HollowTypeDiff {
     /**
      * @return The type name for this type diff
      */
+    @Pure
     public String getTypeName() {
         return type;
     }
@@ -74,6 +78,7 @@ public class HollowTypeDiff {
      * Indicate whether Match Paths are defined
      * @return true to indicate there is
      */
+    @Impure
     public boolean hasMatchPaths() {
         return !matcher.getMatchPaths().isEmpty();
     }
@@ -82,6 +87,7 @@ public class HollowTypeDiff {
      * Add a field path to a component of the primary key
      * @param path the field path
      */
+    @Impure
     public void addMatchPath(String path) {
         matcher.addMatchPath(path);
     }
@@ -92,6 +98,7 @@ public class HollowTypeDiff {
      *
      * @param type the type name
      */
+    @Impure
     public void addShortcutType(String type) {
         shortcutTypes.add(type);
     }
@@ -100,6 +107,7 @@ public class HollowTypeDiff {
      * @param type the type name
      * @return whether or not this type diff will shortcut at the specified type.
      */
+    @Pure
     public boolean isShortcutType(String type) {
         return shortcutTypes.contains(type);
     }
@@ -109,6 +117,7 @@ public class HollowTypeDiff {
      *
      * @return the field differences
      */
+    @Pure
     public List<HollowFieldDiff> getFieldDiffs() {
         return calculatedFieldDiffs;
     }
@@ -116,6 +125,7 @@ public class HollowTypeDiff {
     /**
      * @return the total number of matched records (based on primary key)
      */
+    @Impure
     public int getTotalNumberOfMatches() {
         return matcher.getMatchedOrdinals().size();
     }
@@ -123,6 +133,7 @@ public class HollowTypeDiff {
     /**
      * @return A list of the record ordinals in the from state which did not have a corresponding match (based on primary key) in the to state.
      */
+    @Impure
     public IntList getUnmatchedOrdinalsInFrom() {
         return matcher.getExtraInFrom();
     }
@@ -130,6 +141,7 @@ public class HollowTypeDiff {
     /**
      * @return A list of the record ordinals in the to state which did not have a corresponding match (based on primary key) in the from state.
      */
+    @Impure
     public IntList getUnmatchedOrdinalsInTo() {
         return matcher.getExtraInTo();
     }
@@ -137,6 +149,7 @@ public class HollowTypeDiff {
     /**
      * @return The total 'diff score', useful as a very broad measure of the magnitude of the diff.
      */
+    @Impure
     public long getTotalDiffScore() {
         long totalDiffScore = 0;
         for(HollowFieldDiff diff : calculatedFieldDiffs) {
@@ -148,6 +161,7 @@ public class HollowTypeDiff {
     /**
      * @return The total number of records for this type in the to state.
      */
+    @Impure
     public int getTotalItemsInFromState() {
         if (from == null) return 0;
         return from.getPopulatedOrdinals().cardinality();
@@ -156,31 +170,38 @@ public class HollowTypeDiff {
     /**
      * @return The total number of records for this type in the to state.
      */
+    @Impure
     public int getTotalItemsInToState() {
         if (to == null) return 0;
         return to.getPopulatedOrdinals().cardinality();
     }
 
+    @Pure
     public boolean hasAnyData() {
         return from != null || to != null;
     }
 
+    @Pure
     public HollowObjectTypeReadState getFromTypeState() {
         return from;
     }
 
+    @Pure
     public HollowObjectTypeReadState getToTypeState() {
         return to;
     }
 
+    @Pure
     public HollowDiffMatcher getMatcher() {
         return matcher;
     }
 
+    @Impure
     void calculateMatches() {
         matcher.calculateMatches();
     }
 
+    @Impure
     @SuppressWarnings("unchecked")
     void calculateDiffs() {
         final HollowDiffNodeIdentifier rootId = new HollowDiffNodeIdentifier(type);
@@ -195,6 +216,7 @@ public class HollowTypeDiff {
             final int threadId = i;
 
             executor.execute(new Runnable() {
+                @Impure
                 @Override
                 public void run() {
                     DiffEqualityMapping equalityMapping = rootDiff.getEqualityMapping();
@@ -224,12 +246,14 @@ public class HollowTypeDiff {
                 private final IntList fromIntList = new IntList(1);
                 private final IntList toIntList = new IntList(1);
 
+                @Impure
                 private IntList fromIntList(int ordinal) {
                     fromIntList.clear();
                     fromIntList.add(ordinal);
                     return fromIntList;
                 }
 
+                @Impure
                 private IntList toIntList(int ordinal) {
                     toIntList.clear();
                     toIntList.add(ordinal);
@@ -247,6 +271,7 @@ public class HollowTypeDiff {
         this.calculatedFieldDiffs = combineResults(results);
     }
 
+    @Impure
     private List<HollowFieldDiff> combineResults(List<HollowFieldDiff> shardedResults[]) {
         Map<HollowDiffNodeIdentifier, HollowFieldDiff> combinedResultsMap = new HashMap<HollowDiffNodeIdentifier, HollowFieldDiff>();
 

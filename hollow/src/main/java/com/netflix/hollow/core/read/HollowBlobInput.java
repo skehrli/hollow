@@ -1,5 +1,8 @@
 package com.netflix.hollow.core.read;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.memory.MemoryMode.ON_HEAP;
 import static com.netflix.hollow.core.memory.MemoryMode.SHARED_MEMORY_LAZY;
 import static com.netflix.hollow.core.memory.encoding.BlobByteBuffer.MAX_SINGLE_BUFFER_CAPACITY;
@@ -26,10 +29,12 @@ public class HollowBlobInput implements Closeable {
     private Object input;
     private BlobByteBuffer buffer;
 
+    @SideEffectFree
     private HollowBlobInput(MemoryMode memoryMode) {
         this.memoryMode = memoryMode;
     }
 
+    @Pure
     public MemoryMode getMemoryMode() {
         return memoryMode;
     }
@@ -43,6 +48,7 @@ public class HollowBlobInput implements Closeable {
      * @return the initialized Hollow Blob Input
      * @throws IOException if the Hollow Blob Input couldn't be initialized
      */
+    @Impure
     public static HollowBlobInput modeBasedSelector(MemoryMode mode, HollowConsumer.Blob blob) throws IOException {
         if (mode.equals(ON_HEAP)) {
             return serial(blob.getInputStream());
@@ -63,6 +69,7 @@ public class HollowBlobInput implements Closeable {
      * @return the initialized Hollow Blob Input
      * @throws IOException if the Hollow Blob Input couldn't be initialized
      */
+    @Impure
     public static HollowBlobInput modeBasedSelector(MemoryMode mode, OptionalBlobPartInput input, String partName) throws IOException {
         if (mode.equals(ON_HEAP)) {
             return serial(input.getInputStream(partName));
@@ -81,6 +88,7 @@ public class HollowBlobInput implements Closeable {
      * @return a random access HollowBlobInput object
      * @throws IOException if the mmap operation reported an IOException
      */
+    @Impure
     public static HollowBlobInput randomAccess(File f) throws IOException {
         return randomAccess(f, MAX_SINGLE_BUFFER_CAPACITY);
     }
@@ -88,6 +96,7 @@ public class HollowBlobInput implements Closeable {
     /**
      * Useful for testing with custom buffer capacity
      */
+    @Impure
     public static HollowBlobInput randomAccess(File f,int singleBufferCapacity) throws IOException {
         HollowBlobInput hbi = new HollowBlobInput(SHARED_MEMORY_LAZY);
         RandomAccessFile raf = new RandomAccessFile(f, "r");
@@ -100,6 +109,7 @@ public class HollowBlobInput implements Closeable {
     /**
      * Shorthand for calling {@link HollowBlobInput#serial(InputStream)} on a byte[]
      */
+    @Impure
     public static HollowBlobInput serial(byte[] bytes) {
         InputStream is = new ByteArrayInputStream(bytes);
         return serial(is);
@@ -112,6 +122,7 @@ public class HollowBlobInput implements Closeable {
      * @param is input stream containing for Hollow blob data
      * @return a serial access HollowBlobInput object
      */
+    @Impure
     public static HollowBlobInput serial(InputStream is) {
         HollowBlobInput hbi = new HollowBlobInput(ON_HEAP);
         hbi.input = new DataInputStream(is);
@@ -126,6 +137,7 @@ public class HollowBlobInput implements Closeable {
      * @throws IOException if underlying {@code DataInputStream} or {@code RandomAccessFile}
      * @throws UnsupportedOperationException if the input type wasn't  one of {@code DataInputStream} or {@code RandomAccessFile}
      */
+    @Impure
     public int read() throws IOException {
         if (input instanceof RandomAccessFile) {
             return ((RandomAccessFile) input).read();
@@ -145,6 +157,7 @@ public class HollowBlobInput implements Closeable {
      * @throws IOException if underlying {@code DataInputStream} or {@code RandomAccessFile}
      * @throws UnsupportedOperationException if the input type wasn't  one of {@code DataInputStream} or {@code RandomAccessFile}
      */
+    @Impure
     public int read(byte b[], int off, int len) throws IOException {
         if (input instanceof RandomAccessFile) {
             return ((RandomAccessFile) input).read(b, off, len);
@@ -163,6 +176,7 @@ public class HollowBlobInput implements Closeable {
      * @exception IOException if originated in the underlying {@code RandomAccessFile} implementation
      * @exception UnsupportedOperationException if called when Hollow Blob Input is not a {@code RandomAccessFile}
      */
+    @Impure
     public void seek(long pos) throws IOException {
         if (input instanceof RandomAccessFile) {
             ((RandomAccessFile) input).seek(pos);
@@ -179,6 +193,7 @@ public class HollowBlobInput implements Closeable {
      * @return current offset from the beginning of the file, in bytes
      * @exception IOException if an I/O error occurs.
      */
+    @Impure
     public long getFilePointer() throws IOException {
         if (input instanceof RandomAccessFile) {
             return ((RandomAccessFile) input).getFilePointer();
@@ -196,6 +211,7 @@ public class HollowBlobInput implements Closeable {
      * @return short value read from current offset in input
      * @exception IOException if an I/O error occurs.
      */
+    @Impure
     public final short readShort() throws IOException {
         if (input instanceof RandomAccessFile) {
             return ((RandomAccessFile) input).readShort();
@@ -213,6 +229,7 @@ public class HollowBlobInput implements Closeable {
      * @return int value read from current offset in input
      * @exception IOException if an I/O error occurs.
      */
+    @Impure
     public final int readInt() throws IOException {
         if (input instanceof RandomAccessFile) {
             return ((RandomAccessFile) input).readInt();
@@ -230,6 +247,7 @@ public class HollowBlobInput implements Closeable {
      * @return long value read from current offset in input
      * @exception IOException if an I/O error occurs.
      */
+    @Impure
     public final long readLong() throws IOException {
         if (input instanceof RandomAccessFile) {
             return ((RandomAccessFile) input).readLong();
@@ -246,6 +264,7 @@ public class HollowBlobInput implements Closeable {
      * @return UTF-8 string read from current offset in input
      * @exception IOException if an I/O error occurs.
      */
+    @Impure
     public final String readUTF() throws IOException {
         if (input instanceof RandomAccessFile) {
             return ((RandomAccessFile) input).readUTF();
@@ -269,6 +288,7 @@ public class HollowBlobInput implements Closeable {
      * @return number of bytes skipped
      * @throws IOException
      */
+    @Impure
     public long skipBytes(long n) throws IOException {
         if (input instanceof RandomAccessFile) {
             long total = 0;
@@ -291,6 +311,7 @@ public class HollowBlobInput implements Closeable {
      * Closes underlying InputStream/RandomAccessFile and releases any system resources associated with the Hollow Blob Input.
      * @throws IOException
      */
+    @Impure
     @Override
     public void close() throws IOException {
         if (input instanceof RandomAccessFile) {
@@ -302,10 +323,12 @@ public class HollowBlobInput implements Closeable {
         }
     }
 
+    @Pure
     public Object getInput() {
         return input;
     }
 
+    @Pure
     public BlobByteBuffer getBuffer() {
         if (input instanceof RandomAccessFile) {
             return buffer;

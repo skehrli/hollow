@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.dataaccess;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
@@ -28,6 +29,7 @@ import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
  */
 public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
 
+    @Impure
     HollowObjectSchema getSchema();
 
     /**
@@ -35,6 +37,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return whether or not the record with the specified ordinal's field at the specified field index is null.
      */
+    @Impure
     boolean isNull(int ordinal, int fieldIndex);
 
     /**
@@ -42,6 +45,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return the {@link FieldType#REFERENCE} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     int readOrdinal(int ordinal, int fieldIndex);
 
     /**
@@ -49,6 +53,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return the {@link FieldType#INT} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     int readInt(int ordinal, int fieldIndex);
 
     /**
@@ -56,6 +61,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return the {@link FieldType#FLOAT} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     float readFloat(int ordinal, int fieldIndex);
 
     /**
@@ -63,6 +69,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return the {@link FieldType#DOUBLE} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     double readDouble(int ordinal, int fieldIndex);
 
     /**
@@ -70,6 +77,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return the {@link FieldType#LONG} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     long readLong(int ordinal, int fieldIndex);
 
     /**
@@ -77,6 +85,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return the {@link FieldType#BOOLEAN} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     Boolean readBoolean(int ordinal, int fieldIndex);
 
     /**
@@ -84,6 +93,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return the {@link FieldType#BYTES} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     byte[] readBytes(int ordinal, int fieldIndex);
 
     /**
@@ -91,6 +101,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return the {@link FieldType#STRING} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     String readString(int ordinal, int fieldIndex);
 
     /**
@@ -99,6 +110,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param testValue the value to get against
      * @return whether or not the {@link FieldType#STRING} field's value at the specified fieldIndex for the specified ordinal is exactly equal to the given value.
      */
+    @Impure
     boolean isStringFieldEqual(int ordinal, int fieldIndex, String testValue);
 
     /**
@@ -106,6 +118,7 @@ public interface HollowObjectTypeDataAccess extends HollowTypeDataAccess {
      * @param fieldIndex the field index
      * @return a hashCode for the {@link FieldType#BYTES} or {@link FieldType#STRING} field's value at the specified fieldIndex for the specified ordinal.
      */
+    @Impure
     int findVarLengthFieldHashCode(int ordinal, int fieldIndex);
 
 }

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.Arrays;
 
 /**
@@ -35,10 +37,13 @@ public class FreeOrdinalTracker {
     private int size;
     private int nextEmptyOrdinal;
 
+    @SideEffectFree
+    @Impure
     public FreeOrdinalTracker() {
         this(0);
     }
 
+    @SideEffectFree
     private FreeOrdinalTracker(int nextEmptyOrdinal) {
         this.freeOrdinals = new int[64];
         this.nextEmptyOrdinal = nextEmptyOrdinal;
@@ -48,6 +53,7 @@ public class FreeOrdinalTracker {
     /**
      * @return either an ordinal which was previously deallocated, or the next empty, previously unallocated ordinal in the sequence 0-n
      */
+    @Impure
     public int getFreeOrdinal() {
         if(size == 0)
             return nextEmptyOrdinal++;
@@ -60,6 +66,7 @@ public class FreeOrdinalTracker {
      *
      * @param ordinal the ordinal
      */
+    @Impure
     public void returnOrdinalToPool(int ordinal) {
         if(size == freeOrdinals.length) {
             freeOrdinals = Arrays.copyOf(freeOrdinals, freeOrdinals.length * 3 / 2);
@@ -74,6 +81,7 @@ public class FreeOrdinalTracker {
      *
      * @param nextEmptyOrdinal the next empty ordinal
      */
+    @Impure
     public void setNextEmptyOrdinal(int nextEmptyOrdinal) {
         this.nextEmptyOrdinal = nextEmptyOrdinal;
     }
@@ -81,6 +89,7 @@ public class FreeOrdinalTracker {
     /**
      * Ensure that all future ordinals are returned in ascending order.
      */
+    @Impure
     public void sort() {
         Arrays.sort(freeOrdinals, 0, size);
         reverseFreeOrdinalPool();
@@ -90,6 +99,7 @@ public class FreeOrdinalTracker {
      * Focus returned ordinal holes in as few shards as possible.
      * Within each shard, return ordinals in ascending order.
      */
+    @Impure
     public void sort(int numShards) {
         int shardNumberMask = numShards - 1;
         Shard shards[] = new Shard[numShards];
@@ -125,6 +135,7 @@ public class FreeOrdinalTracker {
         private int currentPos;
     }
 
+    @Impure
     private void reverseFreeOrdinalPool() {
         int midpoint = size / 2;
         for(int i=0;i<midpoint;i++) {
@@ -137,6 +148,7 @@ public class FreeOrdinalTracker {
     /**
      * Resets the FreeOrdinalTracker to its initial state.
      */
+    @Impure
     public void reset() {
         size = 0;
         nextEmptyOrdinal = 0;

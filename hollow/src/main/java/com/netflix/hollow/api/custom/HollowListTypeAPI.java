@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.custom;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 
@@ -26,22 +29,28 @@ import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
  */
 public class HollowListTypeAPI extends HollowTypeAPI {
 
+    @SideEffectFree
+    @Impure
     public HollowListTypeAPI(HollowAPI api, HollowListTypeDataAccess typeDataAccess) {
         super(api, typeDataAccess);
     }
     
+    @Impure
     public int size(int ordinal) {
         return getTypeDataAccess().size(ordinal);
     }
     
+    @Impure
     public int getElementOrdinal(int ordinal, int listIdx) {
         return getTypeDataAccess().getElementOrdinal(ordinal, listIdx);
     }
     
+    @Impure
     public HollowOrdinalIterator getOrdinalIterator(int ordinal) {
         return getTypeDataAccess().ordinalIterator(ordinal);
     }
 
+    @Pure
     @Override
     public HollowListTypeDataAccess getTypeDataAccess() {
         return (HollowListTypeDataAccess) typeDataAccess;

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.history.keyindex;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
 import com.netflix.hollow.core.util.IntMap;
@@ -34,12 +37,14 @@ public class HollowHistoricalStateTypeKeyOrdinalMapping {
     private int numberOfRemovedRecords;
     private int numberOfModifiedRecords;
 
+    @SideEffectFree
     public HollowHistoricalStateTypeKeyOrdinalMapping(String typeName, HollowHistoryTypeKeyIndex keyIndex) {
         this.typeName = typeName;
         this.keyIndex = keyIndex;
     }
 
     // this is only invoked for double snapshots
+    @Impure
     private HollowHistoricalStateTypeKeyOrdinalMapping(String typeName, HollowHistoryTypeKeyIndex keyIndex, IntMap addedOrdinalMap, IntMap removedOrdinalMap) {
         this.typeName = typeName;
         this.keyIndex = keyIndex;
@@ -48,25 +53,30 @@ public class HollowHistoricalStateTypeKeyOrdinalMapping {
         finish();
     }
 
+    @Impure
     public void prepare(int numAdditions, int numRemovals) {
         this.addedOrdinalMap = new IntMap(numAdditions);
         this.removedOrdinalMap = new IntMap(numRemovals);
     }
+    @Impure
     public void added(HollowTypeReadState typeState, int ordinal) {
         int recordKeyOrdinal = keyIndex.findKeyIndexOrdinal((HollowObjectTypeReadState)typeState, ordinal);
         addedOrdinalMap.put(recordKeyOrdinal, ordinal);
     }
 
+    @Impure
     public void removed(HollowTypeReadState typeState, int ordinal) {
         removed(typeState, ordinal, ordinal);
     }
 
+    @Impure
     public void removed(HollowTypeReadState typeState, int stateEngineOrdinal, int mappedOrdinal) {
         int recordKeyOrdinal = keyIndex.findKeyIndexOrdinal((HollowObjectTypeReadState)typeState, stateEngineOrdinal);
         removedOrdinalMap.put(recordKeyOrdinal, mappedOrdinal);
     }
 
     // this is only invoked for double snapshots
+    @Impure
     public HollowHistoricalStateTypeKeyOrdinalMapping remap(OrdinalRemapper remapper) {
         IntMap newAddedOrdinalMap = new IntMap(addedOrdinalMap.size());
         IntMapEntryIterator addedIter = addedOrdinalMap.iterator();
@@ -81,6 +91,7 @@ public class HollowHistoricalStateTypeKeyOrdinalMapping {
         return new HollowHistoricalStateTypeKeyOrdinalMapping(typeName, keyIndex, newAddedOrdinalMap, newRemovedOrdinalMap);
     }
 
+    @Impure
     public void finish() {
         IntMapEntryIterator iter = addedOrdinalMap.iterator();
 
@@ -93,34 +104,42 @@ public class HollowHistoricalStateTypeKeyOrdinalMapping {
         numberOfRemovedRecords = removedOrdinalMap.size() - numberOfModifiedRecords;
     }
 
+    @Impure
     public IntMapEntryIterator removedOrdinalMappingIterator() {
         return removedOrdinalMap.iterator();
     }
 
+    @Impure
     public IntMapEntryIterator addedOrdinalMappingIterator() {
         return addedOrdinalMap.iterator();
     }
 
+    @Impure
     public int findRemovedOrdinal(int keyOrdinal) {
         return removedOrdinalMap.get(keyOrdinal);
     }
 
+    @Impure
     public int findAddedOrdinal(int keyOrdinal) {
         return addedOrdinalMap.get(keyOrdinal);
     }
 
+    @Pure
     public HollowHistoryTypeKeyIndex getKeyIndex() {
         return keyIndex;
     }
 
+    @Pure
     public int getNumberOfNewRecords() {
         return numberOfNewRecords;
     }
 
+    @Pure
     public int getNumberOfRemovedRecords() {
         return numberOfRemovedRecords;
     }
 
+    @Pure
     public int getNumberOfModifiedRecords() {
         return numberOfModifiedRecords;
     }

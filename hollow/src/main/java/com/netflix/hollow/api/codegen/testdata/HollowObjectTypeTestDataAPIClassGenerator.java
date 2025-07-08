@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen.testdata;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
@@ -34,6 +36,7 @@ class HollowObjectTypeTestDataAPIClassGenerator {
     private final String packageName;
     private final String className;
     
+    @Impure
     public HollowObjectTypeTestDataAPIClassGenerator(HollowDataset dataset, HollowObjectSchema schema, String packageName) {
         this.dataset = dataset;
         this.schema = schema;
@@ -41,6 +44,7 @@ class HollowObjectTypeTestDataAPIClassGenerator {
         this.className = schema.getName() + "TestData";
     }
     
+    @Impure
     public String generate() {
         StringBuilder builder = new StringBuilder();
         
@@ -209,10 +213,12 @@ class HollowObjectTypeTestDataAPIClassGenerator {
         return importBuilder.toString() + builder.toString();
     }
     
+    @Pure
     public String className(String type) {
         return type + "TestData";
     }
     
+    @Impure
     public boolean canErgonomicShortcut(int fieldIdx) {
         if(schema.getFieldType(fieldIdx) != FieldType.REFERENCE)
             return false;
@@ -223,6 +229,7 @@ class HollowObjectTypeTestDataAPIClassGenerator {
         return canErgonomicShortcut(refSchema);
     }
     
+    @Impure
     public boolean canErgonomicShortcut(HollowSchema schema) {
         if(schema.getSchemaType() != SchemaType.OBJECT)
             return false;

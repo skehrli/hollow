@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.split;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.schema.HollowSchema;
 import com.netflix.hollow.core.util.HollowWriteStateCreator;
@@ -32,6 +34,7 @@ public class HollowSplitter {
     private final HollowWriteStateEngine outputStateEngines[];
     private final HollowSplitterCopyDirector director;
 
+    @Impure
     public HollowSplitter(HollowSplitterCopyDirector director, HollowReadStateEngine inputStateEngine) {
         this.inputStateEngine = inputStateEngine;
         this.outputStateEngines = new HollowWriteStateEngine[director.getNumShards()];
@@ -43,6 +46,7 @@ public class HollowSplitter {
             outputStateEngines[i] = HollowWriteStateCreator.createWithSchemas(schemas);
     }
 
+    @Impure
     public void split() {
         prepareForNextCycle();
 
@@ -52,6 +56,7 @@ public class HollowSplitter {
             final int shardNumber = i;
 
             executor.execute(new Runnable() {
+                @Impure
                 public void run() {
                     HollowSplitterShardCopier copier = new HollowSplitterShardCopier(inputStateEngine, outputStateEngines[shardNumber], director, shardNumber);
                     copier.copy();
@@ -66,18 +71,22 @@ public class HollowSplitter {
         }
     }
 
+    @Pure
     public HollowReadStateEngine getInputStateEngine() {
         return inputStateEngine;
     }
 
+    @Pure
     public HollowWriteStateEngine getOutputShardStateEngine(int shardNumber) {
         return outputStateEngines[shardNumber];
     }
 
+    @Pure
     public int getNumberOfShards() {
         return outputStateEngines.length;
     }
 
+    @Impure
     private void prepareForNextCycle() {
         for(int i=0;i<outputStateEngines.length;i++)
             outputStateEngines[i].prepareForNextCycle();

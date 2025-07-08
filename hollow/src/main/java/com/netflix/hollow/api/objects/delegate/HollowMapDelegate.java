@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowMapTypeAPI;
 import com.netflix.hollow.api.objects.HollowMap;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
@@ -30,25 +32,36 @@ import java.util.Map;
  */
 public interface HollowMapDelegate<K, V> extends HollowRecordDelegate {
 
+    @Impure
     public int size(int ordinal);
 
+    @Impure
     public V get(HollowMap<K, V> map, int ordinal, Object key);
 
+    @Impure
     public boolean containsKey(HollowMap<K, V> map, int ordinal, Object key);
 
+    @Impure
     public boolean containsValue(HollowMap<K, V> map, int ordinal, Object value);
     
+    @Impure
     public K findKey(HollowMap<K, V> map, int ordinal, Object... hashKey);
     
+    @Impure
     public V findValue(HollowMap<K, V> map, int ordinal, Object... hashKey);
     
+    @Impure
     public Map.Entry<K, V> findEntry(HollowMap<K, V> map, int ordinal, Object... hashKey);
 
+    @Impure
     public HollowMapEntryOrdinalIterator iterator(int ordinal);
 
+    @Impure
     public HollowMapSchema getSchema();
 
+    @Pure
     public HollowMapTypeDataAccess getTypeDataAccess();
 
+    @Pure
     public HollowMapTypeAPI getTypeAPI();
 }

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer.metrics;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.Map;
 import java.util.OptionalLong;
 
@@ -29,29 +32,37 @@ public class AnnouncementMetrics {
     private OptionalLong lastAnnouncementSuccessTimeNano;   // monotonic time of last successful announcement (no relation to wall clock), N/A until first successful announcement
     private OptionalLong deltaChainVersionCounter;
 
+    @Pure
     public long getDataSizeBytes() {
         return dataSizeBytes;
     }
+    @Pure
     public Map<String, Integer> getNumShardsPerType() {
         return numShardsPerType;
     }
+    @Pure
     public Map<String, Long> getShardSizePerType() {
         return shardSizePerType;
     }
+    @Pure
     public long getAnnouncementDurationMillis() {
         return announcementDurationMillis;
     }
+    @Pure
     public boolean getIsAnnouncementSuccess() {
         return isAnnouncementSuccess;
     }
+    @Pure
     public OptionalLong getLastAnnouncementSuccessTimeNano() {
         return lastAnnouncementSuccessTimeNano;
     }
+    @Pure
     public OptionalLong getDeltaChainVersionCounter() {
         return deltaChainVersionCounter;
     }
 
 
+    @SideEffectFree
     private AnnouncementMetrics(Builder builder) {
         this.dataSizeBytes = builder.dataSizeBytes;
         this.numShardsPerType = builder.numShardsPerType;
@@ -71,40 +82,50 @@ public class AnnouncementMetrics {
         private Map<String, Integer> numShardsPerType;
         private Map<String, Long> shardSizePerType;
 
+        @SideEffectFree
         public Builder() {
             lastAnnouncementSuccessTimeNano = OptionalLong.empty();
             deltaChainVersionCounter = OptionalLong.empty();
         }
 
+        @Impure
         public Builder setDataSizeBytes(long dataSizeBytes) {
             this.dataSizeBytes = dataSizeBytes;
             return this;
         }
+        @Impure
         public Builder setNumShardsPerType(Map<String, Integer> numShardsPerType) {
             this.numShardsPerType = numShardsPerType;
             return this;
         }
+        @Impure
         public Builder setShardSizePerType(Map<String, Long> shardSizePerType) {
             this.shardSizePerType = shardSizePerType;
             return this;
         }
+        @Impure
         public Builder setAnnouncementDurationMillis(long announcementDurationMillis) {
             this.announcementDurationMillis = announcementDurationMillis;
             return this;
         }
+        @Impure
         public Builder setIsAnnouncementSuccess(boolean isAnnouncementSuccess) {
             this.isAnnouncementSuccess = isAnnouncementSuccess;
             return this;
         }
+        @Impure
         public Builder setLastAnnouncementSuccessTimeNano(long lastAnnouncementSuccessTimeNano) {
             this.lastAnnouncementSuccessTimeNano = OptionalLong.of(lastAnnouncementSuccessTimeNano);
             return this;
         }
+        @Impure
         public Builder setDeltaChainVersionCounter(long deltaChainVersionCounter) {
             this.deltaChainVersionCounter = OptionalLong.of(deltaChainVersionCounter);
             return this;
         }
 
+        @SideEffectFree
+        @Impure
         public AnnouncementMetrics build() {
             return new AnnouncementMetrics(this);
         }

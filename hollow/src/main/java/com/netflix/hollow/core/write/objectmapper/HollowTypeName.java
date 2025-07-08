@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Pure;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,5 +39,6 @@ public @interface HollowTypeName {
      *
      * @return the hollow type name or hollow field name
      */
+    @Pure
     String name();
 }

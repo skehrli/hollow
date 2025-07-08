@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.time.Duration;
 
 /**
@@ -25,6 +28,7 @@ public final class Status {
     final StatusType type;
     final Throwable cause;
 
+    @SideEffectFree
     public Status(StatusType type, Throwable cause) {
         this.type = type;
         this.cause = cause;
@@ -50,6 +54,7 @@ public final class Status {
      *
      * @return the status type
      */
+    @Pure
     public StatusType getType() {
         return type;
     }
@@ -59,6 +64,7 @@ public final class Status {
      *
      * @return the cause of producer action failure
      */
+    @Pure
     public Throwable getCause() {
         return cause;
     }
@@ -69,16 +75,19 @@ public final class Status {
         long start;
         long end;
 
+        @Impure
         AbstractStatusBuilder() {
             start = System.currentTimeMillis();
         }
 
+        @Impure
         @SuppressWarnings("unchecked")
         T success() {
             this.type = StatusType.SUCCESS;
             return (T) this;
         }
 
+        @Impure
         @SuppressWarnings("unchecked")
         T fail(Throwable cause) {
             this.type = StatusType.FAIL;
@@ -86,11 +95,13 @@ public final class Status {
             return (T) this;
         }
 
+        @Impure
         Status build() {
             end = System.currentTimeMillis();
             return new Status(type, cause);
         }
 
+        @Impure
         Duration elapsed() {
             return Duration.ofMillis(end - start);
         }
@@ -99,6 +110,7 @@ public final class Status {
     static final class StageBuilder extends AbstractStatusBuilder<StageBuilder> {
         long version;
 
+        @Impure
         StageBuilder version(long version) {
             this.version = version;
             return this;
@@ -109,11 +121,13 @@ public final class Status {
         HollowProducer.ReadState readState;
         long version;
 
+        @Impure
         StageWithStateBuilder readState(HollowProducer.ReadState readState) {
             this.readState = readState;
             return version(readState.getVersion());
         }
 
+        @Impure
         StageWithStateBuilder version(long version) {
             this.version = version;
             return this;
@@ -125,11 +139,13 @@ public final class Status {
         long removed;
         long addedOrModified;
 
+        @Impure
         IncrementalPopulateBuilder version(long version) {
             this.version = version;
             return this;
         }
 
+        @Impure
         IncrementalPopulateBuilder changes(long removed, long addedOrModified) {
             this.removed = removed;
             this.addedOrModified = addedOrModified;
@@ -140,6 +156,7 @@ public final class Status {
     static final class PublishBuilder extends AbstractStatusBuilder<PublishBuilder> {
         HollowProducer.Blob blob;
 
+        @Impure
         PublishBuilder blob(HollowProducer.Blob blob) {
             this.blob = blob;
             return this;
@@ -150,6 +167,7 @@ public final class Status {
         long versionDesired;
         long versionReached;
 
+        @Impure
         RestoreStageBuilder versions(long versionDesired, long versionReached) {
             this.versionDesired = versionDesired;
             this.versionReached = versionReached;

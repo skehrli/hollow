@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.diff.exact.mapper;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.PopulatedOrdinalListener;
 import com.netflix.hollow.core.util.IntList;
@@ -36,17 +39,20 @@ public abstract class DiffEqualityTypeMapper {
     protected final HollowTypeReadState toState;
     private final boolean oneToOne;
 
+    @SideEffectFree
     protected DiffEqualityTypeMapper(HollowTypeReadState fromState, HollowTypeReadState toState, boolean oneToOne) {
         this.fromState = fromState;
         this.toState = toState;
         this.oneToOne = oneToOne;
     }
 
+    @Impure
     public DiffEqualOrdinalMap mapEqualObjects() {
         int toOrdinalsHashed[] = hashToOrdinals();
         return mapMatchingFromOrdinals(toOrdinalsHashed);
     }
 
+    @Impure
     protected int[] hashToOrdinals() {
         PopulatedOrdinalListener listener = toState.getListener(PopulatedOrdinalListener.class);
         final BitSet toPopulatedOrdinals = listener.getPopulatedOrdinals();
@@ -92,6 +98,7 @@ public abstract class DiffEqualityTypeMapper {
         return arr;
     }
 
+    @Impure
     protected DiffEqualOrdinalMap mapMatchingFromOrdinals(final int[] hashedToOrdinals) {
         PopulatedOrdinalListener listener = fromState.getListener(PopulatedOrdinalListener.class);
         final BitSet fromPopulatedOrdinals = listener.getPopulatedOrdinals();
@@ -161,14 +168,19 @@ public abstract class DiffEqualityTypeMapper {
         return ordinalMap;
     }
 
+    @Pure
     public abstract boolean requiresTraversalForMissingFields();
 
+    @Impure
     protected abstract int fromRecordHashCode(int ordinal);
+    @Impure
     protected abstract int toRecordHashCode(int ordinal);
 
+    @Impure
     protected abstract EqualityDeterminer getEqualityDeterminer();
 
     protected interface EqualityDeterminer {
+        @Impure
         public boolean recordsAreEqual(int fromOrdinal, int toOrdinal);
     }
 

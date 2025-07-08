@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.objects;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.typeAPIClassname;
 
 import com.netflix.hollow.api.codegen.CodeGeneratorConfig;
@@ -42,6 +43,7 @@ public class HollowListJavaGenerator extends HollowCollectionsGenerator {
     private final String elementClassName;
     private final boolean parameterize;
 
+    @Impure
     public HollowListJavaGenerator(String packageName, String apiClassname, HollowListSchema schema, Set<String>
             parameterizedTypes, boolean parameterizeClassNames, HollowDataset dataset, CodeGeneratorConfig config) {
         super(packageName, apiClassname, schema, dataset, config);
@@ -51,6 +53,7 @@ public class HollowListJavaGenerator extends HollowCollectionsGenerator {
         this.parameterize = parameterizeClassNames || parameterizedTypes.contains(schema.getElementType());
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder builder = new StringBuilder();
@@ -80,12 +83,14 @@ public class HollowListJavaGenerator extends HollowCollectionsGenerator {
         return builder.toString();
     }
 
+    @Impure
     private void appendConstructor(StringBuilder classBuilder) {
         classBuilder.append("    public " + className + "(HollowListDelegate delegate, int ordinal) {\n");
         classBuilder.append("        super(delegate, ordinal);\n");
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendInstantiateMethod(StringBuilder classBuilder) {
         String returnType = parameterize ? "T" : elementClassName;
 
@@ -95,6 +100,7 @@ public class HollowListJavaGenerator extends HollowCollectionsGenerator {
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendEqualityMethod(StringBuilder classBuilder) {
         classBuilder.append("    @Override\n");
         classBuilder.append("    public boolean equalsElement(int elementOrdinal, Object testObject) {\n");
@@ -102,12 +108,14 @@ public class HollowListJavaGenerator extends HollowCollectionsGenerator {
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendAPIAccessor(StringBuilder classBuilder) {
         classBuilder.append("    public " + apiClassname + " api() {\n");
         classBuilder.append("        return typeApi().getAPI();\n");
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendTypeAPIAccessor(StringBuilder classBuilder) {
         String typeAPIClassname = typeAPIClassname(schema.getName());
         classBuilder.append("    public " + typeAPIClassname + " typeApi() {\n");

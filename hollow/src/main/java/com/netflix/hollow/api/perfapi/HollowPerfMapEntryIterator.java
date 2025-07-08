@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.iterator.HollowMapEntryOrdinalIterator;
 
 public class HollowPerfMapEntryIterator {
@@ -24,20 +26,24 @@ public class HollowPerfMapEntryIterator {
     private final long valueMaskedTypeIdx;
     private final HollowMapEntryOrdinalIterator iter;
     
+    @SideEffectFree
     public HollowPerfMapEntryIterator(HollowMapEntryOrdinalIterator iter, long keyMaskedTypeIdx, long valueMaskedTypeIdx) {
         this.iter = iter;
         this.keyMaskedTypeIdx = keyMaskedTypeIdx;
         this.valueMaskedTypeIdx = valueMaskedTypeIdx;
     }
     
+    @Impure
     public boolean next() {
         return iter.next();
     }
     
+    @Impure
     public long getKey() {
         return Ref.toRefWithTypeMasked(keyMaskedTypeIdx, iter.getKey());
     }
     
+    @Impure
     public long getValue() {
         return Ref.toRefWithTypeMasked(valueMaskedTypeIdx, iter.getValue());
     }

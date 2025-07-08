@@ -15,9 +15,11 @@
  *
  */
 package com.netflix.hollow.api.sampling;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 public interface SamplingStatusListener {
 
+    @SideEffectFree
     public void samplingStatusChanged(boolean samplingOn);
 
 }

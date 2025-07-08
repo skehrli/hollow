@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.delegateInterfaceName;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.substituteInvalidChars;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.typeAPIClassname;
@@ -38,12 +39,14 @@ import com.netflix.hollow.core.schema.HollowObjectSchema;
  */
 public class HollowObjectDelegateInterfaceGenerator extends HollowObjectDelegateGenerator {
 
+    @Impure
     public HollowObjectDelegateInterfaceGenerator(String packageName, HollowObjectSchema schema,
             HollowErgonomicAPIShortcuts ergonomicShortcuts, HollowDataset dataset, CodeGeneratorConfig config) {
         super(packageName, schema, ergonomicShortcuts, dataset, config);
         this.className = delegateInterfaceName(schema.getName());
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder classBuilder = new StringBuilder();

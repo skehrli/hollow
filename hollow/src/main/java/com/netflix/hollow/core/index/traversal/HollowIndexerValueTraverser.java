@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.index.traversal;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.read.HollowReadFieldUtils;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -36,6 +38,7 @@ public class HollowIndexerValueTraverser {
     private final HollowTypeDataAccess fieldTypeDataAccess[];
     private final int fieldSchemaPosition[];
     
+    @Impure
     public HollowIndexerValueTraverser(HollowDataAccess dataAccess, String type, String... fieldPaths) {
         this.fieldPaths = fieldPaths;
         
@@ -47,6 +50,7 @@ public class HollowIndexerValueTraverser {
         this.fieldSchemaPosition = builder.getFieldSchemaPositions();
     }
     
+    @Impure
     public void traverse(int ordinal) {
         for(int i=0;i<fieldMatchLists.length;i++)
             fieldMatchLists[i].clear();
@@ -54,28 +58,35 @@ public class HollowIndexerValueTraverser {
         rootNode.traverse(ordinal);
     }
     
+    @Pure
     public int getNumFieldPaths() {
         return fieldPaths.length;
     }
 
+    @Pure
     public String getFieldPath(int idx) {
         return fieldPaths[idx];
     }
 
+    @Pure
+    @Impure
     public int getNumMatches() {
         return fieldMatchLists[0].size();
     }
 
+    @Impure
     public Object getMatchedValue(int matchIdx, int fieldIdx) {
         int matchedOrdinal = fieldMatchLists[fieldIdx].get(matchIdx);
         return HollowReadFieldUtils.fieldValueObject((HollowObjectTypeDataAccess)fieldTypeDataAccess[fieldIdx], matchedOrdinal, fieldSchemaPosition[fieldIdx]);
     }
 
+    @Impure
     public boolean isMatchedValueEqual(int matchIdx, int fieldIdx, Object value) {
         int matchedOrdinal = fieldMatchLists[fieldIdx].get(matchIdx);
         return HollowReadFieldUtils.fieldValueEquals((HollowObjectTypeDataAccess)fieldTypeDataAccess[fieldIdx], matchedOrdinal, fieldSchemaPosition[fieldIdx], value);
     }
 
+    @Impure
     public int getMatchHash(int matchIdx) {
         int hashCode = 0;
         for(int i=0;i<getNumFieldPaths();i++) {
@@ -85,6 +96,7 @@ public class HollowIndexerValueTraverser {
         return hashCode;
     }
 
+    @Impure
     public int getMatchHash(int matchIdx, BitSet fields) {
         int hashCode = 0;
         for(int i=0;i<getNumFieldPaths();i++) {
@@ -105,6 +117,7 @@ public class HollowIndexerValueTraverser {
      * @param otherMatchIdx the other match index
      * @return true if this and the other traverser are equal
      */
+    @Impure
     public boolean isMatchEqual(int matchIdx, HollowIndexerValueTraverser otherTraverser, int otherMatchIdx) {
         for(int i=0;i<getNumFieldPaths();i++) {
             if(!HollowReadFieldUtils.fieldsAreEqual((HollowObjectTypeDataAccess)fieldTypeDataAccess[i], fieldMatchLists[i].get(matchIdx), fieldSchemaPosition[i],
@@ -114,6 +127,7 @@ public class HollowIndexerValueTraverser {
         return true;
     }
 
+    @Impure
     public boolean isMatchEqual(int matchIdx, HollowIndexerValueTraverser otherTraverser, int otherMatchIdx, BitSet fields) {
         for(int i=0;i<getNumFieldPaths();i++) {
             if(fields.get(i)) {
@@ -125,10 +139,13 @@ public class HollowIndexerValueTraverser {
         return true;
     }
 
+    @Pure
+    @Impure
     public int getMatchOrdinal(int matchIdx, int fieldIdx) {
         return fieldMatchLists[fieldIdx].get(matchIdx);
     }
     
+    @Pure
     public HollowTypeDataAccess getFieldTypeDataAccess(int fieldIdx) {
         return fieldTypeDataAccess[fieldIdx];
     }

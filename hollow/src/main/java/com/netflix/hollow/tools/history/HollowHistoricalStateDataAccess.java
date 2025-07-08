@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.client.StackTraceRecorder;
 import com.netflix.hollow.api.error.SchemaNotFoundException;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -51,10 +54,12 @@ public class HollowHistoricalStateDataAccess implements HollowDataAccess {
 
     private StackTraceRecorder stackTraceRecorder;
 
+    @Impure
     public HollowHistoricalStateDataAccess(HollowHistory totalHistory, long version, HollowReadStateEngine removedRecordCopies, OrdinalRemapper removedCopyOrdinalMappings, Map<String, HollowHistoricalSchemaChange> schemaChanges) {
         this(totalHistory, version, removedRecordCopies, removedRecordCopies.getTypeStates(), removedCopyOrdinalMappings, schemaChanges);
     }
 
+    @Impure
     public HollowHistoricalStateDataAccess(HollowHistory totalHistory, long version, HollowReadStateEngine removedRecordCopies, Collection<HollowTypeReadState> typeStates, OrdinalRemapper removedCopyOrdinalMappings, Map<String, HollowHistoricalSchemaChange> schemaChanges) {
         this.totalHistory = totalHistory;
         this.version = version;
@@ -101,34 +106,42 @@ public class HollowHistoricalStateDataAccess implements HollowDataAccess {
         }
     }
 
+    @Pure
     public HollowHistory getTotalHistory() {
         return totalHistory;
     }
 
+    @Pure
     public long getVersion() {
         return version;
     }
 
+    @Impure
     public void setNextState(HollowDataAccess nextState) {
         this.nextState = nextState;
     }
 
+    @Pure
     public HollowDataAccess getNextState() {
         return nextState;
     }
 
+    @Pure
     public OrdinalRemapper getOrdinalMapping() {
         return removedCopyOrdinalMapping;
     }
 
+    @Pure
     public Map<String, HollowHistoricalSchemaChange> getSchemaChanges() {
         return schemaChanges;
     }
 
+    @Pure
     Map<String, HollowHistoricalTypeDataAccess> getTypeDataAccessMap() {
         return typeDataAccessMap;
     }
 
+    @Impure
     @Override
     public HollowTypeDataAccess getTypeDataAccess(String typeName) {
         HollowDataAccess state = this;
@@ -148,11 +161,13 @@ public class HollowHistoricalStateDataAccess implements HollowDataAccess {
         return state.getTypeDataAccess(typeName);
     }
 
+    @SideEffectFree
     @Override
     public Collection<String> getAllTypes() {
         return typeDataAccessMap.keySet();
     }
 
+    @Impure
     @Override
     public HollowTypeDataAccess getTypeDataAccess(String typeName, int ordinal) {
         HollowDataAccess state = this;
@@ -167,22 +182,27 @@ public class HollowHistoricalStateDataAccess implements HollowDataAccess {
         return state.getTypeDataAccess(typeName);
     }
 
+    @Pure
     @Override
     public HollowObjectHashCodeFinder getHashCodeFinder() {
         return hashCodeFinder;
     }
 
+    @Pure
     @Override
     public MissingDataHandler getMissingDataHandler() {
         return missingDataHandler;
     }
 
+    @Impure
     @Override
     public void resetSampling() {
         for(Map.Entry<String, HollowHistoricalTypeDataAccess> entry : typeDataAccessMap.entrySet())
             entry.getValue().getSampler().reset();
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public boolean hasSampleResults() {
         for(Map.Entry<String, HollowHistoricalTypeDataAccess> entry : typeDataAccessMap.entrySet())
@@ -191,14 +211,17 @@ public class HollowHistoricalStateDataAccess implements HollowDataAccess {
         return false;
     }
 
+    @Impure
     public void setStackTraceRecorder(StackTraceRecorder recorder) {
         this.stackTraceRecorder = recorder;
     }
 
+    @Pure
     StackTraceRecorder getStackTraceRecorder() {
         return stackTraceRecorder;
     }
 
+    @Impure
     public List<HollowSchema> getSchemas() {
         List<HollowSchema> schemas = new ArrayList<HollowSchema>(typeDataAccessMap.size());
         for(Map.Entry<String, HollowHistoricalTypeDataAccess> entry : typeDataAccessMap.entrySet())
@@ -206,11 +229,13 @@ public class HollowHistoricalStateDataAccess implements HollowDataAccess {
         return schemas;
     }
     
+    @Impure
     @Override
     public HollowSchema getSchema(String name) {
         return getTypeDataAccess(name).getSchema();
     }
 
+    @Impure
     @Override
     public HollowSchema getNonNullSchema(String name) {
         HollowSchema schema = getSchema(name);

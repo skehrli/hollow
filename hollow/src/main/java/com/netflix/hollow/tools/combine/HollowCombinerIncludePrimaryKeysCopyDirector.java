@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.combine;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.index.HollowPrimaryKeyIndex;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 
@@ -31,10 +32,12 @@ public class HollowCombinerIncludePrimaryKeysCopyDirector implements HollowCombi
 
     private final HollowCombinerExcludePrimaryKeysCopyDirector inverseCopyDirector;
 
+    @Impure
     public HollowCombinerIncludePrimaryKeysCopyDirector() {
         this.inverseCopyDirector = new HollowCombinerExcludePrimaryKeysCopyDirector();
     }
 
+    @Impure
     public HollowCombinerIncludePrimaryKeysCopyDirector(HollowCombinerCopyDirector baseDirector) {
         this.inverseCopyDirector = new HollowCombinerExcludePrimaryKeysCopyDirector(baseDirector);
     }
@@ -45,10 +48,12 @@ public class HollowCombinerIncludePrimaryKeysCopyDirector implements HollowCombi
      * @param idx the index in which to query for the key 
      * @param key the key
      */
+    @Impure
     public void includeKey(HollowPrimaryKeyIndex idx, Object... key) {
         inverseCopyDirector.excludeKey(idx, key);
     }
 
+    @Impure
     @Override
     public boolean shouldCopy(HollowTypeReadState typeState, int ordinal) {
         return !inverseCopyDirector.shouldCopy(typeState, ordinal);

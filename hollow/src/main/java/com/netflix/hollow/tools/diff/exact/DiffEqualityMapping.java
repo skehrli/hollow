@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.diff.exact;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowCollectionTypeReadState;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -55,10 +58,12 @@ public class DiffEqualityMapping {
     
     private boolean isPrepared;
 
+    @Impure
     public DiffEqualityMapping(HollowReadStateEngine fromState, HollowReadStateEngine toState) {
         this(fromState, toState, false, true);
     }
 
+    @SideEffectFree
     public DiffEqualityMapping(HollowReadStateEngine fromState, HollowReadStateEngine toState, boolean oneToOne, boolean listOrderingIsImportant) {
         this.fromState = fromState;
         this.toState = toState;
@@ -66,10 +71,12 @@ public class DiffEqualityMapping {
         this.listOrderingIsImportant = listOrderingIsImportant;
     }
 
+    @Pure
     public boolean requiresMissingFieldTraversal(String type) {
         return typesWhichRequireMissingFieldTraversal.contains(type);
     }
 
+    @Impure
     public DiffEqualOrdinalMap getEqualOrdinalMap(String type) {
         DiffEqualOrdinalMap ordinalMap = map.get(type);
         if(ordinalMap != null)
@@ -77,10 +84,12 @@ public class DiffEqualityMapping {
         return isPrepared ? DiffEqualOrdinalMap.EMPTY_MAP : buildMap(type);
     }
     
+    @Impure
     public void markPrepared() {
         this.isPrepared = true;
     }
 
+    @Impure
     private DiffEqualOrdinalMap buildMap(String type) {
         HollowTypeReadState fromTypeState = fromState.getTypeState(type);
         HollowTypeReadState toTypeState = toState.getTypeState(type);
@@ -94,6 +103,7 @@ public class DiffEqualityMapping {
         return map;
     }
 
+    @Impure
     private DiffEqualOrdinalMap buildMap(HollowTypeReadState fromTypeState, HollowTypeReadState toTypeState) {
         String typeName = fromTypeState.getSchema().getName();
         DiffEqualityTypeMapper mapper = getTypeMapper(fromTypeState, toTypeState);
@@ -107,6 +117,7 @@ public class DiffEqualityMapping {
         return equalOrdinalMap;
     }
 
+    @Impure
     private DiffEqualityTypeMapper getTypeMapper(HollowTypeReadState fromState, HollowTypeReadState toState) {
         if(fromState instanceof HollowObjectTypeReadState)
             return new DiffEqualityObjectMapper(this, (HollowObjectTypeReadState)fromState, (HollowObjectTypeReadState)toState, oneToOne);

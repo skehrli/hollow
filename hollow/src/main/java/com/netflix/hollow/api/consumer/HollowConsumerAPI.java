@@ -15,6 +15,7 @@
  */
 package com.netflix.hollow.api.consumer;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.type.HBoolean;
 import com.netflix.hollow.core.type.HDouble;
 import com.netflix.hollow.core.type.HFloat;
@@ -26,38 +27,50 @@ import java.util.Collection;
 public interface HollowConsumerAPI {
 
     public interface BooleanRetriever {
+        @Pure
         public Collection<HBoolean> getAllHBoolean();
 
+        @Pure
         public HBoolean getHBoolean(int ordinal);
     }
 
     public interface DoubleRetriever {
+        @Pure
         public Collection<HDouble> getAllHDouble();
 
+        @Pure
         public HDouble getHDouble(int ordinal);
     }
 
     public interface FloatRetriever {
+        @Pure
         public Collection<HFloat> getAllHFloat();
 
+        @Pure
         public HFloat getHFloat(int ordinal);
     }
 
     public interface IntegerRetriever {
+        @Pure
         public Collection<HInteger> getAllHInteger();
 
+        @Pure
         public HInteger getHInteger(int ordinal);
     }
 
     public interface LongRetriever {
+        @Pure
         public Collection<HLong> getAllHLong();
 
+        @Pure
         public HLong getHLong(int ordinal);
     }
 
     public interface StringRetriever {
+        @Pure
         public Collection<HString> getAllHString();
 
+        @Pure
         public HString getHString(int ordinal);
     }
 }

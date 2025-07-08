@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.api.objects.generic;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
 import com.netflix.hollow.api.objects.HollowRecord;
 import java.util.Iterator;
 
@@ -23,26 +27,31 @@ class GenericHollowIterable<T extends HollowRecord> implements Iterable<T> {
     
     private final Iterable<HollowRecord> wrappedIterable;
     
+    @SideEffectFree
     GenericHollowIterable(Iterable<HollowRecord> wrap) {
         this.wrappedIterable = wrap;
     }
     
+    @Impure
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<T> iterator(@PolyOwningCollection GenericHollowIterable<T> this) {
         final Iterator<HollowRecord> iter = wrappedIterable.iterator();
         
         return new Iterator<T>() {
+            @Pure
             @Override
             public boolean hasNext() {
                 return iter.hasNext();
             }
 
+            @Impure
             @Override
             @SuppressWarnings("unchecked")
             public T next() {
                 return (T) iter.next();
             }
             
+            @SideEffectFree
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();

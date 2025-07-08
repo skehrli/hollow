@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.HollowProducer.ReadState;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import java.util.function.Supplier;
@@ -61,6 +63,7 @@ public class RecordCountVarianceValidator implements ValidatorListener {
      * 10% allowableVariancePercent: from previous cycle any addition or removal within 10% cardinality is valid.
      * Anything more results in failure of validation.
      */
+    @Impure
     public RecordCountVarianceValidator(String typeName, float allowableVariancePercent) {
         this(typeName, () -> allowableVariancePercent);
     }
@@ -74,6 +77,7 @@ public class RecordCountVarianceValidator implements ValidatorListener {
      * 10% allowableVariancePercent: from previous cycle any addition or removal within 10% cardinality is valid.
      * Anything more results in failure of validation.
      */
+    @Impure
     public RecordCountVarianceValidator(String typeName, Supplier<Float> allowableVariancePercentSupplier)  {
         this.typeName = typeName;
         this.allowableVariancePercentSupplier = allowableVariancePercentSupplier;
@@ -85,11 +89,13 @@ public class RecordCountVarianceValidator implements ValidatorListener {
         }
     }
 
+    @Pure
     @Override
     public String getName() {
         return NAME + "_" + typeName;
     }
 
+    @Impure
     @Override
     public ValidationResult onValidate(ReadState readState) {
         ValidationResult.ValidationResultBuilder vrb = ValidationResult.from(this);
@@ -128,6 +134,7 @@ public class RecordCountVarianceValidator implements ValidatorListener {
     }
 
     // protected for tests
+    @Pure
     float getChangePercent(int latestCardinality, int previousCardinality) {
         int diff = Math.abs(latestCardinality - previousCardinality);
         return (100.0f * diff) / previousCardinality;

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.indexes;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.codegen.CodeGeneratorConfig;
 import com.netflix.hollow.api.codegen.HollowAPIGenerator;
 import com.netflix.hollow.api.codegen.HollowCodeGenerationUtils;
@@ -35,6 +36,7 @@ import java.util.List;
 public class HollowPrimaryKeyIndexGenerator extends HollowUniqueKeyIndexGenerator {
     protected final PrimaryKey pk;
 
+    @Impure
     public HollowPrimaryKeyIndexGenerator(HollowDataset dataset, String packageName, String apiClassname, HollowObjectSchema schema, CodeGeneratorConfig config) {
         super(packageName, apiClassname, schema, dataset, config);
         this.pk = schema.getPrimaryKey();
@@ -44,11 +46,13 @@ public class HollowPrimaryKeyIndexGenerator extends HollowUniqueKeyIndexGenerato
         isImplementsUniqueKeyIndex = false;
     }
 
+    @Impure
     @Override
     protected String getClassName(HollowObjectSchema schema) {
         return schema.getName() + "PrimaryKeyIndex";
     }
 
+    @Impure
     @Override
     protected void genFindMatchAPI(StringBuilder builder) {
         List<String> params = new ArrayList<>();
@@ -86,6 +90,7 @@ public class HollowPrimaryKeyIndexGenerator extends HollowUniqueKeyIndexGenerato
         builder.append("    }\n\n");
     }
 
+    @Impure
     @Override
     protected void genDeprecatedJavaDoc(StringBuilder builder) {
         String typeName = hollowImplClassname(type);

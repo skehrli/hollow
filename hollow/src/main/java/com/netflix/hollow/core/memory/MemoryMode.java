@@ -1,4 +1,5 @@
 package com.netflix.hollow.core.memory;
+import org.checkerframework.dataflow.qual.Pure;
 
 public enum MemoryMode {
 
@@ -9,6 +10,7 @@ public enum MemoryMode {
     /*
      * Returns whether a memory mode is supported by Hollow consumer
      */
+    @Pure
     public boolean consumerSupported() {
         return this.equals(ON_HEAP) || this.equals(SHARED_MEMORY_LAZY);
     }
@@ -16,6 +18,7 @@ public enum MemoryMode {
     /*
      * Returns whether a memory mode supports type filtering
      */
+    @Pure
     public boolean supportsFiltering() {
         return this.equals(ON_HEAP);
     }

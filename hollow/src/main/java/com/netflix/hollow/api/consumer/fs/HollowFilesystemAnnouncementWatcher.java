@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.consumer.fs;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.util.Threads.daemonThread;
 import static java.nio.file.Files.getLastModifiedTime;
 import static java.util.concurrent.Executors.newScheduledThreadPool;
@@ -56,6 +58,7 @@ public class HollowFilesystemAnnouncementWatcher implements HollowConsumer.Annou
      * @param publishPath the publish path
      * @since 2.12.0
      */
+    @Impure
     @SuppressWarnings("unused")
     public HollowFilesystemAnnouncementWatcher(Path publishPath) {
         this(publishPath, newScheduledThreadPool(1,
@@ -70,6 +73,7 @@ public class HollowFilesystemAnnouncementWatcher implements HollowConsumer.Annou
      * @param executor the executor from which watching is executed
      * @since 2.12.0
      */
+    @Impure
     @SuppressWarnings("WeakerAccess")
     public HollowFilesystemAnnouncementWatcher(Path publishPath, ScheduledExecutorService executor) {
         this.executor = executor;
@@ -81,6 +85,7 @@ public class HollowFilesystemAnnouncementWatcher implements HollowConsumer.Annou
         this.watchFuture = setupWatch();
     }
 
+    @Impure
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
@@ -92,20 +97,24 @@ public class HollowFilesystemAnnouncementWatcher implements HollowConsumer.Annou
         }
     }
 
+    @Impure
     private ScheduledFuture setupWatch() {
         return executor.scheduleWithFixedDelay(new Watch(this), 0, 1, TimeUnit.SECONDS);
     }
 
+    @Pure
     @Override
     public long getLatestVersion() {
         return latestVersion;
     }
 
+    @Impure
     @Override
     public void subscribeToUpdates(final HollowConsumer consumer) {
         subscribedConsumers.add(consumer);
     }
 
+    @Impure
     private long readLatestVersion() {
         if (!Files.isReadable(announcePath))
             return NO_ANNOUNCEMENT_AVAILABLE;
@@ -121,10 +130,12 @@ public class HollowFilesystemAnnouncementWatcher implements HollowConsumer.Annou
         private FileTime previousFileTime = FileTime.from(0, TimeUnit.MILLISECONDS);
         private final WeakReference<HollowFilesystemAnnouncementWatcher> ref;
 
+        @Impure
         Watch(HollowFilesystemAnnouncementWatcher watcher) {
             ref = new WeakReference<>(watcher);
         }
 
+        @Impure
         @Override
         public void run() {
             try {

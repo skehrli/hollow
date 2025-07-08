@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer.metrics;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -26,19 +29,24 @@ public class CycleMetrics {
     private Optional<Boolean> isCycleSuccess;               // true if cycle was successful, false if cycle failed, N/A if cycle was skipped
     private OptionalLong lastCycleSuccessTimeNano;          // monotonic time of last successful cycle (no relation to wall clock), N/A until first successful cycle
 
+    @Pure
     public long getConsecutiveFailures() {
         return consecutiveFailures;
     }
+    @Pure
     public OptionalLong getCycleDurationMillis() {
         return cycleDurationMillis;
     }
+    @Pure
     public Optional<Boolean> getIsCycleSuccess() {
         return isCycleSuccess;
     }
+    @Pure
     public OptionalLong getLastCycleSuccessTimeNano() {
         return lastCycleSuccessTimeNano;
     }
 
+    @SideEffectFree
     private CycleMetrics(Builder builder) {
         this.consecutiveFailures = builder.consecutiveFailures;
         this.cycleDurationMillis = builder.cycleDurationMillis;
@@ -52,29 +60,36 @@ public class CycleMetrics {
         private Optional<Boolean> isCycleSuccess;
         private OptionalLong lastCycleSuccessTimeNano;
 
+        @SideEffectFree
         public Builder() {
             isCycleSuccess = Optional.empty();
             cycleDurationMillis = OptionalLong.empty();
             lastCycleSuccessTimeNano = OptionalLong.empty();
         }
 
+        @Impure
         public Builder setConsecutiveFailures(long consecutiveFailures) {
             this.consecutiveFailures = consecutiveFailures;
             return this;
         }
+        @Impure
         public Builder setCycleDurationMillis(long cycleDurationMillis) {
             this.cycleDurationMillis = OptionalLong.of(cycleDurationMillis);
             return this;
         }
+        @Impure
         public Builder setIsCycleSuccess(boolean isCycleSuccess) {
             this.isCycleSuccess = Optional.of(isCycleSuccess);
             return this;
         }
+        @Impure
         public Builder setLastCycleSuccessTimeNano(long lastCycleSuccessTimeNano) {
             this.lastCycleSuccessTimeNano = OptionalLong.of(lastCycleSuccessTimeNano);
             return this;
         }
 
+        @SideEffectFree
+        @Impure
         public CycleMetrics build() {
             return new CycleMetrics(this);
         }

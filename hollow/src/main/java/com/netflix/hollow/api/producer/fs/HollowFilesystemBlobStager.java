@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer.fs;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.api.producer.HollowProducer.Blob.Type.DELTA;
 import static com.netflix.hollow.api.producer.HollowProducer.Blob.Type.REVERSE_DELTA;
 import static com.netflix.hollow.api.producer.HollowProducer.Blob.Type.SNAPSHOT;
@@ -52,6 +55,7 @@ public class HollowFilesystemBlobStager implements BlobStager {
      * Constructor to create a new HollowFilesystemBlobStager with default disk path
      * (java.io.tmpdir) and no compression for Hollow blobs.
      */
+    @Impure
     public HollowFilesystemBlobStager() {
         this(Paths.get(System.getProperty("java.io.tmpdir")), BlobCompressor.NO_COMPRESSION);
     }
@@ -64,10 +68,12 @@ public class HollowFilesystemBlobStager implements BlobStager {
      * @param compressor the blob compressor
      * @throws RuntimeException if errors occur when creating the specified path
      */
+    @Impure
     public HollowFilesystemBlobStager(Path stagingPath, BlobCompressor compressor) throws RuntimeException {
         this(stagingPath, compressor, null);
     }
 
+    @Impure
     public HollowFilesystemBlobStager(Path stagingPath, BlobCompressor compressor, ProducerOptionalBlobPartConfig optionalPartConfig) throws RuntimeException {
         this.stagingPath = stagingPath;
         this.compressor = compressor;
@@ -91,26 +97,31 @@ public class HollowFilesystemBlobStager implements BlobStager {
      * @deprecated Use Path instead
      * @since 2.12.0
      */
+    @Impure
     @Deprecated
     public HollowFilesystemBlobStager(File stagingPath, BlobCompressor compressor) {
         this(stagingPath.toPath(), compressor);
     }
 
+    @Impure
     @Override
     public HollowProducer.Blob openSnapshot(long version) {
         return new FilesystemBlob(HollowConstants.VERSION_NONE, version, SNAPSHOT, stagingPath, compressor, optionalPartConfig);
     }
 
+    @Impure
     @Override
     public HollowProducer.Blob openDelta(long fromVersion, long toVersion) {
         return new FilesystemBlob(fromVersion, toVersion, DELTA, stagingPath, compressor, optionalPartConfig);
     }
 
+    @Impure
     @Override
     public HollowProducer.Blob openReverseDelta(long fromVersion, long toVersion) {
         return new FilesystemBlob(fromVersion, toVersion, REVERSE_DELTA, stagingPath, compressor, optionalPartConfig);
     }
 
+    @Impure
     @Override
     public HollowProducer.HeaderBlob openHeader(long version) {
         return new FilesystemHeaderBlob(version, stagingPath, compressor);
@@ -120,6 +131,7 @@ public class HollowFilesystemBlobStager implements BlobStager {
         protected final Path path;
         private final BlobCompressor compressor;
 
+        @Impure
         protected FilesystemHeaderBlob(long version, Path dirPath, BlobCompressor compressor) {
             super(version);
             this.compressor = compressor;
@@ -127,6 +139,7 @@ public class HollowFilesystemBlobStager implements BlobStager {
             this.path = dirPath.resolve(String.format("header-%d.%s", version, Integer.toHexString(randomExtension)));
         }
 
+        @Impure
         @Override
         public void cleanup() {
             if (path != null) {
@@ -138,6 +151,7 @@ public class HollowFilesystemBlobStager implements BlobStager {
             }
         }
 
+        @Impure
         @Override
         public void write(HollowBlobWriter blobWriter) throws IOException {
             Path parent = this.path.getParent();
@@ -152,16 +166,19 @@ public class HollowFilesystemBlobStager implements BlobStager {
             }
         }
 
+        @Impure
         @Override
         public InputStream newInputStream() throws IOException {
             return new BufferedInputStream(compressor.decompress(Files.newInputStream(this.path)));
         }
 
+        @SideEffectFree
         @Override
         public File getFile() {
             return path.toFile();
         }
 
+        @Pure
         @Override
         public Path getPath() {
             return path;
@@ -174,6 +191,7 @@ public class HollowFilesystemBlobStager implements BlobStager {
         protected final Map<String, Path> optionalPartPaths;
         private final BlobCompressor compressor;
 
+        @Impure
         private FilesystemBlob(long fromVersion, long toVersion, Type type, Path dirPath, BlobCompressor compressor, ProducerOptionalBlobPartConfig optionalPartConfig) {
             super(fromVersion, toVersion, type, optionalPartConfig);
 
@@ -214,16 +232,19 @@ public class HollowFilesystemBlobStager implements BlobStager {
             }
         }
 
+        @SideEffectFree
         @Override
         public File getFile() {
             return path.toFile();
         }
 
+        @Pure
         @Override
         public Path getPath() {
             return path;
         }
 
+        @Impure
         @Override
         public void write(HollowBlobWriter writer) throws IOException {
             Path parent = this.path.getParent();
@@ -266,11 +287,13 @@ public class HollowFilesystemBlobStager implements BlobStager {
 
         }
 
+        @Impure
         @Override
         public InputStream newInputStream() throws IOException {
             return new BufferedInputStream(compressor.decompress(Files.newInputStream(this.path)));
         }
 
+        @Impure
         @Override
         public InputStream newOptionalPartInputStream(String partName) throws IOException {
             Path partPath = optionalPartPaths.get(partName);
@@ -280,6 +303,7 @@ public class HollowFilesystemBlobStager implements BlobStager {
             return new BufferedInputStream(compressor.decompress(Files.newInputStream(partPath)));
         }
 
+        @Pure
         @Override
         public Path getOptionalPartPath(String partName) {
             Path partPath = optionalPartPaths.get(partName);
@@ -288,6 +312,7 @@ public class HollowFilesystemBlobStager implements BlobStager {
             return partPath;
         }
 
+        @Impure
         @Override
         public void cleanup() {
             cleanupFile(path);
@@ -296,6 +321,7 @@ public class HollowFilesystemBlobStager implements BlobStager {
             }
         }
 
+        @Impure
         private void cleanupFile(Path path) {
             try {
                 if (path != null)

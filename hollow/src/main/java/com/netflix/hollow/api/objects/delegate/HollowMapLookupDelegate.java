@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.custom.HollowMapTypeAPI;
 import com.netflix.hollow.api.objects.HollowMap;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
@@ -34,24 +37,31 @@ public class HollowMapLookupDelegate<K, V> implements HollowMapDelegate<K, V> {
     private final HollowMapTypeDataAccess dataAccess;
     protected final HollowMapTypeAPI typeAPI;
 
+    @SideEffectFree
+    @Impure
     public HollowMapLookupDelegate(HollowMapTypeDataAccess dataAccess) {
         this(dataAccess, null);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowMapLookupDelegate(HollowMapTypeAPI typeAPI) {
         this(typeAPI.getTypeDataAccess(), typeAPI);
     }
 
+    @SideEffectFree
     private HollowMapLookupDelegate(HollowMapTypeDataAccess dataAccess, HollowMapTypeAPI typeAPI) {
         this.dataAccess = dataAccess;
         this.typeAPI = typeAPI;
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         return dataAccess.size(ordinal);
     }
 
+    @Impure
     @Override
     public V get(HollowMap<K, V> map, int ordinal, Object key) {
         HollowMapEntryOrdinalIterator iter;
@@ -70,6 +80,7 @@ public class HollowMapLookupDelegate<K, V> implements HollowMapDelegate<K, V> {
         return null;
     }
 
+    @Impure
     @Override
     public boolean containsKey(HollowMap<K, V> map, int ordinal, Object key) {
         HollowMapEntryOrdinalIterator iter;
@@ -88,6 +99,7 @@ public class HollowMapLookupDelegate<K, V> implements HollowMapDelegate<K, V> {
         return false;
     }
 
+    @Impure
     @Override
     public boolean containsValue(HollowMap<K, V> map, int ordinal, Object value) {
         HollowMapEntryOrdinalIterator iter = iterator(ordinal);
@@ -98,6 +110,7 @@ public class HollowMapLookupDelegate<K, V> implements HollowMapDelegate<K, V> {
         return false;
     }
     
+    @Impure
     @Override
     public K findKey(HollowMap<K, V> map, int ordinal, Object... hashKey) {
         int keyOrdinal = dataAccess.findKey(ordinal, hashKey);
@@ -106,6 +119,7 @@ public class HollowMapLookupDelegate<K, V> implements HollowMapDelegate<K, V> {
         return null;
     }
 
+    @Impure
     @Override
     public V findValue(HollowMap<K, V> map, int ordinal, Object... hashKey) {
         int valueOrdinal = dataAccess.findValue(ordinal, hashKey);
@@ -114,21 +128,25 @@ public class HollowMapLookupDelegate<K, V> implements HollowMapDelegate<K, V> {
         return null;
     }
 
+    @Impure
     @Override
     public Entry<K, V> findEntry(final HollowMap<K, V> map, int ordinal, Object... hashKey) {
         final long entryOrdinals = dataAccess.findEntry(ordinal, hashKey);
         if(entryOrdinals != -1L)
             return new Map.Entry<K, V>() {
+                @Impure
                 @Override
                 public K getKey() {
                     return map.instantiateKey((int)(entryOrdinals >> 32));
                 }
 
+                @Impure
                 @Override
                 public V getValue() {
                     return map.instantiateValue((int)entryOrdinals);
                 }
 
+                @Pure
                 @Override
                 public V setValue(V value) {
                     throw new UnsupportedOperationException();
@@ -139,21 +157,25 @@ public class HollowMapLookupDelegate<K, V> implements HollowMapDelegate<K, V> {
     }
     
 
+    @Impure
     @Override
     public HollowMapEntryOrdinalIterator iterator(int ordinal) {
         return dataAccess.ordinalIterator(ordinal);
     }
 
+    @Impure
     @Override
     public HollowMapSchema getSchema() {
         return dataAccess.getSchema();
     }
 
+    @Pure
     @Override
     public HollowMapTypeDataAccess getTypeDataAccess() {
         return dataAccess;
     }
 
+    @Pure
     @Override
     public HollowMapTypeAPI getTypeAPI() {
         return typeAPI;

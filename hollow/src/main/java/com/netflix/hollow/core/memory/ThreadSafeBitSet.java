@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -41,14 +43,17 @@ public class ThreadSafeBitSet {
     private final int segmentMask;
     private final AtomicReference<ThreadSafeBitSetSegments> segments;
 
+    @Impure
     public ThreadSafeBitSet() {
         this(DEFAULT_LOG2_SEGMENT_SIZE_IN_BITS); /// 16384 bits, 2048 bytes, 256 longs per segment
     }
 
+    @Impure
     public ThreadSafeBitSet(int log2SegmentSizeInBits) {
         this(log2SegmentSizeInBits, 0);
     }
 
+    @Impure
     public ThreadSafeBitSet(int log2SegmentSizeInBits, int numBitsToPreallocate) {
         if(log2SegmentSizeInBits < 6)
             throw new IllegalArgumentException("Cannot specify fewer than 64 bits in each segment!");
@@ -64,6 +69,7 @@ public class ThreadSafeBitSet {
         segments.set(new ThreadSafeBitSetSegments(numSegmentsToPreallocate, numLongsPerSegment));
     }
 
+    @Impure
     public void set(int position) {
         int segmentPosition = position >>> log2SegmentSize; /// which segment -- div by num bits per segment
         int longPosition = (position >>> 6) & segmentMask; /// which long in the segment -- remainder of div by num bits per segment
@@ -85,6 +91,7 @@ public class ThreadSafeBitSet {
         }
     }
 
+    @Impure
     public void clear(int position) {
         int segmentPosition = position >>> log2SegmentSize; /// which segment -- div by num bits per segment
         int longPosition = (position >>> 6) & segmentMask; /// which long in the segment -- remainder of div by num bits per segment
@@ -106,6 +113,7 @@ public class ThreadSafeBitSet {
         }
     }
 
+    @Impure
     public boolean get(int position) {
         int segmentPosition = position >>> log2SegmentSize; /// which segment -- div by num bits per segment
         int longPosition = (position >>> 6) & segmentMask; /// which long in the segment -- remainder of div by num bits per segment
@@ -118,6 +126,7 @@ public class ThreadSafeBitSet {
         return ((segment.get(longPosition) & mask) != 0);
     }
 
+    @Impure
     public long maxSetBit() {
         ThreadSafeBitSetSegments segments = this.segments.get();
 
@@ -135,6 +144,7 @@ public class ThreadSafeBitSet {
         return -1;
     }
 
+    @Impure
     public int nextSetBit(int fromIndex) {
         if (fromIndex < 0)
             throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
@@ -171,6 +181,7 @@ public class ThreadSafeBitSet {
     /**
      * @return the number of bits which are set in this bit set.
      */
+    @Impure
     public int cardinality() {
         ThreadSafeBitSetSegments segments = this.segments.get();
 
@@ -190,6 +201,7 @@ public class ThreadSafeBitSet {
      * @return the number of bits which are current specified by this bit set.  This is the maximum value
      * to which you might need to iterate, if you were to iterate over all bits in this set.
      */
+    @Impure
     public int currentCapacity() {
         return segments.get().numSegments() * (1 << log2SegmentSize);
     }
@@ -197,6 +209,7 @@ public class ThreadSafeBitSet {
     /**
      * Clear all bits to 0.
      */
+    @Impure
     public void clearAll() {
         ThreadSafeBitSetSegments segments = this.segments.get();
 
@@ -217,6 +230,7 @@ public class ThreadSafeBitSet {
      * @param other the other bit set
      * @return the resulting bit set
      */
+    @Impure
     public ThreadSafeBitSet andNot(ThreadSafeBitSet other) {
         if(other.log2SegmentSize != log2SegmentSize)
             throw new IllegalArgumentException("Segment sizes must be the same");
@@ -249,6 +263,7 @@ public class ThreadSafeBitSet {
      * @param bitSets the other bit sets
      * @return the resulting bit set
      */
+    @Impure
     public static ThreadSafeBitSet orAll(ThreadSafeBitSet... bitSets) {
         if(bitSets.length == 0)
             return new ThreadSafeBitSet();
@@ -300,6 +315,7 @@ public class ThreadSafeBitSet {
      * @param segmentIndex the segment index
      * @return the segment
      */
+    @Impure
     private AtomicLongArray getSegment(int segmentIndex) {
         ThreadSafeBitSetSegments visibleSegments = segments.get();
 
@@ -327,6 +343,7 @@ public class ThreadSafeBitSet {
 
         private final AtomicLongArray segments[];
 
+        @Impure
         private ThreadSafeBitSetSegments(int numSegments, int segmentLength) {
             AtomicLongArray segments[] = new AtomicLongArray[numSegments];
 
@@ -339,6 +356,7 @@ public class ThreadSafeBitSet {
             this.segments = segments;
         }
 
+        @Impure
         private ThreadSafeBitSetSegments(ThreadSafeBitSetSegments copyFrom, int numSegments, int segmentLength) {
             AtomicLongArray segments[] = new AtomicLongArray[numSegments];
 
@@ -350,16 +368,19 @@ public class ThreadSafeBitSet {
             this.segments = segments;
         }
 
+        @Pure
         public int numSegments() {
             return segments.length;
         }
 
+        @Pure
         public AtomicLongArray getSegment(int index) {
             return segments[index];
         }
 
     }
 
+    @Impure
     public void serializeBitsTo(DataOutputStream os) throws IOException {
         ThreadSafeBitSetSegments segments = this.segments.get();
 
@@ -374,6 +395,7 @@ public class ThreadSafeBitSet {
         }
     }
 
+    @Impure
     @Override
     public boolean equals(Object obj) {
         if(!(obj instanceof ThreadSafeBitSet))
@@ -414,6 +436,7 @@ public class ThreadSafeBitSet {
         return true;
     }
 
+    @Impure
     @Override
     public int hashCode() {
         int result = log2SegmentSize;
@@ -424,6 +447,7 @@ public class ThreadSafeBitSet {
     /**
      * @return a new BitSet with same bits set
      */
+    @Impure
     public BitSet toBitSet() {
         BitSet resultSet = new BitSet();
         int ordinal = this.nextSetBit(0);
@@ -434,6 +458,7 @@ public class ThreadSafeBitSet {
         return resultSet;
     }
 
+    @Impure
     @Override
     public String toString() {
         return toBitSet().toString();

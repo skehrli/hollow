@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.memory.FixedLengthData.bitsRequiredToRepresentValue;
 
 import com.netflix.hollow.core.HollowConstants;
@@ -71,6 +73,7 @@ public class HollowHashIndexBuilder {
      * @param matchFields The query will match on the specified match fields.  The match fields may span collection elements and/or map keys or values.
      * @deprecated Use {@link #HollowHashIndexBuilder(HollowDataAccess, String, String, String...)}
      */
+    @Impure
     @Deprecated
     public HollowHashIndexBuilder(HollowReadStateEngine stateEngine, String type, String selectField, String... matchFields) {
         this((HollowDataAccess) stateEngine, type, selectField, matchFields);
@@ -79,6 +82,7 @@ public class HollowHashIndexBuilder {
     ///TODO: Optimization, make the matchFields[].schemaFieldPositionPath as short as possible, to reduce iteration
     /// this means merging the common roots of path from the same base field, and pushing all unique base fields down
     /// to the leaves.
+    @Impure
     public HollowHashIndexBuilder(HollowDataAccess stateEngine, String type, String selectField, String... matchFields) {
         this.preindexer = new HollowPreindexer(stateEngine, type, selectField, matchFields);
         preindexer.buildFieldSpecifications();
@@ -103,6 +107,7 @@ public class HollowHashIndexBuilder {
         this.bitsPerSelectHashEntry = bitsPerTraverserField[preindexer.getSelectFieldSpec().getBaseIteratorFieldIdx()];
     }
 
+    @Impure
     public void buildIndex() {
         matchIndexHashAndSizeArray = new GrowingSegmentedLongArray(memoryRecycler);
 
@@ -255,6 +260,7 @@ public class HollowHashIndexBuilder {
         this.finalMatchHashMask = finalMatchHashMask;
     }
 
+    @Impure
     private void growIntermediateHashTable() {
         int newMatchHashTableSize = intermediateMatchHashTableSize * 2;
         int newMatchHashMask = newMatchHashTableSize - 1;
@@ -307,6 +313,7 @@ public class HollowHashIndexBuilder {
      * Called after initial pass.
      * Returns the sum total number of select buckets in the low 7 bytes, and the bits required for the max set size in the high 1 byte.
      */
+    @Impure
     private long calculateDedupedSizesAndTotalNumberOfSelectBuckets(MultiLinkedElementArray elementArray, GrowingSegmentedLongArray matchIndexHashAndSizeArray) {
         long totalBuckets = 0;
         long maxSize = 0;
@@ -355,6 +362,7 @@ public class HollowHashIndexBuilder {
         return totalBuckets | (long)bitsRequiredToRepresentValue(maxSize) << 56;
     }
 
+    @Impure
     private boolean intermediateMatchIsEqual(int matchIdx, long hashBucketBit) {
         for(int i=0;i<preindexer.getMatchFieldSpecs().length;i++) {
             HollowHashIndexField field = preindexer.getMatchFieldSpecs()[i];
@@ -390,10 +398,12 @@ public class HollowHashIndexBuilder {
         return true;
     }
 
+    @Pure
     private boolean isAnyFieldNull(int matchOrdinal, int hashOrdinal) {
         return matchOrdinal == HollowConstants.ORDINAL_NONE || hashOrdinal == HollowConstants.ORDINAL_NONE;
     }
 
+    @Impure
     private int getMatchHash(int matchIdx) {
         int matchHash = 0;
 
@@ -422,50 +432,64 @@ public class HollowHashIndexBuilder {
         return matchHash;
     }
 
+    @Pure
     public int getBitsPerMatchHashKey() {
         return bitsPerMatchHashKey;
     }
 
+    @Pure
     public FixedLengthElementArray getFinalMatchHashTable() {
         return finalMatchHashTable;
     }
 
+    @Pure
     public long getFinalMatchHashMask() {
         return finalMatchHashMask;
     }
 
+    @Pure
     public int getFinalBitsPerMatchHashEntry() {
         return finalBitsPerMatchHashEntry;
     }
 
+    @Pure
     public int getFinalBitsPerSelectTableSize() {
         return finalBitsPerSelectTableSize;
     }
 
+    @Pure
     public int getFinalBitsPerSelectTablePointer() {
         return finalBitsPerSelectTablePointer;
     }
 
+    @Pure
     public FixedLengthElementArray getFinalSelectHashArray() {
         return finalSelectHashArray;
     }
 
+    @Pure
+    @Impure
     public HollowHashIndexField getSelectField() {
         return preindexer.getSelectFieldSpec();
     }
 
+    @Pure
+    @Impure
     public HollowHashIndexField[] getMatchFields() {
         return preindexer.getMatchFieldSpecs();
     }
 
+    @Pure
     public int[] getBitsPerTraverserField() {
         return bitsPerTraverserField;
     }
 
+    @Pure
     public int[] getOffsetPerTraverserField() {
         return offsetPerTraverserField;
     }
 
+    @Pure
     public int getBitsPerSelectHashEntry() {
         return bitsPerSelectHashEntry;
     }

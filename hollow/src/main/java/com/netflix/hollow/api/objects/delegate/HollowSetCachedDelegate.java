@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.custom.HollowSetTypeAPI;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.api.objects.HollowSet;
@@ -37,14 +39,17 @@ public class HollowSetCachedDelegate<T> implements HollowSetDelegate<T>, HollowC
     protected HollowSetTypeAPI typeAPI;
     private HollowSetTypeDataAccess dataAccess;
 
+    @Impure
     public HollowSetCachedDelegate(HollowSetTypeDataAccess dataAccess, int ordinal) {
         this(dataAccess, null, ordinal);
     }
 
+    @Impure
     public HollowSetCachedDelegate(HollowSetTypeAPI typeAPI, int ordinal) {
         this(typeAPI.getTypeDataAccess(), typeAPI, ordinal);
     }
 
+    @Impure
     private HollowSetCachedDelegate(HollowSetTypeDataAccess dataAccess, HollowSetTypeAPI typeAPI, int ordinal) {
         int size = dataAccess.size(ordinal);
 
@@ -61,11 +66,13 @@ public class HollowSetCachedDelegate<T> implements HollowSetDelegate<T>, HollowC
         this.typeAPI = typeAPI;
     }
 
+    @Pure
     @Override
     public int size(int ordinal) {
         return size;
     }
 
+    @Impure
     @Override
     public boolean contains(HollowSet<T> set, int ordinal, Object o) {
         if(getSchema().getHashKey() != null) {
@@ -89,6 +96,7 @@ public class HollowSetCachedDelegate<T> implements HollowSetDelegate<T>, HollowC
         return false;
     }
     
+    @Impure
     @Override
     public T findElement(HollowSet<T> set, int ordinal, Object... keys) {
         int elementOrdinal = dataAccess.findElement(ordinal, keys);
@@ -97,11 +105,13 @@ public class HollowSetCachedDelegate<T> implements HollowSetDelegate<T>, HollowC
         return null;
     }
 
+    @Impure
     @Override
     public HollowOrdinalIterator iterator(int ordinal) {
         return new HollowOrdinalIterator() {
             private int bucket = -1;
 
+            @Impure
             @Override
             public int next() {
                 do {
@@ -115,21 +125,25 @@ public class HollowSetCachedDelegate<T> implements HollowSetDelegate<T>, HollowC
         };
     }
 
+    @Impure
     @Override
     public HollowSetSchema getSchema() {
         return dataAccess.getSchema();
     }
 
+    @Pure
     @Override
     public HollowSetTypeDataAccess getTypeDataAccess() {
         return dataAccess;
     }
 
+    @Pure
     @Override
     public HollowSetTypeAPI getTypeAPI() {
         return typeAPI;
     }
 
+    @Impure
     @Override
     public void updateTypeAPI(HollowTypeAPI typeAPI) {
         this.typeAPI = (HollowSetTypeAPI) typeAPI;

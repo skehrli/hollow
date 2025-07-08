@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.objects.provider;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
 
@@ -28,12 +29,14 @@ public class HollowObjectFactoryProvider<T> extends HollowObjectProvider<T> {
     private final HollowTypeAPI typeAPI;
     private final HollowFactory<T> factory;
 
+    @Impure
     public HollowObjectFactoryProvider(HollowTypeDataAccess dataAccess, HollowTypeAPI typeAPI, HollowFactory<T> factory) {
         this.dataAccess = dataAccess;
         this.typeAPI = typeAPI;
         this.factory = factory;
     }
 
+    @Impure
     @Override
     public T getHollowObject(int ordinal) {
         return factory.newHollowObject(dataAccess, typeAPI, ordinal);

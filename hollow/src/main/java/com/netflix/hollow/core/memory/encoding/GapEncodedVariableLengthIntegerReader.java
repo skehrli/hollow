@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory.encoding;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.ByteDataArray;
 import com.netflix.hollow.core.memory.SegmentedByteArray;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
@@ -32,6 +34,7 @@ import java.util.List;
 public class GapEncodedVariableLengthIntegerReader {
 
     public static GapEncodedVariableLengthIntegerReader EMPTY_READER = new GapEncodedVariableLengthIntegerReader(null, 0) {
+        @Pure
         @Override
         public int nextElement() {
             return Integer.MAX_VALUE;
@@ -45,16 +48,19 @@ public class GapEncodedVariableLengthIntegerReader {
     private int nextElement;
     private int elementIndex;
 
+    @Impure
     public GapEncodedVariableLengthIntegerReader(SegmentedByteArray data, int numBytes) {
         this.data = data;
         this.numBytes = numBytes;
         reset();
     }
 
+    @Pure
     public boolean isEmpty() {
         return numBytes == 0;
     }
 
+    @Impure
     public void advance() {
         if(currentPosition == numBytes) {
             nextElement = Integer.MAX_VALUE;
@@ -66,14 +72,17 @@ public class GapEncodedVariableLengthIntegerReader {
         }
     }
 
+    @Pure
     public int nextElement() {
         return nextElement;
     }
 
+    @Pure
     public int elementIndex() {
         return elementIndex;
     }
 
+    @Impure
     public void reset() {
         currentPosition = 0;
         elementIndex = -1;
@@ -81,6 +90,7 @@ public class GapEncodedVariableLengthIntegerReader {
         advance();
     }
     
+    @Impure
     public int remainingElements() {
         int remainingElementCount = 0;
         while(nextElement != Integer.MAX_VALUE) {
@@ -90,16 +100,19 @@ public class GapEncodedVariableLengthIntegerReader {
         return remainingElementCount;
     }
 
+    @Impure
     public void destroy() {
         if(data != null)
             data.destroy();
     }
     
+    @Impure
     public void writeTo(OutputStream os) throws IOException {
         VarInt.writeVInt(os, numBytes);
         data.writeTo(os, 0, numBytes);
     }
 
+    @Impure
     public static GapEncodedVariableLengthIntegerReader readEncodedDeltaOrdinals(HollowBlobInput in, ArraySegmentRecycler memoryRecycler) throws IOException {
         SegmentedByteArray arr = new SegmentedByteArray(memoryRecycler);
         long numBytesEncodedOrdinals = VarInt.readVLong(in);
@@ -107,11 +120,13 @@ public class GapEncodedVariableLengthIntegerReader {
         return new GapEncodedVariableLengthIntegerReader(arr, (int)numBytesEncodedOrdinals);
     }
 
+    @Impure
     public static void copyEncodedDeltaOrdinals(HollowBlobInput in, DataOutputStream... os) throws IOException {
         long numBytesEncodedOrdinals = IOUtils.copyVLong(in, os);
         IOUtils.copyBytes(in, os, numBytesEncodedOrdinals);
     }
 
+    @Impure
     public static void discardEncodedDeltaOrdinals(HollowBlobInput in) throws IOException {
         long numBytesToSkip = VarInt.readVLong(in);
         while(numBytesToSkip > 0) {
@@ -119,6 +134,7 @@ public class GapEncodedVariableLengthIntegerReader {
         }
     }
 
+    @Impure
     public static GapEncodedVariableLengthIntegerReader combine(GapEncodedVariableLengthIntegerReader reader1, GapEncodedVariableLengthIntegerReader reader2, ArraySegmentRecycler memoryRecycler) {
         reader1.reset();
         reader2.reset();
@@ -152,6 +168,7 @@ public class GapEncodedVariableLengthIntegerReader {
      * @param numSplits the number of instances to split into, should be a power of 2.
      * @return an array of {@code GapEncodedVariableLengthIntegerReader} instances populated with the results of the split.
      */
+    @Impure
     public GapEncodedVariableLengthIntegerReader[] split(int numSplits) {
         if (numSplits<=0 || !((numSplits&(numSplits-1))==0)) {
             throw new IllegalStateException("Split should only be called with powers of 2, it was called with " + numSplits);
@@ -196,6 +213,7 @@ public class GapEncodedVariableLengthIntegerReader {
      * @param from the array of {@code GapEncodedVariableLengthIntegerReader} to join, should have a power of 2 number of elements.
      * @return an instance of {@code GapEncodedVariableLengthIntegerReader} with the joined result.
      */
+    @Impure
     public static GapEncodedVariableLengthIntegerReader join(GapEncodedVariableLengthIntegerReader[] from) {
         if (from==null) {
             throw new IllegalStateException("Join invoked on a null input array");

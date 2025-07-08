@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects.generic;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.HollowObject;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.api.objects.delegate.HollowObjectDelegate;
@@ -33,34 +35,43 @@ import com.netflix.hollow.tools.stringifier.HollowRecordStringifier;
  */
 public class GenericHollowObject extends HollowObject {
 
+    @Impure
     public GenericHollowObject(HollowDataAccess dataAccess, String typeName, int ordinal) {
         this((HollowObjectTypeDataAccess)dataAccess.getTypeDataAccess(typeName, ordinal), ordinal);
     }
     
+    @Impure
     public GenericHollowObject(HollowObjectTypeDataAccess dataAccess, int ordinal) {
         this(new HollowObjectGenericDelegate(dataAccess), ordinal);
     }
     
+    @SideEffectFree
+    @Impure
     public GenericHollowObject(HollowObjectDelegate delegate, int ordinal) {
         super(delegate, ordinal);
     }
 
+    @Impure
     public GenericHollowObject getObject(String fieldName) {
         return (GenericHollowObject) getReferencedGenericRecord(fieldName);
     }
     
+    @Impure
     public GenericHollowList getList(String fieldName) {
         return (GenericHollowList) getReferencedGenericRecord(fieldName);
     }
     
+    @Impure
     public GenericHollowSet getSet(String fieldName) {
         return (GenericHollowSet) getReferencedGenericRecord(fieldName);
     }
     
+    @Impure
     public GenericHollowMap getMap(String fieldName) {
         return (GenericHollowMap) getReferencedGenericRecord(fieldName);
     }
     
+    @Impure
     public final HollowRecord getReferencedGenericRecord(String fieldName) {
         String referencedType = getSchema().getReferencedType(fieldName);
 
@@ -82,6 +93,7 @@ public class GenericHollowObject extends HollowObject {
         return GenericHollowRecordHelper.instantiate(getTypeDataAccess().getDataAccess(), referencedType, ordinal);
     }
     
+    @Impure
     @Override
     public String toString() {
         return new HollowRecordStringifier().stringify(this);

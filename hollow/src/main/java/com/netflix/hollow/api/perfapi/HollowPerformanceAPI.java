@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -28,12 +30,14 @@ public class HollowPerformanceAPI extends HollowAPI {
 
     protected final PerfAPITypeIdentifiers types;
 
+    @Impure
     public HollowPerformanceAPI(HollowDataAccess dataAccess) {
         super(dataAccess);
 
         this.types = new PerfAPITypeIdentifiers(dataAccess);
     }
 
+    @Pure
     public PerfAPITypeIdentifiers getTypeIdentifiers() {
         return types;
     };
@@ -42,6 +46,7 @@ public class HollowPerformanceAPI extends HollowAPI {
         private final String[] typeNames;
         private final Map<String, Integer> typeIdxMap;
 
+        @Impure
         public PerfAPITypeIdentifiers(HollowDataset dataset) {
             List<HollowSchema> schemas = dataset.getSchemas();
 
@@ -55,6 +60,7 @@ public class HollowPerformanceAPI extends HollowAPI {
             this.typeNames = typeNames;
         }
 
+        @Pure
         public int getIdx(String typeName) {
             Integer idx = typeIdxMap.get(typeName);
             if (idx == null) {
@@ -64,6 +70,7 @@ public class HollowPerformanceAPI extends HollowAPI {
             return idx;
         }
 
+        @Pure
         public String getTypeName(int idx) {
             if (idx >= 0 && idx < typeNames.length) {
                 return typeNames[idx];

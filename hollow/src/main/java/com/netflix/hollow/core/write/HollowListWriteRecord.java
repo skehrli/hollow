@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.ByteDataArray;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.util.IntList;
@@ -24,14 +26,18 @@ public class HollowListWriteRecord implements HollowWriteRecord {
 
     private final IntList elementOrdinals;
 
+    @SideEffectFree
+    @Impure
     public HollowListWriteRecord() {
         this.elementOrdinals = new IntList();
     }
 
+    @Impure
     public void addElement(int ordinal) {
         elementOrdinals.add(ordinal);
     }
 
+    @Impure
     @Override
     public void writeDataTo(ByteDataArray buf) {
         VarInt.writeVInt(buf, elementOrdinals.size());
@@ -41,6 +47,7 @@ public class HollowListWriteRecord implements HollowWriteRecord {
         }
     }
 
+    @Impure
     @Override
     public void reset() {
         elementOrdinals.clear();

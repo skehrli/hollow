@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.combine;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.index.HollowPrimaryKeyIndex;
 import java.util.Map;
 
@@ -31,17 +33,20 @@ class HollowCombinerPrimaryKeyOrdinalRemapper implements OrdinalRemapper {
     private final OrdinalRemapper baseRemappers[];
     private final int stateEngineIdx;
     
+    @SideEffectFree
     public HollowCombinerPrimaryKeyOrdinalRemapper(OrdinalRemapper[] baseRemappers, Map<String, HollowPrimaryKeyIndex[]> primaryKeyIndexes, int stateEngineIdx) {
         this.primaryKeyIndexes = primaryKeyIndexes;
         this.baseRemappers = baseRemappers;
         this.stateEngineIdx = stateEngineIdx;
     }
 
+    @Impure
     @Override
     public int getMappedOrdinal(String type, int originalOrdinal) {
         return baseRemappers[stateEngineIdx].getMappedOrdinal(type, originalOrdinal);
     }
 
+    @Impure
     @Override
     public void remapOrdinal(String type, int originalOrdinal, int mappedOrdinal) {
         baseRemappers[stateEngineIdx].remapOrdinal(type, originalOrdinal, mappedOrdinal);
@@ -63,6 +68,7 @@ class HollowCombinerPrimaryKeyOrdinalRemapper implements OrdinalRemapper {
         }
     }
 
+    @Impure
     @Override
     public boolean ordinalIsMapped(String type, int originalOrdinal) {
         return baseRemappers[stateEngineIdx].ordinalIsMapped(type, originalOrdinal);

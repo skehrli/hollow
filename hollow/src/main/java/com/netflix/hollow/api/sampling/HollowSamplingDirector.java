@@ -15,17 +15,21 @@
  *
  */
 package com.netflix.hollow.api.sampling;
+import org.checkerframework.dataflow.qual.Impure;
 
 public abstract class HollowSamplingDirector {
 
     private Thread updateThread;
     
+    @Impure
     public abstract boolean shouldRecord();
     
+    @Impure
     public void setUpdateThread(Thread t) {
         this.updateThread = t;
     }
     
+    @Impure
     protected boolean isUpdateThread() {
         return updateThread != null && updateThread == Thread.currentThread();
     }

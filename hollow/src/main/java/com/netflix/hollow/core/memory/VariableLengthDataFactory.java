@@ -1,5 +1,6 @@
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
 import java.util.logging.Logger;
 
@@ -7,6 +8,7 @@ public class VariableLengthDataFactory {
 
     private static final Logger LOG = Logger.getLogger(VariableLengthDataFactory.class.getName());
 
+    @Impure
     public static VariableLengthData get(MemoryMode memoryMode, ArraySegmentRecycler memoryRecycler) {
 
         if (memoryMode.equals(MemoryMode.ON_HEAP)) {
@@ -20,6 +22,7 @@ public class VariableLengthDataFactory {
         }
     }
 
+    @Impure
     public static void destroy(VariableLengthData vld) {
         if (vld instanceof SegmentedByteArray) {
             ((SegmentedByteArray) vld).destroy();

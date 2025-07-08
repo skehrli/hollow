@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen.testdata;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.schema.HollowListSchema;
 import com.netflix.hollow.core.schema.HollowMapSchema;
@@ -36,50 +38,60 @@ public class HollowTestDataAPIGenerator {
     private String packageName;
     private Path destinationPath;
 
+    @Impure
     public static Builder newBuilder() {
         HollowTestDataAPIGenerator gen = new HollowTestDataAPIGenerator();
         return gen.theBuilder();
     }
     
+    @Impure
     private Builder theBuilder() {
         return new Builder();
     }
 
     public class Builder {
+        @Impure
         public Builder withDataset(HollowDataset dataset) {
             HollowTestDataAPIGenerator.this.dataset = dataset;
             return this;
         }
         
+        @Impure
         public Builder withAPIClassname(String apiClassname) {
             HollowTestDataAPIGenerator.this.apiClassname = apiClassname;
             return this;
         }
         
+        @Impure
         public Builder withPackageName(String packageName) {
             HollowTestDataAPIGenerator.this.packageName = packageName;
             return this;
         }
         
+        @Impure
         public Builder withDestination(String destinationPath) {
             return withDestination(Paths.get(destinationPath));
         }
 
+        @Impure
         public Builder withDestination(Path destinationPath) {
             HollowTestDataAPIGenerator.this.destinationPath = destinationPath;
             return this;
         }
         
+        @Pure
         public HollowTestDataAPIGenerator build() {
             return HollowTestDataAPIGenerator.this;
         }
     }
     
+    @Impure
     public void generateSourceFiles() throws IOException {
         generate(dataset, packageName, apiClassname, destinationPath);
     }
 
     
+    @Impure
     private void generate(HollowDataset dataset, String packageName, String apiClassName, Path destination) throws IOException {
         Path apiClassDestination = destination.resolve(apiClassName + ".java");
         Files.createDirectories(destination);

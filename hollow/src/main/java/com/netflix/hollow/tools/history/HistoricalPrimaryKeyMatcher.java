@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
@@ -29,6 +31,7 @@ public class HistoricalPrimaryKeyMatcher {
     private final int fieldPathIndexes[][];
     private final FieldType[] fieldTypes;
     
+    @Impure
     public HistoricalPrimaryKeyMatcher(HollowDataAccess dataAccess, PrimaryKey primaryKey) {
         this.fieldPathIndexes = new int[primaryKey.numFields()][];
         this.fieldTypes = new FieldType[primaryKey.numFields()];
@@ -41,6 +44,7 @@ public class HistoricalPrimaryKeyMatcher {
         this.keyTypeAccess = (HollowObjectTypeDataAccess) dataAccess.getTypeDataAccess(primaryKey.getType());
     }
     
+    @Impure
     public boolean keyMatches(int ordinal, Object... keys) {
         if(keys.length != fieldPathIndexes.length)
             return false;
@@ -53,6 +57,7 @@ public class HistoricalPrimaryKeyMatcher {
         return true;
     }
     
+    @Impure
     public boolean keyMatches(Object key, int ordinal, int fieldIdx) {
         HollowObjectTypeDataAccess dataAccess = keyTypeAccess;
         HollowObjectSchema schema = dataAccess.getSchema();
@@ -95,6 +100,7 @@ public class HistoricalPrimaryKeyMatcher {
 
     }
     
+    @Pure
     public FieldType[] getFieldTypes() {
         return fieldTypes;
     }

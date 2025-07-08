@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.testdata;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.mustcall.qual.Owning;
 import com.netflix.hollow.core.write.HollowSetWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteStateEngine;
@@ -26,14 +29,18 @@ public abstract class HollowTestSetRecord<T> extends HollowTestRecord<T> {
 
     private final Set<HollowTestRecord<?>> elements = new HashSet<>();
 
-    protected HollowTestSetRecord(T parent) {
+    @SideEffectFree
+    @Impure
+    protected HollowTestSetRecord(@Owning T parent) {
         super(parent);
     }
 
+    @Impure
     protected void addElement(HollowTestRecord<?> element) {
         elements.add(element);
     }
 
+    @Impure
     public HollowWriteRecord toWriteRecord(HollowWriteStateEngine writeEngine) {
         HollowSetWriteRecord rec = new HollowSetWriteRecord();
         for(HollowTestRecord<?> e : elements) {

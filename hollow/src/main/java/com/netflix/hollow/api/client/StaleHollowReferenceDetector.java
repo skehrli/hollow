@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.util.Threads.daemonThread;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -61,6 +64,7 @@ public class StaleHollowReferenceDetector {
 
     private Thread monitor;
 
+    @Impure
     public StaleHollowReferenceDetector(HollowConsumer.ObjectLongevityConfig config, HollowConsumer.ObjectLongevityDetector detector) {
         this.handles = new ArrayList<HollowWeakReferenceHandle>();
         this.config = config;
@@ -68,6 +72,8 @@ public class StaleHollowReferenceDetector {
         this.stackTraceRecorder = new StackTraceRecorder(25);
     }
 
+    @SideEffectFree
+    @Impure
     synchronized boolean isKnownAPIHandle(HollowAPI api) {
         for(HollowWeakReferenceHandle handle : handles)
             if(handle.isAPIHandled(api))
@@ -75,12 +81,14 @@ public class StaleHollowReferenceDetector {
         return false;
     }
 
+    @Impure
     synchronized void newAPIHandle(HollowAPI api) {
         for(HollowWeakReferenceHandle handle : handles)
             handle.newAPIAvailable(api);
         handles.add(new HollowWeakReferenceHandle(api));
     }
 
+    @Impure
     private synchronized int countStaleReferenceExistenceSignals() {
         int signals = 0;
 
@@ -92,6 +100,7 @@ public class StaleHollowReferenceDetector {
         return signals;
     }
 
+    @Impure
     private synchronized int countStaleReferenceUsageSignals() {
         int signals = 0;
 
@@ -103,6 +112,7 @@ public class StaleHollowReferenceDetector {
         return signals;
     }
 
+    @Impure
     private synchronized void housekeeping() {
         Iterator<HollowWeakReferenceHandle> iter = handles.iterator();
         while(iter.hasNext()) {
@@ -113,6 +123,7 @@ public class StaleHollowReferenceDetector {
         }
     }
 
+    @Impure
     public void startMonitoring() {
         if (monitor == null) {
             daemonThread(new Monitor(this), getClass(), "monitor")
@@ -120,6 +131,7 @@ public class StaleHollowReferenceDetector {
         }
     }
 
+    @Pure
     public StackTraceRecorder getStaleReferenceStackTraceRecorder() {
         return stackTraceRecorder;
     }
@@ -128,10 +140,12 @@ public class StaleHollowReferenceDetector {
 
         private final WeakReference<StaleHollowReferenceDetector> ref;
 
+        @Impure
         Monitor(StaleHollowReferenceDetector parent) {
             this.ref = new WeakReference<>(parent);
         }
 
+        @Impure
         public void run() {
             while (ref.get() != null) {
 
@@ -161,20 +175,26 @@ public class StaleHollowReferenceDetector {
         private boolean usageDetected;
         private boolean detached;
 
+        @Impure
         private HollowWeakReferenceHandle(HollowAPI stateEngine) {
             this.apiHandle = new WeakReference<HollowAPI>(stateEngine);
             this.sibling = new Object();
             this.siblingHandle = new WeakReference<Object>(sibling);
         }
 
+        @SideEffectFree
+        @Impure
         private boolean isFinished() {
             return !stateEngineIsReachable();
         }
 
+        @SideEffectFree
+        @Impure
         private boolean isExistingStaleReferenceHint() {
             return stateEngineIsReachable() && !siblingIsReachable();
         }
 
+        @Impure
         private boolean hasBeenUsedSinceReset() {
             if(sibling == null) {
                 HollowAPI myAPI = apiHandle.get();
@@ -184,6 +204,7 @@ public class StaleHollowReferenceDetector {
             return false;
         }
 
+        @Impure
         private void housekeeping() {
             if(gracePeriodBeginTimestamp != Long.MAX_VALUE) {
                 if(shouldBeginUsageDetectionPeriod())
@@ -194,6 +215,7 @@ public class StaleHollowReferenceDetector {
             }
         }
 
+        @Impure
         private boolean shouldDetach() {
             if(!detached && System.currentTimeMillis() > (gracePeriodBeginTimestamp + config.gracePeriodMillis() + config.usageDetectionPeriodMillis())) {
                 if(config.forceDropData()) {
@@ -220,6 +242,7 @@ public class StaleHollowReferenceDetector {
             return false;
         }
 
+        @Impure
         private void detach() {
             HollowAPI api = apiHandle.get();
             if(api != null) {
@@ -235,10 +258,12 @@ public class StaleHollowReferenceDetector {
             detached = true;
         }
 
+        @Impure
         private boolean shouldBeginUsageDetectionPeriod() {
             return sibling != null && System.currentTimeMillis() > (gracePeriodBeginTimestamp + config.gracePeriodMillis());
         }
 
+        @Impure
         private void beginUsageDetectionPeriod() {
             sibling = null;
             HollowAPI hollowAPI = apiHandle.get();
@@ -248,6 +273,7 @@ public class StaleHollowReferenceDetector {
             }
         }
 
+        @Impure
         private void setUpStackTraceRecording() {
             HollowAPI api = apiHandle.get();
             if(api != null) {
@@ -260,24 +286,29 @@ public class StaleHollowReferenceDetector {
             }
         }
 
+        @SideEffectFree
         private boolean stateEngineIsReachable() {
             return apiHandle.get() != null;
         }
 
+        @SideEffectFree
         private boolean siblingIsReachable() {
             return siblingHandle.get() != null;
         }
 
+        @SideEffectFree
         private boolean isAPIHandled(HollowAPI api) {
             return apiHandle.get() == api;
         }
 
+        @Impure
         private void newAPIAvailable(HollowAPI api) {
             if(shouldBeginGracePeriod(api)) {
                 gracePeriodBeginTimestamp = System.currentTimeMillis();
             }
         }
 
+        @Impure
         private boolean shouldBeginGracePeriod(HollowAPI newAPI) {
             if(gracePeriodBeginTimestamp != Long.MAX_VALUE)
                 return false;

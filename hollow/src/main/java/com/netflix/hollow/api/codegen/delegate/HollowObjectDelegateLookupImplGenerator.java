@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.delegateInterfaceName;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.delegateLookupImplName;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.substituteInvalidChars;
@@ -39,12 +40,14 @@ import com.netflix.hollow.core.schema.HollowObjectSchema;
  */
 public class HollowObjectDelegateLookupImplGenerator extends HollowObjectDelegateGenerator {
 
+    @Impure
     public HollowObjectDelegateLookupImplGenerator(String packageName, HollowObjectSchema schema,
             HollowErgonomicAPIShortcuts ergonomicShortcuts, HollowDataset dataset, CodeGeneratorConfig config) {
         super(packageName, schema, ergonomicShortcuts, dataset, config);
         this.className = delegateLookupImplName(schema.getName());
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder builder = new StringBuilder();
@@ -154,6 +157,7 @@ public class HollowObjectDelegateLookupImplGenerator extends HollowObjectDelegat
 
     }
 
+    @Impure
     private void addShortcutAccessMethod(StringBuilder builder, String methodFieldName, Shortcut shortcut) {
         String finalFieldName = substituteInvalidChars(uppercase(shortcut.getPath()[shortcut.getPath().length-1]));
         String finalTypeAPI = typeAPIClassname(shortcut.getPathTypes()[shortcut.getPathTypes().length-1]);
@@ -243,6 +247,7 @@ public class HollowObjectDelegateLookupImplGenerator extends HollowObjectDelegat
         }
     }
 
+    @Impure
     private void addShortcutTraversal(StringBuilder builder, Shortcut shortcut) {
         for(int i=0;i<shortcut.getPath().length-1;i++) {
             String typeAPIClassname = typeAPIClassname(shortcut.getPathTypes()[i]);

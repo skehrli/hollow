@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import java.io.IOException;
@@ -32,6 +34,7 @@ public interface FixedLengthData {
      * the result is undefined
      * @return the element value
      */
+    @Impure
     long getElementValue(long index, int bitsPerElement);
 
     /**
@@ -47,6 +50,7 @@ public interface FixedLengthData {
      * before and after the desired element value are not included in the returned value.
      * @return the masked element value
      */
+    @Impure
     long getElementValue(long index, int bitsPerElement, long mask);
 
     /**
@@ -60,6 +64,7 @@ public interface FixedLengthData {
      * @param bitsPerElement bits per element, may be greater than 58
      * @return the large element value
      */
+    @Impure
     long getLargeElementValue(long index, int bitsPerElement);
 
     /**
@@ -77,14 +82,19 @@ public interface FixedLengthData {
      * before and after the desired element value are not included in the returned value.
      * @return the masked large element value
      */
+    @Impure
     long getLargeElementValue(long index, int bitsPerElement, long mask);
 
+    @Impure
     void setElementValue(long index, int bitsPerElement, long value);
 
+    @Impure
     void copyBits(FixedLengthData copyFrom, long sourceStartBit, long destStartBit, long numBits);
 
+    @Impure
     void incrementMany(long startBit, long increment, long bitsBetweenIncrements, int numIncrements);
 
+    @Impure
     void clearElementValue(long index, int bitsPerElement);
 
     /**
@@ -92,6 +102,7 @@ public interface FixedLengthData {
      *
      * @param in Hollow Blob Input to discard data from
      */
+    @Impure
     static void discardFrom(HollowBlobInput in) throws IOException {
         long numLongs = VarInt.readVLong(in);
         long bytesToSkip = numLongs * 8;
@@ -101,6 +112,7 @@ public interface FixedLengthData {
         }
     }
 
+    @Pure
     static int bitsRequiredToRepresentValue(long value) {
         if(value == 0)
             return 1;

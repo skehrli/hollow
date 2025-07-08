@@ -15,6 +15,10 @@
  */
 package com.netflix.hollow.api.consumer.data;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 import java.util.Iterator;
 
@@ -24,23 +28,28 @@ public abstract class AbstractHollowOrdinalIterable<T> implements Iterable<T> {
     private final HollowOrdinalIterator iter;
     private final int firstOrdinal;
 
+    @Impure
     public AbstractHollowOrdinalIterable(final HollowOrdinalIterator iter) {
         this.iter = iter;
         this.firstOrdinal = iter.next();
     }
 
+    @Pure
     protected abstract T getData(int ordinal);
 
+    @Impure
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<T> iterator(@PolyOwningCollection AbstractHollowOrdinalIterable<T> this) {
         return new Iterator<T>() {
             private int next = firstOrdinal;
 
+            @Pure
             @Override
             public boolean hasNext() {
                 return next != HollowOrdinalIterator.NO_MORE_ORDINALS;
             }
 
+            @Impure
             @Override
             public T next() {
                 T obj = getData(next);
@@ -48,6 +57,7 @@ public abstract class AbstractHollowOrdinalIterable<T> implements Iterable<T> {
                 return obj;
             }
 
+            @SideEffectFree
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.MemoryMode;
 import com.netflix.hollow.core.read.dataaccess.HollowCollectionTypeDataAccess;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
@@ -27,13 +30,18 @@ import com.netflix.hollow.core.schema.HollowSchema;
  */
 public abstract class HollowCollectionTypeReadState extends HollowTypeReadState implements HollowCollectionTypeDataAccess {
 
+    @SideEffectFree
+    @Impure
     public HollowCollectionTypeReadState(HollowReadStateEngine stateEngine, MemoryMode memoryMode, HollowSchema schema) {
         super(stateEngine, memoryMode, schema);
     }
 
+    @Impure
     public abstract int size(int ordinal);
+    @Impure
     public abstract HollowOrdinalIterator ordinalIterator(int ordinal);
 
+    @Pure
     public abstract HollowCollectionSchema getSchema();
 
 }

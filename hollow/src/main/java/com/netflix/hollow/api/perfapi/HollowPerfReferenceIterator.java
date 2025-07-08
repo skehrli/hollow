@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 
 public class HollowPerfReferenceIterator {
@@ -25,16 +27,19 @@ public class HollowPerfReferenceIterator {
 
     private int next;
     
+    @Impure
     public HollowPerfReferenceIterator(HollowOrdinalIterator iter, long elementMaskedTypeIdx) {
         this.iter = iter;
         this.elementMaskedTypeIdx = elementMaskedTypeIdx;
         this.next = iter.next(); 
     }
     
+    @Pure
     public boolean hasNext() {
         return next != HollowOrdinalIterator.NO_MORE_ORDINALS;
     }
     
+    @Impure
     public long next() {
         long nextRef = Ref.toRefWithTypeMasked(elementMaskedTypeIdx, next);
         next = iter.next();

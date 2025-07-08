@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.stringifier;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import java.io.IOException;
@@ -32,6 +33,7 @@ public interface HollowStringifier<T extends HollowStringifier> {
      * @param types the object type names
      * @return this stringifier
      */
+    @Impure
     T addExcludeObjectTypes(String... types);
 
     /**
@@ -40,6 +42,7 @@ public interface HollowStringifier<T extends HollowStringifier> {
      * @param record the record
      * @return the string representation
      */
+    @Impure
     String stringify(HollowRecord record);
 
     /**
@@ -49,6 +52,7 @@ public interface HollowStringifier<T extends HollowStringifier> {
      * @param record the record
      * @throws IOException thrown if there is an error writing to the Writer
      */
+    @Impure
     void stringify(Writer writer, HollowRecord record) throws IOException;
 
     /**
@@ -58,6 +62,7 @@ public interface HollowStringifier<T extends HollowStringifier> {
      * @param records the records
      * @throws IOException thrown if there is an error writing to the Writer
      */
+    @Impure
     default void stringify(Writer writer, Iterable<HollowRecord> records) throws IOException {
         throw new UnsupportedOperationException("not implemented");
     }
@@ -70,6 +75,7 @@ public interface HollowStringifier<T extends HollowStringifier> {
      * @param ordinal the oridinal
      * @return the string representation
      */
+    @Impure
     String stringify(HollowDataAccess dataAccess, String type, int ordinal);
 
     /**
@@ -81,6 +87,7 @@ public interface HollowStringifier<T extends HollowStringifier> {
      * @param ordinal the oridinal
      * @throws IOException thrown if there is an error writing to the Writer
      */
+    @Impure
     void stringify(Writer writer, HollowDataAccess dataAccess, String type, int ordinal)
         throws IOException;
 }

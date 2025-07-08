@@ -16,6 +16,12 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.framework.qual.RequiresQualifier;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.framework.qual.EnsuresQualifier;
 import static java.util.stream.Collectors.toList;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -34,71 +40,90 @@ public class HollowUpdatePlan implements Iterable<HollowConsumer.Blob> {
 
     private final List<HollowConsumer.Blob> transitions;
 
+    @SideEffectFree
     private HollowUpdatePlan(List<HollowConsumer.Blob> transitions) {
         this.transitions = transitions;
     }
 
+    @SideEffectFree
+    @EnsuresQualifier(expression="this.transitions", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
     public HollowUpdatePlan() {
         this.transitions = new ArrayList();
     }
 
+    @Pure
+    @Impure
     public boolean isSnapshotPlan() {
         return !transitions.isEmpty() && transitions.get(0).isSnapshot();
     }
 
+    @Impure
     public HollowConsumer.Blob getSnapshotTransition() {
         if(!isSnapshotPlan())
             return null;
         return transitions.get(0);
     }
 
+    @Impure
     public List<HollowConsumer.Blob> getDeltaTransitions() {
         if(!isSnapshotPlan())
             return transitions;
         return transitions.subList(1, transitions.size());
     }
 
+    @Pure
     public HollowConsumer.Blob getTransition(int index) {
         return transitions.get(index);
     }
 
+    @Pure
     public List<HollowConsumer.Blob> getTransitions() {
         return transitions;
     }
 
+    @Impure
     public List<HollowConsumer.Blob.BlobType> getTransitionSequence() {
         return transitions.stream()
                 .map(t -> t.getBlobType())
                 .collect(toList());
     }
 
+    @Impure
     public long destinationVersion(long currentVersion) {
         long dest = destinationVersion();
         return dest == HollowConstants.VERSION_NONE ? currentVersion : dest;
     }
 
+    @Pure
+    @Impure
     public long destinationVersion() {
         return transitions.isEmpty() ? HollowConstants.VERSION_NONE
             : transitions.get(transitions.size() - 1).getToVersion();
     }
 
+    @Pure
     public int numTransitions() {
         return transitions.size();
     }
 
+    @Impure
     public void add(HollowConsumer.Blob transition) {
         transitions.add(transition);
     }
 
+    @RequiresQualifier(expression="this.transitions", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
+    @Impure
     public void appendPlan(HollowUpdatePlan plan) {
         transitions.addAll(plan.transitions);
     }
 
+    @SideEffectFree
     @Override
-    public Iterator<HollowConsumer.Blob> iterator() {
+    public Iterator<HollowConsumer.Blob> iterator(@PolyOwningCollection HollowUpdatePlan this) {
         return transitions.iterator();
     }
 
+    @Impure
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();

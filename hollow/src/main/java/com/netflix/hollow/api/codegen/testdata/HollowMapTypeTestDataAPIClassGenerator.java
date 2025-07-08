@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen.testdata;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.schema.HollowMapSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -32,6 +34,7 @@ class HollowMapTypeTestDataAPIClassGenerator {
     private final String keyClassName;
     private final String valueClassName;
     
+    @Impure
     public HollowMapTypeTestDataAPIClassGenerator(HollowDataset dataset, HollowMapSchema schema, String packageName) {
         this.dataset = dataset;
         this.schema = schema;
@@ -41,6 +44,7 @@ class HollowMapTypeTestDataAPIClassGenerator {
         this.valueClassName = schema.getValueType() + "TestData";
     }
     
+    @Impure
     public String generate() {
         StringBuilder builder = new StringBuilder();
         
@@ -131,14 +135,17 @@ class HollowMapTypeTestDataAPIClassGenerator {
         return builder.toString();
     }
     
+    @Pure
     public String className(String type) {
         return type + "TestData";
     }
     
+    @Impure
     private boolean canErgonomicShortcut(String schemaName) {
         return canErgonomicShortcut(dataset.getSchema(schemaName));
     }
     
+    @Impure
     private boolean canErgonomicShortcut(HollowSchema schema) {
         if(schema.getSchemaType() != SchemaType.OBJECT)
             return false;
@@ -151,6 +158,7 @@ class HollowMapTypeTestDataAPIClassGenerator {
         return objSchema.getFieldType(0) != FieldType.REFERENCE;
     }
     
+    @Impure
     private String getErgonomicShortcutType(String schemaName) {
         HollowObjectSchema schema = (HollowObjectSchema)dataset.getSchema(schemaName);
         
@@ -174,6 +182,7 @@ class HollowMapTypeTestDataAPIClassGenerator {
         }
     }
     
+    @Impure
     private String getErgonomicFieldName(String schemaName) {
         HollowObjectSchema schema = (HollowObjectSchema)dataset.getSchema(schemaName);
         return schema.getFieldName(0);

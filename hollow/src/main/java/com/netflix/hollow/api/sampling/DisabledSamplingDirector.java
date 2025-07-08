@@ -15,18 +15,24 @@
  *
  */
 package com.netflix.hollow.api.sampling;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 
 public class DisabledSamplingDirector extends HollowSamplingDirector {
 
     public static final DisabledSamplingDirector INSTANCE = new DisabledSamplingDirector();
 
+    @Impure
     private DisabledSamplingDirector() { }
 
+    @Pure
     @Override
     public boolean shouldRecord() {
         return false;
     }
 
+    @SideEffectFree
     @Override
     public void setUpdateThread(Thread t) { }
 

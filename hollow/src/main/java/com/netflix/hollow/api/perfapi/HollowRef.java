@@ -15,18 +15,23 @@
  *
  */
 package com.netflix.hollow.api.perfapi;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 public abstract class HollowRef {
     protected final long ref;
 
+    @SideEffectFree
     protected HollowRef(long ref) {
         this.ref = ref;
     }
 
+    @Pure
     public long ref() {
         return ref;
     }
 
+    @Pure
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -40,6 +45,7 @@ public abstract class HollowRef {
         return ref == hollowRef.ref;
     }
 
+    @Pure
     @Override
     public int hashCode() {
         return Long.hashCode(ref);

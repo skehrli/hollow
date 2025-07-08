@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.sampling.DisabledSamplingDirector;
 import com.netflix.hollow.api.sampling.HollowObjectSampler;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
@@ -25,15 +27,18 @@ import com.netflix.hollow.core.schema.HollowObjectSchema;
 
 public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAccess implements HollowObjectTypeDataAccess {
 
+    @Impure
     public HollowHistoricalObjectDataAccess(HollowHistoricalStateDataAccess dataAccess, HollowTypeReadState removedRecords) {
         super(dataAccess, removedRecords, new HollowObjectSampler((HollowObjectSchema)removedRecords.getSchema(), DisabledSamplingDirector.INSTANCE));
     }
 
+    @Impure
     @Override
     public HollowObjectSchema getSchema() {
         return removedRecords().getSchema();
     }
 
+    @Impure
     @Override
     public boolean isNull(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -44,6 +49,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().isNull(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public int readOrdinal(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -54,6 +60,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().readOrdinal(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public int readInt(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -64,6 +71,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().readInt(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public float readFloat(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -74,6 +82,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().readFloat(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public double readDouble(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -84,6 +93,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().readDouble(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public long readLong(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -94,6 +104,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().readLong(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public Boolean readBoolean(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -104,6 +115,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().readBoolean(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public byte[] readBytes(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -114,6 +126,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().readBytes(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public String readString(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -124,6 +137,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().readString(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Impure
     @Override
     public boolean isStringFieldEqual(int ordinal, int fieldIndex, String testValue) {
         sampler().recordFieldAccess(fieldIndex);
@@ -134,6 +148,7 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().isStringFieldEqual(getMappedOrdinal(ordinal), fieldIndex, testValue);
     }
 
+    @Impure
     @Override
     public int findVarLengthFieldHashCode(int ordinal, int fieldIndex) {
         sampler().recordFieldAccess(fieldIndex);
@@ -144,10 +159,12 @@ public class HollowHistoricalObjectDataAccess extends HollowHistoricalTypeDataAc
         return removedRecords().findVarLengthFieldHashCode(getMappedOrdinal(ordinal), fieldIndex);
     }
 
+    @Pure
     private HollowObjectTypeReadState removedRecords() {
         return (HollowObjectTypeReadState) removedRecords;
     }
 
+    @Pure
     private HollowObjectSampler sampler() {
         return (HollowObjectSampler) sampler;
     }

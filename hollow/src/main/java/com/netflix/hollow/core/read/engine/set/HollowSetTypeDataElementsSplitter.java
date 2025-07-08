@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine.set;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.FixedLengthDataFactory;
 import com.netflix.hollow.core.read.engine.HollowTypeDataElementsSplitter;
 
@@ -11,10 +13,13 @@ import com.netflix.hollow.core.read.engine.HollowTypeDataElementsSplitter;
  */
 public class HollowSetTypeDataElementsSplitter extends HollowTypeDataElementsSplitter<HollowSetTypeDataElements> {
 
+    @SideEffectFree
+    @Impure
     public HollowSetTypeDataElementsSplitter(HollowSetTypeDataElements from, int numSplits) {
         super(from, numSplits);
     }
 
+    @Impure
     @Override
     public void initToElements() {
         this.to = new HollowSetTypeDataElements[numSplits];
@@ -23,6 +28,7 @@ public class HollowSetTypeDataElementsSplitter extends HollowTypeDataElementsSpl
         }
     }
 
+    @Impure
     @Override
     public void populateStats() {
         long[] shardTotalOfSetBuckets  = new long[numSplits];
@@ -57,6 +63,7 @@ public class HollowSetTypeDataElementsSplitter extends HollowTypeDataElementsSpl
         }
     }
 
+    @Impure
     @Override
     public void copyRecords() {
         int numSplits = to.length;

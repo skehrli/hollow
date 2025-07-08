@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.consumer;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.util.Threads.daemonThread;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
@@ -133,6 +136,7 @@ public class HollowConsumer {
     /**
      * @deprecated use {@link HollowConsumer.Builder}
      */
+    @Impure
     @Deprecated
     protected HollowConsumer(BlobRetriever blobRetriever,
                              AnnouncementWatcher announcementWatcher,
@@ -153,6 +157,7 @@ public class HollowConsumer {
     /**
      * @deprecated use {@link HollowConsumer.Builder}
      */
+    @Impure
     @Deprecated
     protected HollowConsumer(BlobRetriever blobRetriever,
                              AnnouncementWatcher announcementWatcher,
@@ -186,6 +191,7 @@ public class HollowConsumer {
         this.memoryMode = memoryMode;
     }
 
+    @Impure
     protected  <B extends Builder<B>> HollowConsumer(B builder) {
         // duplicated with HollowConsumer(...) constructor above. We cannot chain constructor calls because that
         // constructor subscribes to the announcement watcher and we have more setup to do first
@@ -221,6 +227,7 @@ public class HollowConsumer {
      * <p>
      * This is a blocking call.
      */
+    @Impure
     public void triggerRefresh() {
         refreshLock.writeLock().lock();
         try {
@@ -245,6 +252,7 @@ public class HollowConsumer {
      * <p>
      * This is an asynchronous call.
      */
+    @Impure
     public void triggerAsyncRefresh() {
         triggerAsyncRefreshWithDelay(0);
     }
@@ -257,6 +265,7 @@ public class HollowConsumer {
      *
      * @param delayMillis the delay, in millseconds, before triggering the refresh
      */
+    @Impure
     public void triggerAsyncRefreshWithDelay(int delayMillis) {
         final long targetBeginTime = System.currentTimeMillis() + delayMillis;
 
@@ -293,6 +302,7 @@ public class HollowConsumer {
      *
      * @param version the version to refresh to
      */
+    @Impure
     public void triggerRefreshTo(long version) {
         triggerRefreshTo(new VersionInfo(version));
     }
@@ -304,6 +314,7 @@ public class HollowConsumer {
      *
      * @param versionInfo version no., metadata, and pined status for the desired version
      */
+    @Impure
     public void triggerRefreshTo(VersionInfo versionInfo) {
         if (announcementWatcher != null)
             throw new UnsupportedOperationException("Cannot trigger refresh to specified version when a HollowConsumer.AnnouncementWatcher is present");
@@ -320,6 +331,7 @@ public class HollowConsumer {
     /**
      * @return the {@link HollowReadStateEngine} which is holding the underlying hollow dataset.
      */
+    @Impure
     public HollowReadStateEngine getStateEngine() {
         return updater.getStateEngine();
     }
@@ -327,6 +339,7 @@ public class HollowConsumer {
     /**
      * @return the current version of the dataset.  This is the unique identifier of the data's state.
      */
+    @Impure
     public long getCurrentVersionId() {
         return updater.getCurrentVersionId();
     }
@@ -346,6 +359,7 @@ public class HollowConsumer {
      *
      * @return a future which, when completed, has a value set to the data version that was initially loaded
      */
+    @Impure
     public CompletableFuture<Long> getInitialLoad() {
         try {
             triggerAsyncRefresh();
@@ -358,6 +372,7 @@ public class HollowConsumer {
     /**
      * @return the api which wraps the underlying dataset.
      */
+    @Impure
     public HollowAPI getAPI() {
         return updater.getAPI();
     }
@@ -369,6 +384,7 @@ public class HollowConsumer {
      * @param <T> the type of the API
      * @return the API which wraps the underlying dataset
      */
+    @Impure
     public <T extends HollowAPI> T getAPI(Class<T> apiClass) {
         return apiClass.cast(updater.getAPI());
     }
@@ -376,6 +392,7 @@ public class HollowConsumer {
     /**
      * Will force a double snapshot refresh on the next update.
      */
+    @Impure
     public void forceDoubleSnapshotNextUpdate() {
         updater.forceDoubleSnapshotNextUpdate();
     }
@@ -383,6 +400,7 @@ public class HollowConsumer {
     /**
      * Clear any failed transitions from the {@link FailedTransitionTracker}, so that they may be reattempted when an update is triggered.
      */
+    @Impure
     public void clearFailedTransitions() {
         updater.clearFailedTransitions();
     }
@@ -390,6 +408,7 @@ public class HollowConsumer {
     /**
      * @return the number of failed snapshot transitions stored in the {@link FailedTransitionTracker}.
      */
+    @Impure
     public int getNumFailedSnapshotTransitions() {
         return updater.getNumFailedSnapshotTransitions();
     }
@@ -397,6 +416,7 @@ public class HollowConsumer {
     /**
      * @return the number of failed delta transitions stored in the {@link FailedTransitionTracker}.
      */
+    @Impure
     public int getNumFailedDeltaTransitions() {
         return updater.getNumFailedDeltaTransitions();
     }
@@ -407,6 +427,7 @@ public class HollowConsumer {
      * This is useful if performing long-running operations which require a consistent view of the entire dataset in a
      * single data state, to guarantee that updates do not happen while the operation runs.
      */
+    @Impure
     public Lock getRefreshLock() {
         return refreshLock.readLock();
     }
@@ -426,6 +447,7 @@ public class HollowConsumer {
      *
      * @param listener the refresh listener to add
      */
+    @Impure
     public void addRefreshListener(RefreshListener listener) {
         updater.addRefreshListener(listener, this);
     }
@@ -445,6 +467,7 @@ public class HollowConsumer {
      *
      * @param listener the refresh listener to remove
      */
+    @Impure
     public void removeRefreshListener(RefreshListener listener) {
         updater.removeRefreshListener(listener, this);
     }
@@ -452,6 +475,7 @@ public class HollowConsumer {
     /**
      * @return the metrics for this consumer
      */
+    @Pure
     public HollowConsumerMetrics getMetrics() {
         return metrics;
     }
@@ -468,6 +492,7 @@ public class HollowConsumer {
          * @param desiredVersion the desired version
          * @return the blob of the snapshot
          */
+        @Impure
         HollowConsumer.Blob retrieveSnapshotBlob(long desiredVersion);
 
         /**
@@ -475,6 +500,7 @@ public class HollowConsumer {
          * @param currentVersion the current version
          * @return the blob of the delta
          */
+        @Impure
         HollowConsumer.Blob retrieveDeltaBlob(long currentVersion);
 
         /**
@@ -482,12 +508,15 @@ public class HollowConsumer {
          * @param currentVersion the current version
          * @return the blob of the reverse delta
          */
+        @Impure
         HollowConsumer.Blob retrieveReverseDeltaBlob(long currentVersion);
 
+        @Pure
         default Set<String> configuredOptionalBlobParts() {
             return null;
         }
 
+        @Impure
         default HollowConsumer.HeaderBlob retrieveHeaderBlob(long currentVersion) {
             throw new UnsupportedOperationException();
         }
@@ -495,8 +524,10 @@ public class HollowConsumer {
 
     protected interface VersionedBlob {
 
+        @Impure
         InputStream getInputStream() throws IOException;
 
+         @Impure
          default File getFile() throws IOException {
             throw new UnsupportedOperationException();
         }
@@ -506,10 +537,12 @@ public class HollowConsumer {
 
         private final long version;
 
+        @SideEffectFree
         protected HeaderBlob(long version) {
             this.version = version;
         }
 
+        @Pure
         public long getVersion() {
             return this.version;
         }
@@ -540,6 +573,7 @@ public class HollowConsumer {
          *
          * @param toVersion the version
          */
+        @Impure
         public Blob(long toVersion) {
             this(HollowConstants.VERSION_NONE, toVersion);
         }
@@ -550,6 +584,8 @@ public class HollowConsumer {
          * @param fromVersion the version to start the delta from
          * @param toVersion the version to end the delta from
          */
+        @SideEffectFree
+        @Impure
         public Blob(long fromVersion, long toVersion) {
             this.fromVersion = fromVersion;
             this.toVersion = toVersion;
@@ -571,6 +607,7 @@ public class HollowConsumer {
          * @return the input stream to the blob
          * @throws IOException if the input stream to the blob cannot be obtained
          */
+        @Impure
         public abstract InputStream getInputStream() throws IOException;
 
         /**
@@ -582,6 +619,7 @@ public class HollowConsumer {
          * @return OptionalBlobPartInput
          * @throws IOException exception in reading from blob or file
          */
+        @Impure
         public OptionalBlobPartInput getOptionalBlobPartInputs() throws IOException {
             return null;
         }
@@ -595,35 +633,44 @@ public class HollowConsumer {
             REVERSE_DELTA("reversedelta");
 
             private final String type;
+            @Impure
             BlobType(String type) {
                 this.type = type;
             }
 
+            @Pure
             public String getType() {
                 return this.type;
             }
         }
 
+        @Pure
         public boolean isSnapshot() {
             return fromVersion == HollowConstants.VERSION_NONE;
         }
 
+        @Pure
         public boolean isReverseDelta() {
             return toVersion < fromVersion;
         }
 
+        @Pure
+        @Impure
         public boolean isDelta() {
             return !isSnapshot() && !isReverseDelta();
         }
 
+        @Pure
         public long getFromVersion() {
             return fromVersion;
         }
 
+        @Pure
         public long getToVersion() {
             return toVersion;
         }
 
+        @Pure
         public BlobType getBlobType() {
             return blobType;
         }
@@ -644,14 +691,18 @@ public class HollowConsumer {
         Optional<Map<String, String>> announcementMetadata;
         Optional<Boolean> wasAnnounced;
 
+        @Impure
         public VersionInfo(long version) {
             this(version, Optional.empty(), Optional.empty());
         }
 
+        @SideEffectFree
+        @Impure
         public VersionInfo(long version, Optional<Map<String, String>> announcementMetadata, Optional<Boolean> isPinned) {
             this(version, announcementMetadata, isPinned, Optional.empty());
         }
 
+        @SideEffectFree
         public VersionInfo(long version, Optional<Map<String, String>> announcementMetadata, Optional<Boolean> isPinned, Optional<Boolean> wasAnnounced) {
             this.version = version;
             this.announcementMetadata = announcementMetadata;
@@ -659,18 +710,22 @@ public class HollowConsumer {
             this.wasAnnounced = wasAnnounced;
         }
 
+        @Pure
         public long getVersion() {
             return version;
         }
 
+        @Pure
         public Optional<Map<String, String>> getAnnouncementMetadata() {
             return announcementMetadata;
         }
 
+        @Pure
         public Optional<Boolean> isPinned() {
             return isPinned;
         }
 
+        @Pure
         public Optional<Boolean> wasAnnounced() {
             return wasAnnounced;
         }
@@ -691,6 +746,7 @@ public class HollowConsumer {
         /**
          * @return the latest announced version.
          */
+        @Pure
         long getLatestVersion();
 
         /**
@@ -701,11 +757,14 @@ public class HollowConsumer {
          *
          * @param consumer the hollow consumer
          */
+        @Impure
         void subscribeToUpdates(HollowConsumer consumer);
 
         /***
          * @return versionInfo - the latest announced version, its pinned status and announcement metadata.
          */
+        @SideEffectFree
+        @Impure
         default VersionInfo getLatestVersionInfo() {
             return new VersionInfo(getLatestVersion(), Optional.empty(), Optional.empty(), Optional.of(true));
         }
@@ -718,6 +777,7 @@ public class HollowConsumer {
          *  AnnouncementStatus.NOT_ANNOUNCED - no announcement was found for the version
          *  AnnouncementStatus.NOT_SUPPORTED - impl does not support this method
          */
+        @Pure
         default AnnouncementStatus getVersionAnnouncementStatus(long version) {
             return AnnouncementStatus.UNKNOWN;
         }
@@ -734,18 +794,24 @@ public class HollowConsumer {
 
     public interface DoubleSnapshotConfig {
 
+        @Pure
+        @Impure
         boolean allowDoubleSnapshot();
 
+        @Pure
         int maxDeltasBeforeDoubleSnapshot();
 
+        @Pure
         default boolean doubleSnapshotOnSchemaChange() { return false; }
 
         DoubleSnapshotConfig DEFAULT_CONFIG = new DoubleSnapshotConfig() {
+            @Pure
             @Override
             public int maxDeltasBeforeDoubleSnapshot() {
                 return 32;
             }
 
+            @Pure
             @Override
             public boolean allowDoubleSnapshot() {
                 return true;
@@ -759,27 +825,33 @@ public class HollowConsumer {
         // method, any look back snapshots will be discarded if they did not correspond to an announced version, and then
         // the next-highest look back snapshot will be attempted, and so on. This will repeat until an "announced" snapshot
         // is found, or max lookback versions is breached (see {@code announcementVerificationMaxLookback}).
+        @Pure
         boolean announcementVerificationEnabled();
 
         // Specifies how many past snapshot versions can be looked up if announcementVerificationEnabled is true,
         // and an exact snapshot version matching with the update plan desired version could not be retrieved. Multiple
         // lookups may be required in order to retrieve one that corresponds to an announced version.
+        @Pure
         int announcementVerificationMaxLookback();
 
         // Announcemnet watcher impl for verifying that a retrieved blob had a corresponding announcement
+        @Pure
         AnnouncementWatcher announcementWatcher();
 
         UpdatePlanBlobVerifier DEFAULT_INSTANCE = new UpdatePlanBlobVerifier() {
+            @Pure
             @Override
             public boolean announcementVerificationEnabled() {
                 return false;
             }
 
+            @Pure
             @Override
             public int announcementVerificationMaxLookback() {
                 return 1;
             }
 
+            @Pure
             @Override
             public AnnouncementWatcher announcementWatcher() {
                 return null;
@@ -800,14 +872,17 @@ public class HollowConsumer {
          * <p>
          * These reserved copies are backed by the {@link HollowHistory} data structure.
          */
+        @Pure
         boolean enableLongLivedObjectSupport();
 
+        @Pure
         boolean enableExpiredUsageStackTraces();
 
         /**
          * @return if long-lived object support is enabled, the number of milliseconds before the {@link StaleHollowReferenceDetector}
          * will begin flagging usage of stale objects.
          */
+        @Pure
         long gracePeriodMillis();
 
         /**
@@ -817,45 +892,54 @@ public class HollowConsumer {
          * After the grace period + usage detection period have expired, the data from stale references will become inaccessible if
          * dropDataAutomatically() is enabled.
          */
+        @Pure
         long usageDetectionPeriodMillis();
 
         /**
          * @return whether or not to drop data behind stale references after the grace period + usage detection period has elapsed, assuming
          * that no usage was detected during the usage detection period.
          */
+        @Pure
         boolean dropDataAutomatically();
 
         /**
          * @return whether data is dropped even if flagged during the usage detection period.
          */
+        @Pure
         boolean forceDropData();
 
         ObjectLongevityConfig DEFAULT_CONFIG = new ObjectLongevityConfig() {
+            @Pure
             @Override
             public boolean enableLongLivedObjectSupport() {
                 return false;
             }
 
+            @Pure
             @Override
             public boolean dropDataAutomatically() {
                 return false;
             }
 
+            @Pure
             @Override
             public boolean forceDropData() {
                 return false;
             }
 
+            @Pure
             @Override
             public boolean enableExpiredUsageStackTraces() {
                 return false;
             }
 
+            @Pure
             @Override
             public long usageDetectionPeriodMillis() {
                 return 60 * 60 * 1000;
             }
 
+            @Pure
             @Override
             public long gracePeriodMillis() {
                 return 60 * 60 * 1000;
@@ -877,6 +961,7 @@ public class HollowConsumer {
          *
          * @param count the count of stale references
          */
+        @SideEffectFree
         void staleReferenceExistenceDetected(int count);
 
         /**
@@ -888,13 +973,16 @@ public class HollowConsumer {
          *
          * @param count the count of stale references
          */
+        @SideEffectFree
         void staleReferenceUsageDetected(int count);
 
         ObjectLongevityDetector DEFAULT_DETECTOR = new ObjectLongevityDetector() {
+            @SideEffectFree
             @Override
             public void staleReferenceUsageDetected(int count) {
             }
 
+            @SideEffectFree
             @Override
             public void staleReferenceExistenceDetected(int count) {
             }
@@ -913,6 +1001,7 @@ public class HollowConsumer {
          *
          * @param requestedVersionInfo requested version's information comprising version, announcement metadata and its pinned status
          * */
+        @Impure
         default void versionDetected(VersionInfo requestedVersionInfo) {};
 
         /**
@@ -929,6 +1018,7 @@ public class HollowConsumer {
          * @param currentVersion   the current state version
          * @param requestedVersion the version to which the refresh is progressing
          */
+        @Impure
         void refreshStarted(long currentVersion, long requestedVersion);
 
         /**
@@ -946,6 +1036,7 @@ public class HollowConsumer {
          * @param version     the current state version
          * @throws Exception thrown if an error occurs in processing
          */
+        @Impure
         void snapshotUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception;
 
         /**
@@ -965,6 +1056,7 @@ public class HollowConsumer {
          * @param version     the current state version
          * @throws Exception thrown if an error occurs in processing
          */
+        @Impure
         void deltaUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception;
 
         /**
@@ -972,6 +1064,7 @@ public class HollowConsumer {
          *
          * @param transition The transition which was applied.
          */
+        @Impure
         void blobLoaded(HollowConsumer.Blob transition);
 
         /**
@@ -981,6 +1074,7 @@ public class HollowConsumer {
          * @param afterVersion     - The version when the refresh completed
          * @param requestedVersion - The specific version which was requested
          */
+        @Impure
         void refreshSuccessful(long beforeVersion, long afterVersion, long requestedVersion);
 
 
@@ -992,6 +1086,7 @@ public class HollowConsumer {
          * @param requestedVersion - The specific version which was requested
          * @param failureCause     - The Exception which caused the failure.
          */
+        @Impure
         void refreshFailed(long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause);
 
     }
@@ -1009,6 +1104,7 @@ public class HollowConsumer {
          * @param version     the current state version
          * @throws Exception thrown if an error occurs in processing
          */
+        @SideEffectFree
         void snapshotApplied(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception;
 
         /**
@@ -1023,6 +1119,7 @@ public class HollowConsumer {
          * @param version     the current state version
          * @throws Exception thrown if an error occurs in processing
          */
+        @SideEffectFree
         void deltaApplied(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception;
 
         /**
@@ -1036,6 +1133,7 @@ public class HollowConsumer {
          * @param isSnapshotPlan Indicates whether the refresh involves a snapshot transition
          * @param transitionSequence List of transitions comprising the refresh
          */
+        @Impure
         default void transitionsPlanned(long beforeVersion, long desiredVersion, boolean isSnapshotPlan, List<HollowConsumer.Blob.BlobType> transitionSequence) {}
     }
 
@@ -1054,63 +1152,75 @@ public class HollowConsumer {
          * Called before the refresh listener is added.
          * @param c the consumer the associated reference listener is being added to
          */
+        @Impure
         void onBeforeAddition(HollowConsumer c);
 
         /**
          * Called after the refresh listener is removed.
          * @param c the consumer the associated reference listener is being removed from
          */
+        @Impure
         void onAfterRemoval(HollowConsumer c);
     }
 
 
     public static class AbstractRefreshListener implements TransitionAwareRefreshListener {
+        @Impure
         @Override
         public void refreshStarted(long currentVersion, long requestedVersion) {
             // no-op
         }
 
+        @Impure
         @Override
         public void transitionsPlanned(long beforeVersion, long desiredVersion, boolean isSnapshotPlan, List<HollowConsumer.Blob.BlobType> transitionSequence) {
             // no-op
         }
 
+        @Impure
         @Override
         public void snapshotUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception {
             // no-op
         }
 
+        @Impure
         @Override
         public void deltaUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception {
             // no-op
         }
 
+        @Impure
         @Override
         public void blobLoaded(Blob transition) {
             // no-op
         }
 
+        @Impure
         @Override
         public void refreshSuccessful(long beforeVersion, long afterVersion, long requestedVersion) {
             // no-op
         }
 
+        @Impure
         @Override
         public void refreshFailed(long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause) {
             // no-op
         }
 
+        @SideEffectFree
         @Override
         public void snapshotApplied(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception {
             // no-op
         }
 
+        @SideEffectFree
         @Override
         public void deltaApplied(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception {
             // no-op
         }
     }
 
+    @Impure
     public static <B extends HollowConsumer.Builder<B>> HollowConsumer.Builder<B> newHollowConsumer() {
         return new Builder<>();
     }
@@ -1118,6 +1228,7 @@ public class HollowConsumer {
     /**
      * Convenience method for {@code .newHollowConsumer().withBlobRetriever(...)}
      */
+    @Impure
     public static HollowConsumer.Builder<?> withBlobRetriever(HollowConsumer.BlobRetriever blobRetriever) {
         HollowConsumer.Builder<?> builder = new Builder<>();
         return builder.withBlobRetriever(blobRetriever);
@@ -1126,6 +1237,7 @@ public class HollowConsumer {
     /**
      * @deprecated use {@link #newHollowConsumer()}, i.e. {@code newHollowConsumer().withLocalBlobStore(...)}
      */
+    @Impure
     public static HollowConsumer.Builder<?> withLocalBlobStore(File localBlobStoreDir) {
         HollowConsumer.Builder<?> builder = new Builder<>();
         return builder.withLocalBlobStore(localBlobStoreDir);
@@ -1157,6 +1269,7 @@ public class HollowConsumer {
         protected HollowMetricsCollector<HollowConsumerMetrics> metricsCollector;
         protected boolean skipTypeShardUpdateWithNoAdditions = false;
 
+        @Impure
         public B withBlobRetriever(HollowConsumer.BlobRetriever blobRetriever) {
             this.blobRetriever = blobRetriever;
             return (B)this;
@@ -1167,6 +1280,7 @@ public class HollowConsumer {
          * is set to {@code false}.
          * @see #withLocalBlobStore(File, boolean)
          */
+        @Impure
         public B withLocalBlobStore(File localBlobStoreDir) {
             this.localBlobStoreDir = localBlobStoreDir;
             return (B)this;
@@ -1175,6 +1289,7 @@ public class HollowConsumer {
         /**
          * @see #withLocalBlobStore(File)
          */
+        @Impure
         public B withLocalBlobStore(String localBlobStoreDir) {
             return withLocalBlobStore(new File(localBlobStoreDir));
         }
@@ -1199,6 +1314,7 @@ public class HollowConsumer {
          *   AND it has cached a snapshot of an older version
          *   THEN Hollow will use the older cached snapshot instead of fetching the desired snapshot
          */
+        @Impure
         public B withLocalBlobStore(File localBlobStoreDir, boolean useExistingStaleSnapshot) {
             this.localBlobStoreDir = localBlobStoreDir;
             this.useExistingStaleSnapshot = useExistingStaleSnapshot;
@@ -1208,20 +1324,24 @@ public class HollowConsumer {
         /**
          * @see #withLocalBlobStore(File, boolean)
          */
+        @Impure
         public B withLocalBlobStore(String localBlobStoreDir, boolean useExistingStaleSnapshot) {
             return withLocalBlobStore(new File(localBlobStoreDir), useExistingStaleSnapshot);
         }
 
+        @Impure
         public B withAnnouncementWatcher(HollowConsumer.AnnouncementWatcher announcementWatcher) {
             this.announcementWatcher = announcementWatcher;
             return (B)this;
         }
 
+        @Impure
         public B withRefreshListener(HollowConsumer.RefreshListener refreshListener) {
             refreshListeners.add(refreshListener);
             return (B)this;
         }
 
+        @Impure
         public B withRefreshListeners(HollowConsumer.RefreshListener... refreshListeners) {
             Collections.addAll(this.refreshListeners, refreshListeners);
             return (B)this;
@@ -1261,6 +1381,7 @@ public class HollowConsumer {
          *
          * @see <a href="https://hollow.how/advanced-topics/#caching">https://hollow.how/advanced-topics/#caching</a>
          */
+        @Impure
         public B withGeneratedAPIClass(Class<? extends HollowAPI> generatedAPIClass,
                                        String cachedType,
                                        String... additionalCachedTypes) {
@@ -1292,6 +1413,7 @@ public class HollowConsumer {
          * @return this builder
          * @throws IllegalArgumentException if provided API class is {@code HollowAPI} instead of a subclass
          */
+        @Impure
         public B withGeneratedAPIClass(Class<? extends HollowAPI> generatedAPIClass) {
             if (HollowAPI.class.equals(generatedAPIClass))
                 throw new IllegalArgumentException("must provide a code generated API class");
@@ -1317,6 +1439,7 @@ public class HollowConsumer {
          * @see #withTypeFilter(UnaryOperator)
          * @deprecated use {@link #withTypeFilter(TypeFilter)} or {@link #withTypeFilter(UnaryOperator)}
          */
+        @Impure
         @Deprecated
         public B withFilterConfig(HollowFilterConfig filterConfig) {
             this.typeFilter = filterConfig;
@@ -1334,6 +1457,7 @@ public class HollowConsumer {
          * @see #withTypeFilter(UnaryOperator)
          * @see #withFilterConfig(HollowFilterConfig)
          */
+        @Impure
         public B withTypeFilter(TypeFilter typeFilter) {
             this.typeFilter = typeFilter;
             return (B)this;
@@ -1362,31 +1486,37 @@ public class HollowConsumer {
          * @see #withTypeFilter(TypeFilter)
          * @see #withFilterConfig(HollowFilterConfig)
          */
+        @Impure
         public B withTypeFilter(UnaryOperator<TypeFilter.Builder> op) {
             TypeFilter.Builder builder = op.apply(TypeFilter.newTypeFilter());
             return withTypeFilter(builder.build());
         }
 
+        @Impure
         public B withDoubleSnapshotConfig(HollowConsumer.DoubleSnapshotConfig doubleSnapshotConfig) {
             this.doubleSnapshotConfig = doubleSnapshotConfig;
             return (B)this;
         }
 
+        @Impure
         public B withUpdatePlanVerifier(UpdatePlanBlobVerifier updatePlanBlobVerifier) {
             this.updatePlanBlobVerifier = updatePlanBlobVerifier;
             return (B)this;
         }
 
+        @Impure
         public B withObjectLongevityConfig(HollowConsumer.ObjectLongevityConfig objectLongevityConfig) {
             this.objectLongevityConfig = objectLongevityConfig;
             return (B)this;
         }
 
+        @Impure
         public B withObjectLongevityDetector(HollowConsumer.ObjectLongevityDetector objectLongevityDetector) {
             this.objectLongevityDetector = objectLongevityDetector;
             return (B)this;
         }
 
+        @Impure
         public B withRefreshExecutor(Executor refreshExecutor) {
             this.refreshExecutor = refreshExecutor;
             return (B)this;
@@ -1400,11 +1530,13 @@ public class HollowConsumer {
          * implementation is not suitable for production use given its limited functionality (no delta refreshes, no
          * un-mmap of previous version, feature gaps like indexes continue to live on heap) and limited production hardening.
          */
+        @Impure
         public B withMemoryMode(MemoryMode memoryMode) {
             this.memoryMode = memoryMode;
             return (B)this;
         }
 
+        @Impure
         public B withMetricsCollector(HollowMetricsCollector<HollowConsumerMetrics> metricsCollector) {
             this.metricsCollector = metricsCollector;
             return (B)this;
@@ -1413,17 +1545,20 @@ public class HollowConsumer {
         /**
          * Experimental: When there are no updates for a type shard in a delta, skip updating that type shard.
          */
+        @Impure
         public B withSkipTypeShardUpdateWithNoAdditions() {
             this.skipTypeShardUpdateWithNoAdditions = true;
             return (B)this;
         }
 
+        @Impure
         @Deprecated
         public B withHashCodeFinder(HollowObjectHashCodeFinder hashCodeFinder) {
             this.hashCodeFinder = hashCodeFinder;
             return (B)this;
         }
 
+        @Impure
         protected void checkArguments() {
             if (filterConfig != null && typeFilter != null) {
                 // this should only be possible in custom subclasses that override #withFilterConfig(...)
@@ -1454,6 +1589,7 @@ public class HollowConsumer {
             }
         }
 
+        @Impure
         public HollowConsumer build() {
             checkArguments();
             if (filterConfig != null) {

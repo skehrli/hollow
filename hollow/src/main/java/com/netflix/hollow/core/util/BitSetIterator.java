@@ -15,6 +15,10 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.BitSet;
 import java.util.Iterator;
 
@@ -27,10 +31,13 @@ public class BitSetIterator implements Iterator<Integer> {
     private int next = -1;
     private int count = 0;
 
+    @SideEffectFree
+    @Impure
     public BitSetIterator(BitSet bitSet) {
         this(bitSet, null, null);
     }
 
+    @SideEffectFree
     public BitSetIterator(BitSet bitSet, Integer start, Integer limit) {
         this.bitset = bitSet;
         this.limit = limit == null ? Integer.MAX_VALUE : limit.intValue();
@@ -47,13 +54,15 @@ public class BitSetIterator implements Iterator<Integer> {
         }
     }
 
+    @Pure
     @Override
-    public boolean hasNext() {
+    public boolean hasNext(@NotOwningCollection BitSetIterator this) {
         return next != -1;
     }
 
+    @Impure
     @Override
-    public Integer next() {
+    public Integer next(@NotOwningCollection BitSetIterator this) {
         if (!hasNext())
             return null;
 
@@ -65,6 +74,7 @@ public class BitSetIterator implements Iterator<Integer> {
         return returnValue;
     }
 
+    @SideEffectFree
     @Override
     public void remove() {
         throw new UnsupportedOperationException("remove");

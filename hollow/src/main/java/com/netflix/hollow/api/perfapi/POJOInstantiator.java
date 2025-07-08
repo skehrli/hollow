@@ -15,10 +15,12 @@
  *
  */
 package com.netflix.hollow.api.perfapi;
+import org.checkerframework.dataflow.qual.Pure;
 
 @FunctionalInterface
 public interface POJOInstantiator<T> {
     
+    @Pure
     T instantiate(long ref);
 
 }

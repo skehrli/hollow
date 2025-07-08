@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen.perfapi;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.codegen.HollowCodeGenerationUtils;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
@@ -27,12 +29,14 @@ class HollowObjectTypePerfAPIClassGenerator {
     private final String packageName;
     private final Set<String> checkFieldExistsMethods;
 
+    @SideEffectFree
     public HollowObjectTypePerfAPIClassGenerator(HollowObjectSchema schema, String packageName, Set<String> checkFieldExistsMethods) {
         this.schema = schema;
         this.packageName = packageName;
         this.checkFieldExistsMethods = checkFieldExistsMethods;
     }
 
+    @Impure
     public String generate() {
         StringBuilder builder = new StringBuilder();
 
@@ -71,6 +75,7 @@ class HollowObjectTypePerfAPIClassGenerator {
         return builder.toString();
     }
 
+    @Impure
     public void appendFieldMethod(StringBuilder builder, FieldType fieldType, String fieldName, int fieldIdx, String referencedType) {
         String type = fieldType.name();
         if(fieldType == FieldType.REFERENCE)

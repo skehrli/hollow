@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.listener.HollowProducerEventListener;
 
@@ -33,6 +34,7 @@ public interface ValidatorListener extends HollowProducerEventListener {
      *
      * @return the name
      */
+    @Impure
     String getName();
 
     /**
@@ -46,5 +48,6 @@ public interface ValidatorListener extends HollowProducerEventListener {
      * @param readState the read state.
      * @return the validation result
      */
+    @Impure
     ValidationResult onValidate(HollowProducer.ReadState readState);
 }

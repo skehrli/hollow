@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.objects.provider;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
 
@@ -25,8 +26,10 @@ import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
  */
 public abstract class HollowFactory<T> {
 
+    @Impure
     public abstract T newHollowObject(HollowTypeDataAccess dataAccess, HollowTypeAPI typeAPI, int ordinal);
 
+    @Impure
     public T newCachedHollowObject(HollowTypeDataAccess dataAccess, HollowTypeAPI typeAPI, int ordinal) {
         return newHollowObject(dataAccess, typeAPI, ordinal);
     }

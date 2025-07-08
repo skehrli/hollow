@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.type;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.api.custom.HollowObjectTypeAPI;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
@@ -25,6 +27,7 @@ public class IntegerTypeAPI extends HollowObjectTypeAPI {
 
     private final IntegerDelegateLookupImpl delegateLookupImpl;
 
+    @Impure
     public IntegerTypeAPI(HollowAPI api, HollowObjectTypeDataAccess typeDataAccess) {
         super(api, typeDataAccess, new String[] {
             "value"
@@ -32,12 +35,14 @@ public class IntegerTypeAPI extends HollowObjectTypeAPI {
         this.delegateLookupImpl = new IntegerDelegateLookupImpl(this);
     }
 
+    @Impure
     public int getValue(int ordinal) {
         if(fieldIndex[0] == -1)
             return missingDataHandler().handleInt("Integer", ordinal, "value");
         return getTypeDataAccess().readInt(ordinal, fieldIndex[0]);
     }
 
+    @Impure
     public Integer getValueBoxed(int ordinal) {
         int i;
         if(fieldIndex[0] == -1) {
@@ -51,6 +56,7 @@ public class IntegerTypeAPI extends HollowObjectTypeAPI {
         return Integer.valueOf(i);
     }
 
+    @Pure
     public IntegerDelegateLookupImpl getDelegateLookupImpl() {
         return delegateLookupImpl;
     }

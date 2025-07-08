@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.consumer.fs;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -51,6 +53,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
      * @param blobStorePath The directory from which to retrieve blobs
      * @since 2.12.0
      */
+    @Impure
     @SuppressWarnings("unused")
     public HollowFilesystemBlobRetriever(Path blobStorePath) {
         this(blobStorePath, null, false);
@@ -66,6 +69,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
      *                               available on the filesystem.
      * @since 2.12.0
      */
+    @Impure
     public HollowFilesystemBlobRetriever(Path blobStorePath, HollowConsumer.BlobRetriever fallbackBlobRetriever) {
         this(blobStorePath, fallbackBlobRetriever, false);
     }
@@ -82,6 +86,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
      *                               blob present for a version older than the desired version then that snapshot blob is
      *                               returned and the fallback blob retriever (if present) is not queried.
      */
+    @Impure
     public HollowFilesystemBlobRetriever(Path blobStorePath, HollowConsumer.BlobRetriever fallbackBlobRetriever, boolean useExistingStaleSnapshot) {
         this.blobStorePath = blobStorePath;
         this.fallbackBlobRetriever = fallbackBlobRetriever;
@@ -99,6 +104,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
      * @param blobStorePath The directory from which to retrieve blobs
      * @since 2.12.0
      */
+    @Impure
     public HollowFilesystemBlobRetriever(Path blobStorePath, Set<String> optionalBlobParts) {
         this.blobStorePath = blobStorePath;
         this.optionalBlobParts = optionalBlobParts;
@@ -108,6 +114,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         ensurePathExists(blobStorePath);
     }
 
+    @Impure
     private void ensurePathExists(Path blobStorePath) {
         try {
             if(!Files.exists(this.blobStorePath)){
@@ -118,6 +125,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         }
     }
 
+    @Impure
     @Override
     public HollowConsumer.HeaderBlob retrieveHeaderBlob(long desiredVersion) {
         Path exactPath = blobStorePath.resolve("header-" + desiredVersion);
@@ -155,6 +163,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         return filesystemBlob;
     }
 
+    @Impure
     @Override
     public HollowConsumer.Blob retrieveSnapshotBlob(long desiredVersion) {
         Path exactPath = blobStorePath.resolve("snapshot-" + desiredVersion);
@@ -201,6 +210,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         return filesystemBlob;
     }
 
+    @Impure
     private HollowConsumer.Blob filesystemBlob(HollowConsumer.Blob.BlobType type, long currentVersion, long destinationVersion) {
         Path path;
         Map<String, Path> optionalPartPaths = null;
@@ -240,6 +250,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         }
     }
 
+    @Impure
     @Override
     public HollowConsumer.Blob retrieveDeltaBlob(long currentVersion) {
 
@@ -265,6 +276,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         return null;
     }
 
+    @Impure
     @Override
     public HollowConsumer.Blob retrieveReverseDeltaBlob(long currentVersion) {
         try(DirectoryStream<Path> directoryStream = Files.newDirectoryStream(blobStorePath)) {
@@ -289,6 +301,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         return null;
     }
 
+    @SideEffectFree
     private boolean allRequestedPartsExist(HollowConsumer.Blob.BlobType type, long currentVersion, long destinationVersion) {
         if(optionalBlobParts == null || optionalBlobParts.isEmpty())
             return true;
@@ -317,16 +330,20 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
     private static class FilesystemHeaderBlob extends HollowConsumer.HeaderBlob {
         private final Path path;
 
+        @SideEffectFree
+        @Impure
         protected FilesystemHeaderBlob(Path headerPath, long version) {
             super(version);
             this.path = headerPath;
         }
 
+        @Impure
         @Override
         public InputStream getInputStream() throws IOException {
             return new BufferedInputStream(Files.newInputStream(path));
         }
 
+        @SideEffectFree
         @Override
         public File getFile() throws IOException {
             return path.toFile();
@@ -338,6 +355,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         private final Path path;
         private final Map<String, Path> optionalPartPaths;
 
+        @Impure
         @Deprecated
         FilesystemBlob(File snapshotFile, long toVersion) {
             this(snapshotFile.toPath(), toVersion);
@@ -346,6 +364,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         /**
          * @since 2.12.0
          */
+        @Impure
         FilesystemBlob(Path snapshotPath, long toVersion) {
             this(snapshotPath, toVersion, null);
         }
@@ -353,27 +372,32 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         /**
          * @since 2.12.0
          */
+        @Impure
         FilesystemBlob(Path deltaPath, long fromVersion, long toVersion) {
             this(deltaPath, fromVersion, toVersion, null);
         }
 
+        @Impure
         FilesystemBlob(Path snapshotPath, long toVersion, Map<String, Path> optionalPartPaths) {
             super(toVersion);
             this.path = snapshotPath;
             this.optionalPartPaths = optionalPartPaths;
         }
 
+        @Impure
         FilesystemBlob(Path deltaPath, long fromVersion, long toVersion, Map<String, Path> optionalPartPaths) {
             super(fromVersion, toVersion);
             this.path = deltaPath;
             this.optionalPartPaths = optionalPartPaths;
         }
 
+        @Impure
         @Override
         public InputStream getInputStream() throws IOException {
             return new BufferedInputStream(Files.newInputStream(path));
         }
 
+        @Impure
         @Override
         public OptionalBlobPartInput getOptionalBlobPartInputs() throws IOException {
             if(optionalPartPaths == null || optionalPartPaths.isEmpty())
@@ -386,6 +410,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
             return input;
         }
 
+        @SideEffectFree
         @Override
         public File getFile() throws IOException {
             return path.toFile();
@@ -397,12 +422,15 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         private final HollowConsumer.HeaderBlob remoteHeaderBlob;
         private final Path path;
 
+        @SideEffectFree
+        @Impure
         protected HeaderBlobFromBackupToFilesystem(HollowConsumer.HeaderBlob remoteHeaderBlob, Path destinationPath) {
             super(remoteHeaderBlob.getVersion());
             this.path = destinationPath;
             this.remoteHeaderBlob = remoteHeaderBlob;
         }
 
+        @Impure
         @Override
         public InputStream getInputStream() throws IOException {
 
@@ -421,6 +449,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
             return new BufferedInputStream(Files.newInputStream(path));
         }
 
+        @Impure
         @Override
         public File getFile() throws IOException {
             Path tempPath = path.resolveSibling(path.getName(path.getNameCount()-1) + "-" + UUID.randomUUID().toString());
@@ -444,12 +473,14 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         private final HollowConsumer.Blob remoteBlob;
         private final Path path;
 
+        @Impure
         BlobForBackupToFilesystem(HollowConsumer.Blob remoteBlob, Path destinationPath) {
             super(remoteBlob.getFromVersion(), remoteBlob.getToVersion());
             this.path = destinationPath;
             this.remoteBlob = remoteBlob;
         }
 
+        @Impure
         @Override
         public InputStream getInputStream() throws IOException {
 
@@ -469,6 +500,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
         }
 
 
+        @Impure
         @Override
         public File getFile() throws IOException {
             Path tempPath = path.resolveSibling(path.getName(path.getNameCount()-1) + "-" + UUID.randomUUID().toString());
@@ -486,6 +518,7 @@ public class HollowFilesystemBlobRetriever implements HollowConsumer.BlobRetriev
             return path.toFile();
         }
 
+        @Impure
         @Override
         public OptionalBlobPartInput getOptionalBlobPartInputs() throws IOException {
             OptionalBlobPartInput remoteOptionalParts = remoteBlob.getOptionalBlobPartInputs();

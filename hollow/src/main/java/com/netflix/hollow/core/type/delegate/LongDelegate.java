@@ -16,16 +16,21 @@
  */
 package com.netflix.hollow.core.type.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.delegate.HollowObjectDelegate;
 import com.netflix.hollow.core.type.LongTypeAPI;
 
 @SuppressWarnings("all")
 public interface LongDelegate extends HollowObjectDelegate {
 
+    @Impure
     public long getValue(int ordinal);
 
+    @Impure
     public Long getValueBoxed(int ordinal);
 
+    @Pure
     @Override
     public LongTypeAPI getTypeAPI();
 

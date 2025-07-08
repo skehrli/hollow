@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.sampling;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.filter.HollowFilterConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ public class HollowObjectCreationSampler implements HollowSampler {
     private final long creationSamples[];
     private final HollowSamplingDirector typeDirectors[];
 
+    @Impure
     public HollowObjectCreationSampler(String... typeNames) {
         this.typeNames = typeNames;
         this.creationSamples = new long[typeNames.length];
@@ -39,16 +42,19 @@ public class HollowObjectCreationSampler implements HollowSampler {
         this.typeDirectors = typeDirectors;
     }
 
+    @Impure
     public void recordCreation(int index) {
         if(typeDirectors[index].shouldRecord())
             creationSamples[index]++;
     }
 
+    @Impure
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         Arrays.fill(typeDirectors, director);
     }
 
+    @Impure
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         for(int i=0;i<typeNames.length;i++) {
@@ -57,12 +63,14 @@ public class HollowObjectCreationSampler implements HollowSampler {
         }
     }
     
+    @Impure
     @Override
     public void setUpdateThread(Thread t) {
         for(int i=0;i<typeDirectors.length;i++)
             typeDirectors[i].setUpdateThread(t);
     }
 
+    @Pure
     @Override
     public boolean hasSampleResults() {
         for(int i=0;i<creationSamples.length;i++)
@@ -71,6 +79,7 @@ public class HollowObjectCreationSampler implements HollowSampler {
         return false;
     }
 
+    @Impure
     @Override
     public Collection<SampleResult> getSampleResults() {
         List<SampleResult> results = new ArrayList<SampleResult>(typeNames.length);
@@ -84,6 +93,7 @@ public class HollowObjectCreationSampler implements HollowSampler {
         return results;
     }
 
+    @Impure
     @Override
     public void reset() {
         Arrays.fill(creationSamples, 0L);

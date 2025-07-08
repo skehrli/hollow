@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.combine;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.index.HollowPrimaryKeyIndex;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -42,6 +43,7 @@ public class HollowCombinerExcludePrimaryKeysCopyDirector implements HollowCombi
     private final HollowCombinerCopyDirector baseDirector;
     private final Map<HollowTypeReadState, BitSet> excludedOrdinals;
     
+    @Impure
     public HollowCombinerExcludePrimaryKeysCopyDirector() {
         this(HollowCombinerCopyDirector.DEFAULT_DIRECTOR);
     }
@@ -49,6 +51,7 @@ public class HollowCombinerExcludePrimaryKeysCopyDirector implements HollowCombi
     /**
      * @param baseDirector if primary keys are not matched, delegate to the provided director for the answer to {@link #shouldCopy(HollowTypeReadState, int) }
      */
+    @Impure
     public HollowCombinerExcludePrimaryKeysCopyDirector(HollowCombinerCopyDirector baseDirector) {
         this.excludedOrdinals = new HashMap<HollowTypeReadState, BitSet>();
         this.baseDirector = baseDirector;
@@ -60,6 +63,7 @@ public class HollowCombinerExcludePrimaryKeysCopyDirector implements HollowCombi
      * @param idx the index in which to query for the key 
      * @param key the key
      */
+    @Impure
     public void excludeKey(HollowPrimaryKeyIndex idx, Object... key) {
         int excludeOrdinal = idx.getMatchingOrdinal(key);
         
@@ -78,6 +82,7 @@ public class HollowCombinerExcludePrimaryKeysCopyDirector implements HollowCombi
     /**
      * Exclude any objects which are referenced by excluded objects.
      */
+    @Impure
     public void excludeReferencedObjects() {
         Set<HollowReadStateEngine> stateEngines = new HashSet<HollowReadStateEngine>();
         for(Map.Entry<HollowTypeReadState, BitSet> entry : excludedOrdinals.entrySet())
@@ -100,6 +105,7 @@ public class HollowCombinerExcludePrimaryKeysCopyDirector implements HollowCombi
         }
     }
 
+    @Impure
     @Override
     public boolean shouldCopy(HollowTypeReadState typeState, int ordinal) {
         BitSet bitSet = excludedOrdinals.get(typeState);

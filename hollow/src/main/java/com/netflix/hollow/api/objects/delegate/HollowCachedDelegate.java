@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.api.objects.provider.HollowObjectCacheProvider;
 
@@ -30,6 +31,7 @@ public interface HollowCachedDelegate extends HollowRecordDelegate {
      * Called by the {@link HollowObjectCacheProvider} when the api is updated.
      * @param typeAPI the type api that is updated
      */
+    @Impure
     void updateTypeAPI(HollowTypeAPI typeAPI);
 
 }

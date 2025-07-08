@@ -1,5 +1,6 @@
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 
@@ -16,6 +17,7 @@ public class HollowSchemaUtil {
      *
      * @return a set of top-level type names
      */
+    @Impure
     public static Set<String> getTopLevelTypes(HollowReadStateEngine readState) {
         List<HollowSchema> schemas = readState.getSchemas();
         Set<String> topLevelTypes = new HashSet<>(readState.getAllTypes());

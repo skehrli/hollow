@@ -15,6 +15,9 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.nio.file.Path;
 
 public class CodeGeneratorConfig {
@@ -34,27 +37,33 @@ public class CodeGeneratorConfig {
     private boolean useMetaInfo = false;
     private Path metaInfoPath;
 
+    @Impure
     public void setMetaInfoPath(Path metaInfoPath) {
         this.useMetaInfo = true;
         this.metaInfoPath = metaInfoPath;
     }
 
+    @Pure
     public boolean isUseMetaInfo() {
         return useMetaInfo;
     }
 
+    @Pure
     public Path getMetaInfoPath() {
         return metaInfoPath;
     }
 
+    @SideEffectFree
     public CodeGeneratorConfig() {}
 
+    @SideEffectFree
     public CodeGeneratorConfig(String classPostfix, String getterPrefix) {
         this.classPostfix = classPostfix;
         this.getterPrefix = getterPrefix;
     }
 
     // Make it easier to automatically use defaults for next major version
+    @Impure
     public void initWithNextMajorVersionDefaults_V3() {
         usePackageGrouping = true;
         useBooleanFieldErgonomics = true;
@@ -64,91 +73,113 @@ public class CodeGeneratorConfig {
         useVerboseToString = true;
     }
 
+    @Pure
     public String getClassPostfix() {
         return classPostfix;
     }
 
+    @Impure
     public void setClassPostfix(String classPostfix) {
         this.classPostfix = classPostfix;
     }
 
+    @Pure
     public String getGetterPrefix() {
         return getterPrefix;
     }
 
+    @Impure
     public void setGetterPrefix(String getterPrefix) {
         this.getterPrefix = getterPrefix;
     }
 
+    @Pure
     public boolean isUsePackageGrouping() {
         return usePackageGrouping;
     }
 
+    @Impure
     public void setUsePackageGrouping(boolean usePackageGrouping) {
         this.usePackageGrouping = usePackageGrouping;
     }
 
+    @Pure
     public boolean isUseAggressiveSubstitutions() {
         return useAggressiveSubstitutions;
     }
 
+    @Impure
     public void setUseAggressiveSubstitutions(boolean useAggressiveSubstitutions) {
         this.useAggressiveSubstitutions = useAggressiveSubstitutions;
     }
 
+    @Pure
     public boolean isUseBooleanFieldErgonomics() {
         return useBooleanFieldErgonomics;
     }
 
+    @Impure
     public void setUseBooleanFieldErgonomics(boolean useBooleanFieldErgonomics) {
         this.useBooleanFieldErgonomics = useBooleanFieldErgonomics;
     }
 
+    @Pure
     public boolean isReservePrimaryKeyIndexForTypeWithPrimaryKey() {
         return reservePrimaryKeyIndexForTypeWithPrimaryKey;
     }
 
+    @Impure
     public void setReservePrimaryKeyIndexForTypeWithPrimaryKey(boolean reservePrimaryKeyIndexForTypeWithPrimaryKey) {
         this.reservePrimaryKeyIndexForTypeWithPrimaryKey = reservePrimaryKeyIndexForTypeWithPrimaryKey;
     }
 
+    @Pure
     public boolean isListenToDataRefresh() {
         return !reservePrimaryKeyIndexForTypeWithPrimaryKey; // NOTE: to be backwards compatible
     }
 
+    @Pure
     public boolean isUseHollowPrimitiveTypes() {
         return useHollowPrimitiveTypes;
     }
 
+    @Impure
     public void setUseHollowPrimitiveTypes(boolean useHollowPrimitiveTypes) {
         this.useHollowPrimitiveTypes = useHollowPrimitiveTypes;
     }
 
+    @Pure
     public boolean isRestrictApiToFieldType() {
         return restrictApiToFieldType;
     }
 
+    @Impure
     public void setRestrictApiToFieldType(boolean restrictApiToFieldType) {
         this.restrictApiToFieldType = restrictApiToFieldType;
     }
 
+    @Pure
     public boolean isUseVerboseToString() {
         return useVerboseToString;
     }
 
+    @Impure
     public void setUseVerboseToString(boolean useVerboseToString) {
         this.useVerboseToString = useVerboseToString;
     }
 
+    @Pure
     public boolean isUseGeneratedAnnotation() {
         return useGeneratedAnnotation;
     }
 
+    @Impure
     public void setUseGeneratedAnnotation(boolean useGeneratedAnnotation) {
         this.useGeneratedAnnotation = useGeneratedAnnotation;
     }
 
 
+    @Pure
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -168,6 +199,7 @@ public class CodeGeneratorConfig {
         return result;
     }
 
+    @Pure
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -213,6 +245,7 @@ public class CodeGeneratorConfig {
         return true;
     }
 
+    @Impure
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

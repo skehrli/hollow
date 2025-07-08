@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.consumer.metrics;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.HollowConstants.VERSION_NONE;
 import static com.netflix.hollow.core.HollowStateEngine.HEADER_TAG_DELTA_CHAIN_VERSION_COUNTER;
 import static com.netflix.hollow.core.HollowStateEngine.HEADER_TAG_METRIC_ANNOUNCEMENT;
@@ -62,6 +64,7 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
 
     private final Map<Long, Long> cycleVersionDeltaCounters; // delta chain version counter for each cycle version
 
+    @Impure
     public AbstractRefreshMetricsListener() {
         lastRefreshTimeNanoOptional = OptionalLong.empty();
         consecutiveFailures = 0l;
@@ -71,6 +74,7 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
         cycleVersionDeltaCounters = new HashMap<>();
     }
 
+    @Impure
     public void refreshStarted(long currentVersion, long requestedVersion) {
         updatePlanDetails = new ConsumerRefreshMetrics.UpdatePlanDetails();
         refreshStartTimeNano = System.nanoTime();
@@ -82,6 +86,7 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
         cycleVersionDeltaCounters.clear();
     }
 
+    @Impure
     @Override
     public void versionDetected(HollowConsumer.VersionInfo requestedVersionInfo) {
         announcementTimestamps.clear(); // clear map to avoid accumulation over time
@@ -114,6 +119,7 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
      * @param isSnapshotPlan Indicates whether the refresh involves a snapshot transition
      * @param transitionSequence List of transitions comprising the refresh
      */
+    @Impure
     @Override
     public void transitionsPlanned(long beforeVersion, long desiredVersion, boolean isSnapshotPlan, List<HollowConsumer.Blob.BlobType> transitionSequence) {
         updatePlanDetails.beforeVersion = beforeVersion;
@@ -127,6 +133,7 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
         refreshMetricsBuilder.setOverallRefreshType(overallRefreshType);
     }
 
+    @Impure
     @Override
     public void blobLoaded(HollowConsumer.Blob transition) {
         updatePlanDetails.numSuccessfulTransitions ++;
@@ -139,6 +146,8 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
      * that there was an exception, and continuing with the consumer refresh.
      * @param refreshMetrics Consumer refresh metrics being reported
      */
+    @SideEffectFree
+    @Impure
     private final void noFailRefreshEndMetricsReporting(ConsumerRefreshMetrics refreshMetrics) {
         try {
             refreshEndMetricsReporting(refreshMetrics);
@@ -149,6 +158,7 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
         }
     }
 
+    @Impure
     @Override
     public void refreshSuccessful(long beforeVersion, long afterVersion, long requestedVersion) {
         long refreshEndTimeNano = System.nanoTime();
@@ -177,6 +187,7 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
         noFailRefreshEndMetricsReporting(refreshMetricsBuilder.build());
     }
 
+    @Impure
     @Override
     public void refreshFailed(long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause) {
         long  refreshEndTimeNano = System.nanoTime();
@@ -202,12 +213,14 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
         noFailRefreshEndMetricsReporting(refreshMetricsBuilder.build());
     }
 
+    @Impure
     @Override
     public void snapshotUpdateOccurred(HollowAPI refreshAPI, HollowReadStateEngine stateEngine, long version) {
         trackHeaderTagInVersion(version, stateEngine.getHeaderTags(), HEADER_TAG_METRIC_CYCLE_START, cycleVersionStartTimes);
         trackHeaderTagInVersion(version, stateEngine.getHeaderTags(), HEADER_TAG_DELTA_CHAIN_VERSION_COUNTER, cycleVersionDeltaCounters);
     }
 
+    @Impure
     @Override
     public void deltaUpdateOccurred(HollowAPI refreshAPI, HollowReadStateEngine stateEngine, long version) {
         trackHeaderTagInVersion(version, stateEngine.getHeaderTags(), HEADER_TAG_METRIC_CYCLE_START, cycleVersionStartTimes);
@@ -218,6 +231,7 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
      * If the blob header contains a value for the given header tag (like producer cycle start time) then save that value in
      * a maps tracking the value per version in this refresh.
      */
+    @Impure
     private void trackHeaderTagInVersion(long version, Map<String, String> headers, String headerTag, Map<Long, Long> tracker) {
         if (headers != null) {
             String headerTagValue = headers.get(headerTag);
@@ -235,11 +249,13 @@ public abstract class AbstractRefreshMetricsListener extends AbstractRefreshList
         }
     }
 
+    @SideEffectFree
     @Override
     public void snapshotApplied(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception {
         // no-op
     }
 
+    @SideEffectFree
     @Override
     public void deltaApplied(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception {
         // no-op

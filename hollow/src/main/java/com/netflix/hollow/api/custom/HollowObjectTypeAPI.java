@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.custom;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.sampling.DisabledSamplingDirector;
 import com.netflix.hollow.api.sampling.HollowObjectSampler;
 import com.netflix.hollow.api.sampling.HollowSampler;
@@ -42,6 +44,7 @@ public abstract class HollowObjectTypeAPI extends HollowTypeAPI {
 
     protected final HollowObjectSampler boxedFieldAccessSampler;
 
+    @Impure
     protected HollowObjectTypeAPI(HollowAPI api, HollowObjectTypeDataAccess typeDataAccess, String fieldNames[]) {
         super(api, typeDataAccess);
         this.fieldNames = fieldNames;
@@ -64,37 +67,44 @@ public abstract class HollowObjectTypeAPI extends HollowTypeAPI {
         this.boxedFieldAccessSampler = boxedFieldAccessSampler;
     }
 
+    @Pure
     @Override
     public HollowObjectTypeDataAccess getTypeDataAccess() {
         return (HollowObjectTypeDataAccess) typeDataAccess;
     }
 
+    @Impure
     public HollowDataAccess getDataAccess() {
         return typeDataAccess.getDataAccess();
     }
 
+    @Pure
     public HollowSampler getBoxedFieldAccessSampler() {
         return boxedFieldAccessSampler;
     }
 
+    @Impure
     @Override
     public void setSamplingDirector(HollowSamplingDirector samplingDirector) {
         super.setSamplingDirector(samplingDirector);
         boxedFieldAccessSampler.setSamplingDirector(samplingDirector);
     }
     
+    @Impure
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         super.setFieldSpecificSamplingDirector(fieldSpec, director);
         boxedFieldAccessSampler.setFieldSpecificSamplingDirector(fieldSpec, director);
     }
     
+    @Impure
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         super.ignoreUpdateThreadForSampling(t);
         boxedFieldAccessSampler.setUpdateThread(t);
     }
 
+    @Impure
     protected MissingDataHandler missingDataHandler() {
         return api.getDataAccess().getMissingDataHandler();
     }

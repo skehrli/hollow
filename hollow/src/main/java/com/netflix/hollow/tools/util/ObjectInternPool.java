@@ -1,5 +1,7 @@
 package com.netflix.hollow.tools.util;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.ByteArrayOrdinalMap;
 import com.netflix.hollow.core.memory.ByteDataArray;
 import com.netflix.hollow.core.memory.ByteData;
@@ -16,11 +18,13 @@ public class ObjectInternPool {
     private boolean isReadyToRead = false;
     HashSet<Integer> ordinalsInCycle;
 
+    @Impure
     public ObjectInternPool() {
         this.ordinalMap = new ByteArrayOrdinalMap(1024);
         this.ordinalsInCycle = new HashSet<>();
     }
 
+    @Impure
     public void prepareForRead() {
         if(!isReadyToRead) {
             ordinalMap.prepareForWrite();
@@ -29,10 +33,12 @@ public class ObjectInternPool {
         isReadyToRead = true;
     }
 
+    @Pure
     public boolean ordinalInCurrentCycle(int ordinal) {
         return ordinalsInCycle.contains(ordinal);
     }
 
+    @Impure
     public Object getObject(int ordinal, FieldType type) {
         long pointer = ordinalMap.getPointerForData(ordinal);
 
@@ -54,33 +60,39 @@ public class ObjectInternPool {
         }
     }
 
+    @Impure
     public boolean getBoolean(long pointer) {
         ByteData byteData = ordinalMap.getByteData().getUnderlyingArray();
         return byteData.get(pointer) == 1;
     }
 
+    @Impure
     public float getFloat(long pointer) {
         ByteData byteData = ordinalMap.getByteData().getUnderlyingArray();
         int intBytes = VarInt.readVInt(byteData, pointer);
         return Float.intBitsToFloat(intBytes);
     }
 
+    @Impure
     public double getDouble(long pointer) {
         ByteData byteData = ordinalMap.getByteData().getUnderlyingArray();
         long longBytes = VarInt.readVLong(byteData, pointer);
         return Double.longBitsToDouble(longBytes);
     }
 
+    @Impure
     public int getInt(long pointer) {
         ByteData byteData = ordinalMap.getByteData().getUnderlyingArray();
         return VarInt.readVInt(byteData, pointer);
     }
 
+    @Impure
     public long getLong(long pointer) {
         ByteData byteData = ordinalMap.getByteData().getUnderlyingArray();
         return VarInt.readVLong(byteData, pointer);
     }
 
+    @Impure
     public String getString(long pointer) {
         ByteData byteData = ordinalMap.getByteData().getUnderlyingArray();
         int length = VarInt.readVInt(byteData, pointer);
@@ -91,6 +103,7 @@ public class ObjectInternPool {
         return new String(bytes);
     }
 
+    @Impure
     public int writeAndGetOrdinal(Object objectToIntern) {
         ByteDataArray buf = new ByteDataArray();
         if(objectToIntern==null) {

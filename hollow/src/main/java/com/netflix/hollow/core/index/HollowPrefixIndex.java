@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.util.Objects.requireNonNull;
 
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
@@ -87,6 +90,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      *                                     List, Set or a Map. The fields should be separated by ".".
      *
      */
+    @Impure
     public HollowPrefixIndex(HollowReadStateEngine readStateEngine, String type, String fieldPath) {
         this(readStateEngine, type, fieldPath, 1, false);
     }
@@ -106,6 +110,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      *                                     the prefix tree will reserve more memory to reference several elements per node.
      * @param caseSensitive                Specify the case sensitivity for indexing and querying
      */
+    @Impure
     public HollowPrefixIndex(HollowReadStateEngine readStateEngine, String type, String fieldPath,
             int estimatedMaxStringDuplicates, boolean caseSensitive) {
         requireNonNull(type, "Hollow Prefix Key Index creation failed because type was null");
@@ -133,6 +138,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
     }
 
     // initialize field positions and field paths.
+    @Impure
     private void initialize() {
 
         String lastRefType = this.fieldPath.getLastRefTypeInPath();
@@ -157,6 +163,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
         build();
     }
 
+    @Impure
     private void build() {
 
         if (!buildIndexOnUpdate) return;
@@ -196,6 +203,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      * @param averageWordLen the average word length
      * @return the estimated total number of nodes
      */
+    @Pure
     @SuppressWarnings("WeakerAccess")
     protected long estimateNumNodes(long totalWords, long averageWordLen) {
         return totalWords * averageWordLen;
@@ -214,6 +222,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      * @param caseSensitive controls whether to maintain casing when indexing.
      * @return keys to index.
      */
+    @Impure
     protected String[] getKeys(int ordinal, boolean caseSensitive) {
         Object[] values = fieldPath.findValues(ordinal);
         String[] stringValues = new String[values.length];
@@ -230,6 +239,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
     /**
      * @deprecated see getKeys(int ordinal, boolean caseSensitive)
      */
+    @Impure
     @Deprecated
     protected String[] getKeys(int ordinal) {
         return getKeys(ordinal, false);
@@ -251,6 +261,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      * @param prefix findKeysWithPrefix prefix.
      * @return An instance of HollowOrdinalIterator to iterate over ordinals that match the given findKeysWithPrefix.
      */
+    @Impure
     public HollowOrdinalIterator findKeysWithPrefix(String prefix) {
         TST current;
         HollowOrdinalIterator it;
@@ -281,6 +292,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      * @param key a string for which the longest indexed substring needs to be found
      * @return A list of ordinals corresponding to the longest matching prefix
      */
+    @Impure
     public List<Integer> findLongestMatch(String key) {
         TST current;
         List<Integer> ordinals;
@@ -298,6 +310,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      * @param key the key
      * @return {@code true} if the key exists, otherwise {@code false}
      */
+    @Impure
     public boolean contains(String key) {
         if (key == null) throw new IllegalArgumentException("key cannot be null");
         TST current;
@@ -314,6 +327,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      * Remember to call detachFromDeltaUpdates to stop the delta changes.
      * NOTE: Each delta updates creates a new prefix index and swaps the new with current.
      */
+    @Impure
     @SuppressWarnings("WeakerAccess")
     public void listenForDeltaUpdates() {
         readStateEngine.getTypeState(type).addListener(this);
@@ -322,26 +336,31 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
     /**
      * Stop delta updates for this index.
      */
+    @Impure
     @SuppressWarnings("WeakerAccess")
     public void detachFromDeltaUpdates() {
         readStateEngine.getTypeState(type).removeListener(this);
     }
 
+    @SideEffectFree
     @Override
     public void beginUpdate() {
         // before delta is applied -> no action to be taken
     }
 
+    @Impure
     @Override
     public void addedOrdinal(int ordinal) {
         buildIndexOnUpdate = true;
     }
 
+    @Impure
     @Override
     public void removedOrdinal(int ordinal) {
         buildIndexOnUpdate = true;
     }
 
+    @Impure
     @Override
     public void endUpdate() {
         // pass 1 for delta support - rebuild the tree and swap the new tree with the one that is serving the queries.
@@ -353,6 +372,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
      * Returns memory usage stats for the prefix index. Not thread-safe with concurrent updates to index.
      * @return approx heap footprint in bytes
      */
+    @Impure
     public Stats usageStats() {
         Stats stats = new Stats();
         stats.nodesCapacity = prefixIndexVolatile.getMaxNodes();
@@ -373,6 +393,7 @@ public class HollowPrefixIndex implements HollowTypeStateListener {
         int maxValuesPerNode; // a single tree node reserves capacity to reference upto these many records
         long approxHeapFootprintInBytes;    // approx heap footprint of tree
 
+        @Pure
         @Override
         public String toString() {
             return "nodesCapacity=" + nodesCapacity + ", "

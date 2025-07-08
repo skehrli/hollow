@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.encoding.GapEncodedVariableLengthIntegerReader;
 
 public abstract class HollowTypeDataElementsJoiner<T extends HollowTypeDataElements> {
@@ -9,6 +11,7 @@ public abstract class HollowTypeDataElementsJoiner<T extends HollowTypeDataEleme
 
     public T to;
 
+    @SideEffectFree
     public HollowTypeDataElementsJoiner(T[] from) {
         this.from = from;
         this.fromMask = from.length - 1;
@@ -38,6 +41,7 @@ public abstract class HollowTypeDataElementsJoiner<T extends HollowTypeDataEleme
         }
     }
 
+    @Impure
     public T join() {
 
         initToElements();
@@ -59,16 +63,19 @@ public abstract class HollowTypeDataElementsJoiner<T extends HollowTypeDataEleme
     /**
      * Initialize the target data elements.
      */
+    @Impure
     public abstract void initToElements();
 
     /**
      * Populate the stats of the target data elements.
      */
+    @Impure
     public abstract void populateStats();
 
     /**
      * Copy records from the source data elements to the target data elements.
      */
+    @Impure
     public abstract void copyRecords();
 
 

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowSetTypeAPI;
 import com.netflix.hollow.api.objects.HollowSet;
 import com.netflix.hollow.core.read.dataaccess.HollowSetTypeDataAccess;
@@ -29,17 +32,24 @@ import com.netflix.hollow.core.schema.HollowSetSchema;
  */
 public interface HollowSetDelegate<T> extends HollowRecordDelegate {
 
+    @Impure
     public int size(int ordinal);
 
-    public boolean contains(HollowSet<T> set, int ordinal, Object o);
+    @Impure
+    public boolean contains(@NotOwningCollection HollowSet<T> set, int ordinal, Object o);
     
+    @Impure
     public T findElement(HollowSet<T> set, int ordinal, Object... keys);
 
+    @Impure
     public HollowOrdinalIterator iterator(int ordinal);
 
+    @Impure
     public HollowSetSchema getSchema();
 
+    @Pure
     public HollowSetTypeDataAccess getTypeDataAccess();
 
+    @Pure
     public HollowSetTypeAPI getTypeAPI();
 }

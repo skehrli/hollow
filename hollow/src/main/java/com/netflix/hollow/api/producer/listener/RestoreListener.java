@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.listener;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.Status;
 import java.time.Duration;
@@ -35,6 +37,7 @@ public interface RestoreListener extends HollowProducerEventListener {
      *
      * @param restoreVersion Version from which the state for {@code HollowProducer} was restored.
      */
+    @SideEffectFree
     void onProducerRestoreStart(long restoreVersion);
 
     /**
@@ -47,5 +50,6 @@ public interface RestoreListener extends HollowProducerEventListener {
      * @param versionReached the actual version restored to
      * @param elapsed duration of the restore in {@code unit} units
      */
+    @Impure
     void onProducerRestoreComplete(Status status, long versionDesired, long versionReached, Duration elapsed);
 }

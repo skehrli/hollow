@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.combine;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import java.util.BitSet;
 import java.util.Map;
@@ -31,10 +33,12 @@ public class HollowCombinerExcludeOrdinalsCopyDirector implements HollowCombiner
 
     private final Map<String, BitSet> excludedOrdinals;
 
+    @SideEffectFree
     public HollowCombinerExcludeOrdinalsCopyDirector(Map<String, BitSet> excludedOrdinals) {
         this.excludedOrdinals = excludedOrdinals;
     }
 
+    @Impure
     @Override
     public boolean shouldCopy(HollowTypeReadState typeState, int ordinal) {
         BitSet typeExcludedOrdinals = excludedOrdinals.get(typeState.getSchema().getName());

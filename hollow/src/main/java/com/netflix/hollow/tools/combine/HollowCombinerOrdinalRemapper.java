@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.combine;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import java.util.Arrays;
@@ -33,11 +35,13 @@ public class HollowCombinerOrdinalRemapper implements OrdinalRemapper {
     private final HollowCombiner combiner;
     private final Map<String, int[]> typeMappings;
     
+    @Impure
     public HollowCombinerOrdinalRemapper(HollowCombiner combiner, HollowReadStateEngine inputStateEngine) {
         this.combiner = combiner;
         this.typeMappings = initializeTypeMappings(inputStateEngine);
     }
 
+    @Impure
     @Override
     public int getMappedOrdinal(String type, int originalOrdinal) {
         int typeMapping[] = typeMappings.get(type);
@@ -51,16 +55,19 @@ public class HollowCombinerOrdinalRemapper implements OrdinalRemapper {
         return typeMapping[originalOrdinal];
     }
 
+    @Impure
     @Override
     public void remapOrdinal(String type, int originalOrdinal, int mappedOrdinal) {
         typeMappings.get(type)[originalOrdinal] = mappedOrdinal;
     }
     
+    @Pure
     @Override
     public boolean ordinalIsMapped(String type, int originalOrdinal) {
         return typeMappings.get(type)[originalOrdinal] != -1;
     }
 
+    @Impure
     private Map<String, int[]> initializeTypeMappings(HollowReadStateEngine inputStateEngine) {
         Map<String, int[]> typeMappings = new HashMap<String, int[]>();
         for(HollowTypeReadState typeState : inputStateEngine.getTypeStates()) {

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Pure;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,6 +40,7 @@ public class HollowUnsafeHandle {
         unsafe = u;
     }
 
+    @Pure
     public static Unsafe getUnsafe() {
         return unsafe;
     }

@@ -15,6 +15,7 @@
  *
  */
 package com.netflix.hollow.api.producer.metrics;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * Allows implementations to plug in custom reporting of producer metrics, while not enforcing that any or all metrics
@@ -22,10 +23,12 @@ package com.netflix.hollow.api.producer.metrics;
  */
 public interface ProducerMetricsReporting {
 
+    @SideEffectFree
     default void cycleMetricsReporting(CycleMetrics cycleMetrics) {
         // no-op
     }
 
+    @SideEffectFree
     default void announcementMetricsReporting(AnnouncementMetrics announcementMetrics) {
         // no-op
     }

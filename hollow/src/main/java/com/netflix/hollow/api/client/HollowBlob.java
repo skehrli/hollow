@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.HollowConstants;
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +53,8 @@ public abstract class HollowBlob {
      *
      * @param toVersion the version to end from
      */
+    @SideEffectFree
+    @Impure
     public HollowBlob(long toVersion) {
         this(HollowConstants.VERSION_NONE, toVersion);
     }
@@ -60,6 +65,7 @@ public abstract class HollowBlob {
      * @param fromVersion the version to start from
      * @param toVersion the version to end from
      */
+    @SideEffectFree
     public HollowBlob(long fromVersion, long toVersion) {
         this.fromVersion = fromVersion;
         this.toVersion = toVersion;
@@ -74,24 +80,30 @@ public abstract class HollowBlob {
      * @return the input stream to the blob
      * @throws IOException if the input stream to the blob cannot be obtained
      */
+    @Impure
     public abstract InputStream getInputStream() throws IOException;
 
+    @Impure
     public File getFile() throws IOException {
         throw new UnsupportedOperationException();
     }
 
+    @Pure
     public boolean isSnapshot() {
         return fromVersion == HollowConstants.VERSION_NONE;
     }
 
+    @Pure
     public boolean isReverseDelta() {
         return toVersion < fromVersion;
     }
 
+    @Pure
     public long getFromVersion() {
         return fromVersion;
     }
 
+    @Pure
     public long getToVersion() {
         return toVersion;
     }

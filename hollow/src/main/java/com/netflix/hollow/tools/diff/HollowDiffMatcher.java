@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowConstants;
 import com.netflix.hollow.core.index.HollowPrimaryKeyIndex;
 import com.netflix.hollow.core.read.engine.PopulatedOrdinalListener;
@@ -46,6 +48,7 @@ public class HollowDiffMatcher {
     private HollowPrimaryKeyIndex fromIdx;
     private HollowPrimaryKeyIndex toIdx;
 
+    @Impure
     public HollowDiffMatcher(HollowObjectTypeReadState fromTypeState, HollowObjectTypeReadState toTypeState) {
         this.matchPaths = new ArrayList<>();
         this.fromTypeState = fromTypeState;
@@ -55,14 +58,17 @@ public class HollowDiffMatcher {
         this.extraInTo = new IntList();
     }
 
+    @Impure
     public void addMatchPath(String path) {
         matchPaths.add(path);
     }
 
+    @Pure
     public List<String> getMatchPaths() {
         return matchPaths;
     }
 
+    @Impure
     public void calculateMatches() {
         if (fromTypeState==null) {
             toTypeState.getPopulatedOrdinals().stream().forEach(i -> extraInTo.add(i));
@@ -119,18 +125,22 @@ public class HollowDiffMatcher {
         }
     }
 
+    @Pure
     public LongList getMatchedOrdinals() {
         return matchedOrdinals;
     }
 
+    @Pure
     public IntList getExtraInFrom() {
         return extraInFrom;
     }
 
+    @Pure
     public IntList getExtraInTo() {
         return extraInTo;
     }
 
+    @Impure
     public String getKeyDisplayString(HollowObjectTypeReadState state, int ordinal) {
         Object[] key = null;
 
@@ -147,6 +157,7 @@ public class HollowDiffMatcher {
         return keyDisplayString(key);
     }
 
+    @Impure
     private String keyDisplayString(Object[] key) {
         StringBuilder sb = new StringBuilder(key[0].toString());
 

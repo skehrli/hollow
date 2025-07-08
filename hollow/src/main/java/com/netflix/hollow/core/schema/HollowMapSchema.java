@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -41,6 +44,8 @@ public class HollowMapSchema extends HollowSchema {
     private HollowTypeReadState keyTypeState;
     private HollowTypeReadState valueTypeState;
 
+    @SideEffectFree
+    @Impure
     public HollowMapSchema(String schemaName, String keyType, String valueType, String... hashKeyFieldPaths) {
         super(schemaName);
         this.keyType = keyType;
@@ -48,39 +53,49 @@ public class HollowMapSchema extends HollowSchema {
         this.hashKey = hashKeyFieldPaths == null || hashKeyFieldPaths.length == 0 ? null : new PrimaryKey(keyType, hashKeyFieldPaths);
     }
 
+    @Pure
     public String getKeyType() {
         return keyType;
     }
 
+    @Pure
     public String getValueType() {
         return valueType;
     }
 
+    @Pure
     public PrimaryKey getHashKey() {
         return hashKey;
     }
 
+    @Pure
     public HollowTypeReadState getKeyTypeState() {
         return keyTypeState;
     }
 
+    @Impure
     public void setKeyTypeState(HollowTypeReadState keyTypeState) {
         this.keyTypeState = keyTypeState;
     }
 
+    @Pure
     public HollowTypeReadState getValueTypeState() {
         return valueTypeState;
     }
 
+    @Impure
     public void setValueTypeState(HollowTypeReadState valueTypeState) {
         this.valueTypeState = valueTypeState;
     }
 
+    @Pure
     @Override
     public SchemaType getSchemaType() {
         return SchemaType.MAP;
     }
 
+    @Pure
+    @Impure
     @Override
     public boolean equals(Object other) {
         if (this == other)
@@ -98,6 +113,8 @@ public class HollowMapSchema extends HollowSchema {
         return isNullableObjectEquals(hashKey, otherSchema.getHashKey());
     }
 
+    @Pure
+    @Impure
     @Override
     public int hashCode() {
         int result = getName().hashCode();
@@ -108,6 +125,7 @@ public class HollowMapSchema extends HollowSchema {
         return result;
     }
 
+    @Impure
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(getName());
@@ -128,6 +146,7 @@ public class HollowMapSchema extends HollowSchema {
         return builder.toString();
     }
 
+    @Impure
     @Override
     public void writeTo(OutputStream os) throws IOException {
         DataOutputStream dos = new DataOutputStream(os);

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.HollowStateEngine.HEADER_TAG_SCHEMA_HASH;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -63,6 +65,7 @@ public class HollowClientUpdater {
 
     private TypeFilter filter;
 
+    @Impure
     @Deprecated
     public HollowClientUpdater(HollowConsumer.BlobRetriever transitionCreator,
                                List<HollowConsumer.RefreshListener> refreshListeners,
@@ -79,6 +82,7 @@ public class HollowClientUpdater {
                 HollowConsumer.UpdatePlanBlobVerifier.DEFAULT_INSTANCE);
     }
 
+    @Impure
     public HollowClientUpdater(HollowConsumer.BlobRetriever transitionCreator,
                                List<HollowConsumer.RefreshListener> refreshListeners,
                                HollowAPIFactory apiFactory,
@@ -107,6 +111,7 @@ public class HollowClientUpdater {
         this.initialLoad = new CompletableFuture<>();
     }
 
+    @Impure
     public void setSkipShardUpdateWithNoAdditions(boolean skipTypeShardUpdateWithNoAdditions) {
         this.skipTypeShardUpdateWithNoAdditions = skipTypeShardUpdateWithNoAdditions;
         HollowDataHolder dataHolder = hollowDataHolderVolatile;
@@ -130,9 +135,11 @@ public class HollowClientUpdater {
      * {@code hollowDataHolderVolatile}, so we don't need to worry about it changing out from
      * under us.
      */
+    @Impure
     public synchronized boolean updateTo(long requestedVersion) throws Throwable {
         return updateTo(new HollowConsumer.VersionInfo(requestedVersion));
     }
+    @Impure
     public synchronized boolean updateTo(HollowConsumer.VersionInfo requestedVersionInfo) throws Throwable {
         long requestedVersion = requestedVersionInfo.getVersion();
         if (requestedVersion == getCurrentVersionId()) {
@@ -244,6 +251,7 @@ public class HollowClientUpdater {
         }
     }
 
+    @Impure
     public synchronized void addRefreshListener(HollowConsumer.RefreshListener refreshListener,
             HollowConsumer c) {
         if (refreshListener instanceof HollowConsumer.RefreshRegistrationListener) {
@@ -256,6 +264,7 @@ public class HollowClientUpdater {
         }
     }
 
+    @Impure
     public synchronized void removeRefreshListener(HollowConsumer.RefreshListener refreshListener,
             HollowConsumer c) {
         if (refreshListeners.remove(refreshListener)) {
@@ -265,12 +274,15 @@ public class HollowClientUpdater {
         }
     }
 
+    @Pure
+    @Impure
     public long getCurrentVersionId() {
         HollowDataHolder hollowDataHolderLocal = hollowDataHolderVolatile;
         return hollowDataHolderLocal != null ? hollowDataHolderLocal.getCurrentVersion()
             : HollowConstants.VERSION_NONE;
     }
 
+    @Impure
     public void forceDoubleSnapshotNextUpdate() {
         this.forceDoubleSnapshot = true;
     }
@@ -278,6 +290,7 @@ public class HollowClientUpdater {
     /**
      * Whether or not a snapshot plan should be created. Visible for testing.
      */
+    @Impure
     boolean shouldCreateSnapshotPlan(HollowConsumer.VersionInfo incomingVersionInfo) {
         if (getCurrentVersionId() == HollowConstants.VERSION_NONE
         || (forceDoubleSnapshot && doubleSnapshotConfig.allowDoubleSnapshot())) {
@@ -318,6 +331,7 @@ public class HollowClientUpdater {
         return false;
     }
 
+    @Impure
     private HollowDataHolder newHollowDataHolder() {
         return new HollowDataHolder(newStateEngine(), apiFactory, memoryMode,
                 doubleSnapshotConfig, failedTransitionTracker,
@@ -326,6 +340,7 @@ public class HollowClientUpdater {
                 .setSkipTypeShardUpdateWithNoAdditions(skipTypeShardUpdateWithNoAdditions);
     }
 
+    @Impure
     private HollowReadStateEngine newStateEngine() {
         HollowDataHolder hollowDataHolderLocal = hollowDataHolderVolatile;
         if (hollowDataHolderLocal != null) {
@@ -336,24 +351,32 @@ public class HollowClientUpdater {
         return new HollowReadStateEngine(hashCodeFinder);
     }
 
+    @Pure
+    @Impure
     public StackTraceRecorder getStaleReferenceUsageStackTraceRecorder() {
         return staleReferenceDetector.getStaleReferenceStackTraceRecorder();
     }
 
+    @Pure
+    @Impure
     public HollowReadStateEngine getStateEngine() {
         HollowDataHolder hollowDataHolderLocal = hollowDataHolderVolatile;
         return hollowDataHolderLocal == null ? null : hollowDataHolderLocal.getStateEngine();
     }
 
+    @Pure
+    @Impure
     public HollowAPI getAPI() {
         HollowDataHolder hollowDataHolderLocal = hollowDataHolderVolatile;
         return hollowDataHolderLocal == null ? null : hollowDataHolderLocal.getAPI();
     }
 
+    @Impure
     public void setFilter(HollowFilterConfig filter) {
         this.filter = filter;
     }
 
+    @Impure
     public void setFilter(TypeFilter filter) {
         this.filter = filter;
     }
@@ -361,6 +384,8 @@ public class HollowClientUpdater {
     /**
      * @return the number of failed snapshot transitions stored in the {@link FailedTransitionTracker}.
      */
+    @Pure
+    @Impure
     public int getNumFailedSnapshotTransitions() {
         return failedTransitionTracker.getNumFailedSnapshotTransitions();
     }
@@ -368,6 +393,8 @@ public class HollowClientUpdater {
     /**
      * @return the number of failed delta transitions stored in the {@link FailedTransitionTracker}.
      */
+    @Pure
+    @Impure
     public int getNumFailedDeltaTransitions() {
         return failedTransitionTracker.getNumFailedDeltaTransitions();
     }
@@ -375,6 +402,7 @@ public class HollowClientUpdater {
     /**
      * Clear any failed transitions from the {@link FailedTransitionTracker}, so that they may be reattempted when an update is triggered.
      */
+    @Impure
     public void clearFailedTransitions() {
         this.failedTransitionTracker.clear();
     }
@@ -383,6 +411,7 @@ public class HollowClientUpdater {
      * @return a future that will be completed with the version of data loaded when the initial load of data
      * has completed.
      */
+    @Pure
     public CompletableFuture<Long> getInitialLoad() {
         return this.initialLoad;
     }

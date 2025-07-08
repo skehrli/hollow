@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.codegen.api.HollowDataAccessorGenerator;
 import com.netflix.hollow.api.codegen.api.TypeAPIListJavaGenerator;
 import com.netflix.hollow.api.codegen.api.TypeAPIMapJavaGenerator;
@@ -129,6 +131,7 @@ public class HollowAPIGenerator {
      *
      * @deprecated use {@link #HollowAPIGenerator(String, String, HollowDataset, Path)} and use {@link #generateSourceFiles()}
      */
+    @Impure
     public HollowAPIGenerator(String apiClassname, String packageName, HollowDataset dataset) {
         this(apiClassname, packageName, dataset, Collections.<String>emptySet(), false, false);
     }
@@ -139,6 +142,7 @@ public class HollowAPIGenerator {
      * @param dataset a HollowStateEngine containing the schemas which define the data model.
      * @param destinationPath the directory under which the source files will be generated
      */
+    @Impure
     public HollowAPIGenerator(String apiClassname, String packageName, HollowDataset dataset, Path destinationPath) {
         this(apiClassname, packageName, dataset, Collections.<String>emptySet(), false, false, destinationPath);
     }
@@ -152,6 +156,7 @@ public class HollowAPIGenerator {
      *
      * @deprecated use {@link #HollowAPIGenerator(String, String, HollowDataset, boolean, Path)} and use {@link #generateSourceFiles()}
      */
+    @Impure
     public HollowAPIGenerator(String apiClassname, String packageName, HollowDataset dataset, boolean parameterizeAllClassNames) {
         this(apiClassname, packageName, dataset, Collections.<String>emptySet(), parameterizeAllClassNames, false);
     }
@@ -164,6 +169,7 @@ public class HollowAPIGenerator {
      *                               alternate implementations are desired for some types.
      * @param destinationPath the directory under which the source files will be generated
      */
+    @Impure
     public HollowAPIGenerator(String apiClassname, String packageName, HollowDataset dataset, boolean parameterizeAllClassNames, Path destinationPath) {
         this(apiClassname, packageName, dataset, Collections.<String>emptySet(), parameterizeAllClassNames, false, destinationPath);
     }
@@ -177,6 +183,7 @@ public class HollowAPIGenerator {
      *
      * @deprecated use {@link #HollowAPIGenerator(String, String, HollowDataset, Set, Path)} and use {@link #generateSourceFiles()}
      */
+    @Impure
     public HollowAPIGenerator(String apiClassname, String packageName, HollowDataset dataset, Set<String> parameterizeSpecificTypeNames) {
         this(apiClassname, packageName, dataset, parameterizeSpecificTypeNames, false, false);
     }
@@ -188,6 +195,7 @@ public class HollowAPIGenerator {
      * @param parameterizedTypes the parameterized types
      * @param destinationPath the directory under which the source files will be generated
      */
+    @Impure
     public HollowAPIGenerator(String apiClassname,
                               String packageName,
                               HollowDataset dataset,
@@ -205,10 +213,12 @@ public class HollowAPIGenerator {
      * @param useErgonomicShortcuts true if ergonomic shortcuts should be used
      * @deprecated construct with a {@code destinationPath} and use {@link #generateSourceFiles()}
      */
+    @Impure
     protected HollowAPIGenerator(String apiClassname, String packageName, HollowDataset dataset, Set<String> parameterizedTypes, boolean parameterizeAllClassNames, boolean useErgonomicShortcuts) {
         this(apiClassname, packageName, dataset, parameterizedTypes, parameterizeAllClassNames, useErgonomicShortcuts, null);
     }
 
+    @Impure
     protected HollowAPIGenerator(String apiClassname,
                                  String packageName,
                                  HollowDataset dataset,
@@ -240,6 +250,7 @@ public class HollowAPIGenerator {
      * @throws IOException if a schema could not be read or the data model written
      * @throws ClassNotFoundException if a class of a data model cannot be loaded
      */
+    @Impure
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         if (args.length == 0) {
             System.out.println("Usage:\n"
@@ -289,6 +300,7 @@ public class HollowAPIGenerator {
      * @param dataset the data set
      * @return {@code true} if the data set contains any collections schema
      */
+    @Impure
     protected static boolean hasCollectionsInDataSet(HollowDataset dataset) {
         for(HollowSchema schema : dataset.getSchemas()) {
             if ((schema instanceof HollowListSchema) ||
@@ -304,6 +316,7 @@ public class HollowAPIGenerator {
      * Set the CodeGeneratorConfig
      * @param config the configuration
      */
+    @Impure
     protected void setCodeGeneratorConfig(CodeGeneratorConfig config) {
         this.config = config;
     }
@@ -312,6 +325,7 @@ public class HollowAPIGenerator {
      * Use this method to override the default postfix "Hollow" for all generated Hollow object classes.
      * @param classPostfix the postfix for all generated Hollow object classes
      */
+    @Impure
     public void setClassPostfix(String classPostfix) {
         config.setClassPostfix(classPostfix);
     }
@@ -320,6 +334,7 @@ public class HollowAPIGenerator {
      * Use this method to override the default prefix "_" for all getters on all generated Hollow object classes.
      * @param getterPrefix the prefix for all generated getters
      */
+    @Impure
     public void setGetterPrefix(String getterPrefix) {
         config.setGetterPrefix(getterPrefix);
     }
@@ -331,6 +346,7 @@ public class HollowAPIGenerator {
      *
      * @param useAggressiveSubstitutions true if applied.
      */
+    @Impure
     public void setUseAggressiveSubstitutions(boolean useAggressiveSubstitutions) {
         config.setUseAggressiveSubstitutions(useAggressiveSubstitutions);
     }
@@ -342,6 +358,7 @@ public class HollowAPIGenerator {
      *
      * @param useBooleanFieldErgonomics true if applied.
      */
+    @Impure
     public void setUseBooleanFieldErgonomics(boolean useBooleanFieldErgonomics) {
         config.setUseBooleanFieldErgonomics(useBooleanFieldErgonomics);
     }
@@ -353,6 +370,7 @@ public class HollowAPIGenerator {
      *
      * @param usePackageGrouping true if applied.
      */
+    @Impure
     public void setUsePackageGrouping(boolean usePackageGrouping) {
         config.setUsePackageGrouping(usePackageGrouping );
     }
@@ -364,6 +382,7 @@ public class HollowAPIGenerator {
      *
      * @param reservePrimaryKeyIndexForTypeWithPrimaryKey true if applied.
      */
+    @Impure
     public void reservePrimaryKeyIndexForTypeWithPrimaryKey(boolean reservePrimaryKeyIndexForTypeWithPrimaryKey) {
         config.setReservePrimaryKeyIndexForTypeWithPrimaryKey(reservePrimaryKeyIndexForTypeWithPrimaryKey);
     }
@@ -375,6 +394,7 @@ public class HollowAPIGenerator {
      *
      * @param useHollowPrimitiveTypes true if applied.
      */
+    @Impure
     public void setUseHollowPrimitiveTypes(boolean useHollowPrimitiveTypes) {
         config.setUseHollowPrimitiveTypes(useHollowPrimitiveTypes);
     }
@@ -386,6 +406,7 @@ public class HollowAPIGenerator {
      *
      * @param restrictApiToFieldType true if applied.
      */
+    @Impure
     public void setRestrictApiToFieldType(boolean restrictApiToFieldType) {
         config.setRestrictApiToFieldType(restrictApiToFieldType);
     }
@@ -395,6 +416,7 @@ public class HollowAPIGenerator {
      *
      * @throws IOException if the files cannot be generated
      */
+    @Impure
     public void generateSourceFiles() throws IOException {
         generateFiles(destinationPath.toFile());
     }
@@ -406,6 +428,7 @@ public class HollowAPIGenerator {
      * @throws IOException if the files cannot be generated
      * @deprecated construct {@code HollowAPIGenerator} with a {@code destinationPath} then call {@link #generateSourceFiles()}
      */
+    @Impure
     public void generateFiles(String directory) throws IOException {
         generateFiles(new File(directory));
     }
@@ -417,6 +440,7 @@ public class HollowAPIGenerator {
      * @throws IOException if the files cannot be generated
      * @deprecated construct {@code HollowAPIGenerator} with a {@code destinationPath} then call {@link #generateSourceFiles()}
      */
+    @Impure
     public void generateFiles(File directory) throws IOException {
         if (packageName != null && !packageName.trim().isEmpty()) {
             String packageDir = packageName.replace(".", File.separator);
@@ -449,6 +473,7 @@ public class HollowAPIGenerator {
      *
      * @throws IOException if the files cannot be generated
      */
+    @Impure
     protected void generateSourceFilesForHollowSchemas() throws IOException {
         this.generateFilesForHollowSchemas(destinationPath.toFile());
     }
@@ -460,6 +485,7 @@ public class HollowAPIGenerator {
      * @throws IOException if the files cannot be generated
      * @deprecated construct {@code HollowAPIGenerator} with a {@code destinationPath} then call {@link #generateSourceFilesForHollowSchemas()}
      */
+    @Impure
     protected void generateFilesForHollowSchemas(File directory) throws IOException {
         for(HollowSchema schema : dataset.getSchemas()) {
             String type = schema.getName();
@@ -493,6 +519,7 @@ public class HollowAPIGenerator {
         }
     }
 
+    @Impure
     protected void generateSourceFile(HollowJavaFileGenerator generator) throws IOException {
         this.generateFile(destinationPath.toFile(), generator);
     }
@@ -503,6 +530,7 @@ public class HollowAPIGenerator {
      * @throws IOException if the file cannot be generated
      * @deprecated construct {@code HollowAPIGenerator} with a {@code destinationPath} then call {@link #generateSourceFile(HollowJavaFileGenerator)}
      */
+    @Impure
     protected void generateFile(File directory, HollowJavaFileGenerator generator) throws IOException {
         // create sub folder if not using default package and sub packages are enabled
         if ((packageName!=null && !packageName.trim().isEmpty()) && config.isUsePackageGrouping() && (generator instanceof HollowConsumerJavaFileGenerator)) {
@@ -517,6 +545,7 @@ public class HollowAPIGenerator {
         writer.close();
     }
 
+    @Impure
     private void generateMetaInfo(String apiClassname) throws IOException {
         if (config.getMetaInfoPath() == null)  {
             throw new IllegalStateException("Meta info generation is enabled but path for generating meta info not set");
@@ -541,6 +570,7 @@ public class HollowAPIGenerator {
         writer.close();
     }
 
+    @Impure
     protected HollowJavaFileGenerator getStaticAPIGenerator(HollowSchema schema) {
         if(schema instanceof HollowObjectSchema) {
             return new TypeAPIObjectJavaGenerator(apiClassname, packageName, (HollowObjectSchema) schema, dataset, config);
@@ -555,6 +585,7 @@ public class HollowAPIGenerator {
         throw new UnsupportedOperationException("What kind of schema is a " + schema.getClass().getName() + "?");
     }
 
+    @Impure
     protected HollowJavaFileGenerator getHollowObjectGenerator(HollowSchema schema) {
         if(schema instanceof HollowObjectSchema) {
             return new HollowObjectJavaGenerator(packageName, apiClassname, (HollowObjectSchema) schema,
@@ -572,16 +603,19 @@ public class HollowAPIGenerator {
         throw new UnsupportedOperationException("What kind of schema is a " + schema.getClass().getName() + "?");
     }
 
+    @Impure
     protected HollowFactoryJavaGenerator getHollowFactoryGenerator(HollowSchema schema) {
         return new HollowFactoryJavaGenerator(packageName, schema, dataset, config);
     }
 
     public static class Builder extends AbstractHollowAPIGeneratorBuilder<Builder, HollowAPIGenerator> {
+        @Impure
         @Override
         protected HollowAPIGenerator instantiateGenerator() {
             return new HollowAPIGenerator(apiClassname, packageName, dataset, parameterizedTypes, parameterizeAllClassNames, useErgonomicShortcuts, destinationPath);
         }
 
+        @Pure
         @Override
         protected Builder getBuilder() {
             return this;

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.producer.ProducerListenerSupport.ProducerListeners;
 import static com.netflix.hollow.core.HollowStateEngine.HEADER_TAG_DELTA_CHAIN_VERSION_COUNTER;
 import static com.netflix.hollow.core.HollowStateEngine.HEADER_TAG_TYPE_RESHARDING_INVOKED;
@@ -99,6 +102,7 @@ abstract class AbstractHollowProducer {
     private final boolean allowTypeResharding;
     private final boolean forceCoverageOfTypeResharding;   // exercise re-sharding often (for testing)
 
+    @Impure
     @Deprecated
     public AbstractHollowProducer(
             HollowProducer.Publisher publisher,
@@ -114,6 +118,7 @@ abstract class AbstractHollowProducer {
     // The only constructor should be that which accepts a builder
     // This ensures that if the builder modified to include new state that
     // extended builders will not require modification to pass on that new state
+    @Impure
     AbstractHollowProducer(HollowProducer.Builder<?> b) {
         this(b.stager, b.publisher, b.announcer,
                 b.eventListeners,
@@ -124,6 +129,7 @@ abstract class AbstractHollowProducer {
                 b.hashCodeFinder, b.doIntegrityCheck);
     }
 
+    @Impure
     private AbstractHollowProducer(
             HollowProducer.BlobStager blobStager,
             HollowProducer.Publisher publisher,
@@ -178,6 +184,7 @@ abstract class AbstractHollowProducer {
     /**
      * @return the metrics for this producer
      */
+    @Impure
     public HollowProducerMetrics getMetrics() {
         return this.metrics;
     }
@@ -200,6 +207,7 @@ abstract class AbstractHollowProducer {
      * @throws IllegalArgumentException if {@code classes} is empty
      * @see #restore(long, HollowConsumer.BlobRetriever)
      */
+    @Impure
     public void initializeDataModel(Class<?>... classes) {
         Objects.requireNonNull(classes);
         if (classes.length == 0) {
@@ -233,6 +241,7 @@ abstract class AbstractHollowProducer {
      * @throws IllegalArgumentException if {@code schemas} is empty
      * @see #restore(long, HollowConsumer.BlobRetriever)
      */
+    @Impure
     public void initializeDataModel(HollowSchema... schemas) {
         Objects.requireNonNull(schemas);
         if (schemas.length == 0) {
@@ -261,17 +270,20 @@ abstract class AbstractHollowProducer {
      * @throws IllegalStateException if the producer's data model has not been initialized
      * @see #initializeDataModel(Class[])
      */
+    @Impure
     public HollowProducer.ReadState restore(long versionDesired, HollowConsumer.BlobRetriever blobRetriever) {
         return restore(versionDesired, blobRetriever,
                 (restoreFrom, restoreTo) -> restoreTo.restoreFrom(restoreFrom));
     }
 
+    @Impure
     HollowProducer.ReadState hardRestore(long versionDesired, HollowConsumer.BlobRetriever blobRetriever) {
         return restore(versionDesired, blobRetriever,
                 (restoreFrom, restoreTo) -> HollowWriteStateCreator.
                         populateUsingReadEngine(restoreTo, restoreFrom, false));
     }
 
+    @Impure
     private HollowProducer.ReadState restore(
             long versionDesired, HollowConsumer.BlobRetriever blobRetriever,
             BiConsumer<HollowReadStateEngine, HollowWriteStateEngine> restoreAction) {
@@ -322,10 +334,12 @@ abstract class AbstractHollowProducer {
         return readState;
     }
 
+    @Impure
     public HollowWriteStateEngine getWriteEngine() {
         return objectMapper.getStateEngine();
     }
 
+    @Impure
     public HollowObjectMapper getObjectMapper() {
         return objectMapper;
     }
@@ -337,6 +351,7 @@ abstract class AbstractHollowProducer {
      * @param doEnable true if enable primary producer, if false
      * @return true if the intended action was successful
      */
+    @Impure
     public boolean enablePrimaryProducer(boolean doEnable) {
         if (!singleProducerEnforcer.isPrimary()) {
             cycleCountSincePrimaryStatus = 0;
@@ -349,6 +364,7 @@ abstract class AbstractHollowProducer {
         return (singleProducerEnforcer.isPrimary() == doEnable);
     }
 
+    @Impure
     long runCycle(HollowProducer.Incremental.IncrementalPopulator incrementalPopulator, HollowProducer.Populator populator) {
         ProducerListeners localListeners = listeners.listeners();
 
@@ -378,6 +394,7 @@ abstract class AbstractHollowProducer {
         }
     }
 
+    @Impure
     long runCycle(
             ProducerListeners listeners,
             HollowProducer.Incremental.IncrementalPopulator incrementalPopulator, HollowProducer.Populator populator,
@@ -483,6 +500,7 @@ abstract class AbstractHollowProducer {
      *
      * @param listener the listener to add
      */
+    @Impure
     public void addListener(HollowProducerListener listener) {
         listeners.addListener(listener);
     }
@@ -498,6 +516,7 @@ abstract class AbstractHollowProducer {
      *
      * @param listener the listener to add
      */
+    @Impure
     public void addListener(HollowProducerEventListener listener) {
         listeners.addListener(listener);
     }
@@ -513,6 +532,7 @@ abstract class AbstractHollowProducer {
      *
      * @param listener the listener to remove
      */
+    @Impure
     public void removeListener(HollowProducerListener listener) {
         listeners.removeListener(listener);
     }
@@ -528,10 +548,12 @@ abstract class AbstractHollowProducer {
      *
      * @param listener the listener to remove
      */
+    @Impure
     public void removeListener(HollowProducerEventListener listener) {
         listeners.removeListener(listener);
     }
 
+    @Impure
     private void updateHeaderTags(HollowWriteStateEngine writeEngine, long toVersion, boolean schemaChangedFromPriorVersion) {
         writeEngine.addHeaderTag(HollowStateEngine.HEADER_TAG_SCHEMA_HASH, new HollowSchemaHash(writeEngine.getSchemas()).getHash());
         if (schemaChangedFromPriorVersion) {
@@ -557,6 +579,7 @@ abstract class AbstractHollowProducer {
         writeEngine.addHeaderTag(HEADER_TAG_DELTA_CHAIN_VERSION_COUNTER, String.valueOf(deltaChainVersionCounter));
     }
 
+    @Impure
     void populate(
             ProducerListeners listeners,
             HollowProducer.Incremental.IncrementalPopulator incrementalPopulator, HollowProducer.Populator populator,
@@ -585,6 +608,7 @@ abstract class AbstractHollowProducer {
         }
     }
 
+    @Impure
     HollowProducer.Populator incrementalPopulate(
             ProducerListeners listeners,
             HollowProducer.Incremental.IncrementalPopulator incrementalPopulator,
@@ -612,6 +636,7 @@ abstract class AbstractHollowProducer {
     /*
      * Publish the write state, storing the artifacts in the provided object. Visible for testing.
      */
+    @Impure
     void publish(ProducerListeners listeners, long toVersion, Artifacts artifacts) throws IOException {
         Status.StageBuilder psb = listeners.firePublishStart(toVersion);
         try {
@@ -656,6 +681,7 @@ abstract class AbstractHollowProducer {
         }
     }
 
+    @Impure
     private HollowProducer.Blob stageBlob(ProducerListeners listeners, HollowProducer.Blob blob)
             throws IOException {
         Status.PublishBuilder builder = new Status.PublishBuilder();
@@ -673,6 +699,7 @@ abstract class AbstractHollowProducer {
         }
     }
 
+    @Impure
     private void publishBlob(ProducerListeners listeners, HollowProducer.Blob blob) {
         Status.PublishBuilder builder = new Status.PublishBuilder();
         try {
@@ -712,6 +739,7 @@ abstract class AbstractHollowProducer {
         }
     }
 
+    @Impure
     private void publishSnapshotBlobAsync(ProducerListeners listeners, Artifacts artifacts) {
         HollowProducer.Blob blob = artifacts.snapshot;
         CompletableFuture<HollowProducer.Blob> cf = new CompletableFuture<>();
@@ -748,6 +776,7 @@ abstract class AbstractHollowProducer {
         }
     }
 
+    @Impure
     private void publishBlob(HollowProducer.Blob b) {
         try {
             publisher.publish((HollowProducer.PublishArtifact)b);
@@ -756,6 +785,7 @@ abstract class AbstractHollowProducer {
         }
     }
 
+    @Impure
     private void publishHeaderBlob(HollowProducer.HeaderBlob b) {
         try {
             HollowBlobWriter writer = new HollowBlobWriter(getWriteEngine());
@@ -779,6 +809,7 @@ abstract class AbstractHollowProducer {
      *
      * @return S(cur) and S(pnd)
      */
+    @Impure
     private ReadStateHelper checkIntegrity(
             ProducerListeners listeners, ReadStateHelper readStates, Artifacts artifacts,
             boolean schemaChangedFromPriorVersion) throws Exception {
@@ -839,6 +870,7 @@ abstract class AbstractHollowProducer {
         }
     }
 
+    @Impure
     private ReadStateHelper noIntegrityCheck(ReadStateHelper readStates, Artifacts artifacts) throws IOException {
         ReadStateHelper result = readStates;
 
@@ -863,18 +895,21 @@ abstract class AbstractHollowProducer {
         return result;
     }
 
+    @Impure
     private void readSnapshot(HollowProducer.Blob blob, HollowReadStateEngine stateEngine) throws IOException {
         try (HollowBlobInput in = HollowBlobInput.serial(blob.newInputStream())) {   // shared memory mode is not supported for producer
             new HollowBlobReader(stateEngine, new HollowBlobHeaderReader()).readSnapshot(in);
         }
     }
 
+    @Impure
     private void applyDelta(HollowProducer.Blob blob, HollowReadStateEngine stateEngine) throws IOException {
         try (HollowBlobInput in = HollowBlobInput.serial(blob.newInputStream())) {   // shared memory mode is not supported for producer
             new HollowBlobReader(stateEngine, new HollowBlobHeaderReader()).applyDelta(in);
         }
     }
 
+    @Impure
     private void validate(ProducerListeners listeners, HollowProducer.ReadState readState) {
         Status.StageWithStateBuilder psb = listeners.fireValidationStart(readState);
 
@@ -907,6 +942,7 @@ abstract class AbstractHollowProducer {
     }
 
 
+    @Impure
     private void announce(ProducerListeners listeners, HollowProducer.ReadState readState) {
         if (announcer != null) {
             Status.StageWithStateBuilder status = listeners.fireAnnouncementStart(readState);
@@ -950,6 +986,7 @@ abstract class AbstractHollowProducer {
         boolean cleanupCalled;
         boolean snapshotPublishComplete;
 
+        @Impure
         synchronized void cleanup() {
             cleanupCalled = true;
 
@@ -969,12 +1006,14 @@ abstract class AbstractHollowProducer {
             }
         }
 
+        @Impure
         synchronized void markSnapshotPublishComplete() {
             snapshotPublishComplete = true;
 
             cleanupSnapshot();
         }
 
+        @Impure
         private void cleanupSnapshot() {
             if (cleanupCalled && snapshotPublishComplete && snapshot != null) {
                 snapshot.cleanup();
@@ -982,14 +1021,17 @@ abstract class AbstractHollowProducer {
             }
         }
 
+        @Pure
         boolean hasDelta() {
             return delta != null;
         }
 
+        @Pure
         boolean hasReverseDelta() {
             return reverseDelta != null;
         }
 
+        @Pure
         boolean hasHeader() { return header != null; }
     }
 
@@ -998,14 +1040,17 @@ abstract class AbstractHollowProducer {
      */
     static class DummyBlobStorageCleaner extends HollowProducer.BlobStorageCleaner {
 
+        @SideEffectFree
         @Override
         public void cleanSnapshots() {
         }
 
+        @SideEffectFree
         @Override
         public void cleanReverseDeltas() {
         }
 
+        @SideEffectFree
         @Override
         public void cleanDeltas() {
         }
@@ -1018,6 +1063,7 @@ abstract class AbstractHollowProducer {
      *
      * @return cycle count of a producer with primary status.
      * */
+    @Pure
     public int getCycleCountWithPrimaryStatus() {
         return this.cycleCountSincePrimaryStatus;
     }

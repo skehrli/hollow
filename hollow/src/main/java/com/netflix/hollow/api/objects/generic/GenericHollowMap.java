@@ -16,6 +16,11 @@
  */
 package com.netflix.hollow.api.objects.generic;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
 import com.netflix.hollow.api.objects.HollowMap;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.api.objects.delegate.HollowMapDelegate;
@@ -34,42 +39,53 @@ import java.util.Map;
  */
 public class GenericHollowMap extends HollowMap<HollowRecord, HollowRecord>{
 
+    @Impure
     public GenericHollowMap(HollowDataAccess dataAccess, String type, int ordinal) {
         this((HollowMapTypeDataAccess)dataAccess.getTypeDataAccess(type, ordinal), ordinal);
     }
     
+    @Impure
     public GenericHollowMap(HollowMapTypeDataAccess dataAccess, int ordinal) {
         this(new HollowMapLookupDelegate<HollowRecord, HollowRecord>(dataAccess), ordinal);
     }
 
+    @SideEffectFree
+    @Impure
     public GenericHollowMap(HollowMapDelegate<HollowRecord, HollowRecord> typeState, int ordinal) {
         super(typeState, ordinal);
     }
     
+    @Impure
     @Override
     public HollowRecord instantiateKey(int keyOrdinal) {
         return GenericHollowRecordHelper.instantiate(getTypeDataAccess().getDataAccess(), getSchema().getKeyType(), keyOrdinal);
     }
 
+    @Impure
     @Override
     public HollowRecord instantiateValue(int valueOrdinal) {
         return GenericHollowRecordHelper.instantiate(getTypeDataAccess().getDataAccess(), getSchema().getValueType(), valueOrdinal);
     }
 
+    @Impure
     @Override
     public boolean equalsKey(int keyOrdinal, Object testObject) {
         return GenericHollowRecordHelper.equalObject(getSchema().getKeyType(), keyOrdinal, testObject);
     }
 
+    @Impure
     @Override
     public boolean equalsValue(int valueOrdinal, Object testObject) {
         return GenericHollowRecordHelper.equalObject(getSchema().getValueType(), valueOrdinal, testObject);
     }
     
+    @SideEffectFree
+    @Impure
     public <K extends HollowRecord, V extends HollowRecord> Iterable<Map.Entry<K, V>>entries() {
         return new GenericHollowMapEntryIterable<K, V>(entrySet());
     }
 
+    @Impure
     @Override
     public String toString() {
         return new HollowRecordStringifier().stringify(this);
@@ -79,21 +95,25 @@ public class GenericHollowMap extends HollowMap<HollowRecord, HollowRecord>{
 
         private final Iterable<Map.Entry<HollowRecord, HollowRecord>> wrappedIterable;
         
+        @SideEffectFree
         public GenericHollowMapEntryIterable(Iterable<Map.Entry<HollowRecord, HollowRecord>> wrap) {
             this.wrappedIterable = wrap;
         }
         
+        @Impure
         @Override
-        public Iterator<Map.Entry<K, V>> iterator() {
+        public Iterator<Map.Entry<K, V>> iterator(GenericHollowMap.@PolyOwningCollection GenericHollowMapEntryIterable<K, V> this) {
             final Iterator<Map.Entry<HollowRecord, HollowRecord>> iter = wrappedIterable.iterator();
 
             return new Iterator<Map.Entry<K,V>>() {
 
+                @Pure
                 @Override
                 public boolean hasNext() {
                     return iter.hasNext();
                 }
 
+                @Impure
                 @Override
                 @SuppressWarnings("unchecked")
                 public Entry<K, V> next() {
@@ -101,6 +121,7 @@ public class GenericHollowMap extends HollowMap<HollowRecord, HollowRecord>{
                     return new GenericHollowMapEntry((K) entry.getKey(), (V) entry.getValue());
                 }
                 
+                @SideEffectFree
                 @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
@@ -114,21 +135,27 @@ public class GenericHollowMap extends HollowMap<HollowRecord, HollowRecord>{
             private final K key;
             private final V value;
             
+            @SideEffectFree
             public GenericHollowMapEntry(K key, V value) {
                 this.key = key;
                 this.value = value;
             }
             
+            @NotOwning
+            @Pure
             @Override
             public K getKey() {
                 return key;
             }
 
+            @NotOwning
+            @Pure
             @Override
             public V getValue() {
                 return value;
             }
 
+            @Pure
             @Override
             public V setValue(V value) {
                 throw new UnsupportedOperationException();

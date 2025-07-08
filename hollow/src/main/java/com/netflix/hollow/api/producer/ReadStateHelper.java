@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer.ReadState;
 import com.netflix.hollow.core.HollowConstants;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -30,21 +33,28 @@ import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
  *
  */
 final class ReadStateHelper {
+    @SideEffectFree
+    @Impure
     static ReadStateHelper newDeltaChain() {
         return new ReadStateHelper(null, null);
     }
 
+    @SideEffectFree
+    @Impure
     static ReadStateHelper restored(ReadState state) {
         return new ReadStateHelper(state, null);
     }
     
+    @Impure
     static ReadState newReadState(final long version, final HollowReadStateEngine stateEngine) {
         return new HollowProducer.ReadState() {
+            @Pure
             @Override
             public long getVersion() {
                 return version;
             }
 
+            @Pure
             @Override
             public HollowReadStateEngine getStateEngine() {
                 return stateEngine;
@@ -55,11 +65,13 @@ final class ReadStateHelper {
     private final ReadState current;
     private final ReadState pending;
 
+    @SideEffectFree
     private ReadStateHelper(ReadState current, ReadState pending) {
         this.current = current;
         this.pending = pending;
     }
 
+    @Impure
     ReadStateHelper roundtrip(long version) {
         if(pending != null) throw new IllegalStateException();
         return new ReadStateHelper(this.current, newReadState(version, new HollowReadStateEngine()));
@@ -71,33 +83,42 @@ final class ReadStateHelper {
      *
      * @return
      */
+    @Impure
     ReadStateHelper swap() {
         return new ReadStateHelper(newReadState(current.getVersion(), pending.getStateEngine()),
                 newReadState(pending.getVersion(), current.getStateEngine()));
     }
 
+    @SideEffectFree
+    @Impure
     ReadStateHelper commit() {
         if(pending == null) throw new IllegalStateException();
         return new ReadStateHelper(this.pending, null);
     }
 
+    @Impure
     ReadStateHelper rollback() {
         if(pending == null) throw new IllegalStateException();
         return new ReadStateHelper(newReadState(current.getVersion(), pending.getStateEngine()), null);
     }
 
+    @Pure
     ReadState current() {
         return current;
     }
 
+    @Pure
     boolean hasCurrent() {
         return current != null;
     }
 
+    @Pure
     ReadState pending() {
         return pending;
     }
 
+    @Pure
+    @Impure
     long pendingVersion() {
         return pending != null ? pending.getVersion() : HollowConstants.VERSION_NONE;
     }

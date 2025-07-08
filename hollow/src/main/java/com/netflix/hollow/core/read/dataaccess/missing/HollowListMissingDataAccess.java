@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.dataaccess.missing;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.sampling.HollowListSampler;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
@@ -35,57 +38,69 @@ public class HollowListMissingDataAccess implements HollowListTypeDataAccess {
     private final HollowDataAccess dataAccess;
     private final String typeName;
 
+    @SideEffectFree
     public HollowListMissingDataAccess(HollowDataAccess dataAccess, String typeName) {
         this.dataAccess = dataAccess;
         this.typeName = typeName;
     }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         return dataAccess;
     }
 
+    @Impure
     @Override
     public HollowListSchema getSchema() {
         return (HollowListSchema) missingDataHandler().handleSchema(typeName);
     }
 
+    @Impure
     @Override
     public int getElementOrdinal(int ordinal, int listIndex) {
         return missingDataHandler().handleListElementOrdinal(typeName, ordinal, listIndex);
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         return missingDataHandler().handleListSize(typeName, ordinal);
     }
 
+    @Impure
     @Override
     public HollowOrdinalIterator ordinalIterator(int ordinal) {
         return missingDataHandler().handleListIterator(typeName, ordinal);
     }
 
+    @Impure
     private MissingDataHandler missingDataHandler() {
         return dataAccess.getMissingDataHandler();
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         throw new UnsupportedOperationException("No HollowTypeReadState exists for " + typeName);
     }
 
+    @SideEffectFree
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
     }
     
+    @SideEffectFree
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
     }
     
+    @SideEffectFree
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         return HollowListSampler.NULL_SAMPLER;

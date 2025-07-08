@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.write.HollowHashableWriteRecord.HashBehavior.IGNORED_HASHES;
 import static com.netflix.hollow.core.write.HollowHashableWriteRecord.HashBehavior.MIXED_HASHES;
 
@@ -29,29 +31,37 @@ public class HollowSetWriteRecord implements HollowHashableWriteRecord {
     private final LongList elementsAndHashes;
     private final HashBehavior defaultHashBehavior;
 
+    @SideEffectFree
+    @Impure
     public HollowSetWriteRecord() {
         this(HashBehavior.MIXED_HASHES);
     }
     
+    @SideEffectFree
+    @Impure
     public HollowSetWriteRecord(HashBehavior defaultHashBehavior) {
         this.elementsAndHashes = new LongList();
         this.defaultHashBehavior = defaultHashBehavior;
     }
 
+    @Impure
     public void addElement(int ordinal) {
         addElement(ordinal, ordinal);
     }
 
+    @Impure
     public void addElement(int ordinal, int hashCode) {
         long elementAndHash = (long)ordinal << 32 | (hashCode & 0xFFFFFFFFL);
         elementsAndHashes.add(elementAndHash);
     }
 
+    @Impure
     @Override
     public void writeDataTo(ByteDataArray buf) {
         writeDataTo(buf, defaultHashBehavior);
     }
 
+    @Impure
     @Override
     public void writeDataTo(ByteDataArray buf, HashBehavior hashBehavior) {
         elementsAndHashes.sort();
@@ -78,6 +88,7 @@ public class HollowSetWriteRecord implements HollowHashableWriteRecord {
         }
     }
 
+    @Impure
     @Override
     public void reset() {
         elementsAndHashes.clear();

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.compact;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.PopulatedOrdinalListener;
@@ -65,6 +68,8 @@ public class HollowCompactor {
      * @param readEngine  a HollowReadStateEngine at the same data state as the writeEngine
      * @param config      The criteria to identify when a compaction is necessary. 
      */
+    @SideEffectFree
+    @Impure
     public HollowCompactor(HollowWriteStateEngine writeEngine, HollowReadStateEngine readEngine, CompactionConfig config) {
         this(writeEngine, readEngine, config.getMinCandidateHoleCostInBytes(), config.getMinCandidateHolePercentage());
     }
@@ -77,6 +82,7 @@ public class HollowCompactor {
      * @param minCandidateHoleCostInBytes identify a type as a candidate for compaction only when the bytes used by ordinal holes exceeds this value 
      * @param minCandidateHolePercentage  identify a type as a candidate for compaction only when the percentage of space used by ordinal holes exceeds this value
      */
+    @SideEffectFree
     public HollowCompactor(HollowWriteStateEngine writeEngine, HollowReadStateEngine readEngine, long minCandidateHoleCostInBytes, int minCandidateHolePercentage) {
         this.writeEngine = writeEngine;
         this.readEngine = readEngine;
@@ -88,6 +94,7 @@ public class HollowCompactor {
      * Determine whether a compaction is necessary, based on the criteria specified in the constructor.
      * @return {@code true} if compaction is necessary, otherwise {@code false}
      */
+    @Impure
     public boolean needsCompaction() {
         return !findCompactionTargets().isEmpty();
     }
@@ -103,6 +110,7 @@ public class HollowCompactor {
      * </ul>
      *   
      */
+    @Impure
     public void compact() {
         Set<String> compactionTargets = findCompactionTargets();
         
@@ -189,6 +197,7 @@ public class HollowCompactor {
      * Find candidate types for compaction.  No two types in the returned set will have a dependency relationship, either
      * directly or transitively.  
      */
+    @Impure
     private Set<String> findCompactionTargets() {
         List<HollowSchema> schemas = HollowSchemaSorter.dependencyOrderedSchemaList(readEngine.getSchemas());
         Set<String> typesToCompact = new HashSet<String>();
@@ -203,6 +212,7 @@ public class HollowCompactor {
         return typesToCompact;
     }
     
+    @Impure
     private boolean isCompactionCandidate(String typeName) {
         HollowTypeReadState typeState = readEngine.getTypeState(typeName);
         BitSet populatedOrdinals = typeState.getListener(PopulatedOrdinalListener.class).getPopulatedOrdinals();
@@ -214,6 +224,7 @@ public class HollowCompactor {
         return isCompactionCandidate;
     }
     
+    @Impure
     private boolean candidateIsDependentOnAnyTargetedType(String type, Set<String> targetedTypes) {
         for(String targetedType : targetedTypes) {
             if(HollowSchemaSorter.typeIsTransitivelyDependent(readEngine, type, targetedType))
@@ -223,6 +234,7 @@ public class HollowCompactor {
         return false;
     }
     
+    @Impure
     private boolean shouldPreserveHashPositions(HollowSchema schema) {
         switch(schema.getSchemaType()) {
         case MAP:
@@ -248,15 +260,18 @@ public class HollowCompactor {
          * @param minCandidateHoleCostInBytes identify a type as a candidate for compaction only when the bytes used by ordinal holes exceeds this value 
          * @param minCandidateHolePercentage identify a type as a candidate for compaction only when the percentage of space used by ordinal holes exceeds this value
          */
+        @SideEffectFree
         public CompactionConfig(long minCandidateHoleCostInBytes, int minCandidateHolePercentage) {
             this.minCandidateHoleCostInBytes = minCandidateHoleCostInBytes;
             this.minCandidateHolePercentage = minCandidateHolePercentage;
         }
 
+        @Pure
         public long getMinCandidateHoleCostInBytes() {
             return minCandidateHoleCostInBytes;
         }
 
+        @Pure
         public int getMinCandidateHolePercentage() {
             return minCandidateHolePercentage;
         }

@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
 import com.netflix.hollow.core.read.dataaccess.HollowSetTypeDataAccess;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 import java.util.AbstractSet;
@@ -29,6 +33,7 @@ public class HollowPerfBackedSet<T> extends AbstractSet<T> {
     private final POJOInstantiator<T> instantiator;
     private final HashKeyExtractor hashKeyExtractor;
 
+    @Impure
     public HollowPerfBackedSet(
             HollowSetTypePerfAPI typeApi, 
             long ref,
@@ -41,17 +46,20 @@ public class HollowPerfBackedSet<T> extends AbstractSet<T> {
         this.hashKeyExtractor = hashKeyExtractor;
     }
 
+    @Impure
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<T> iterator(@PolyOwningCollection HollowPerfBackedSet<T> this) {
         HollowOrdinalIterator oi = dataAccess.ordinalIterator(ordinal);
 
         return new Iterator<T>() {
             int eo = oi.next();
 
+            @Pure
             @Override public boolean hasNext() {
                 return eo != HollowOrdinalIterator.NO_MORE_ORDINALS;
             }
 
+            @Impure
             @Override public T next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
@@ -63,8 +71,9 @@ public class HollowPerfBackedSet<T> extends AbstractSet<T> {
         };
     }
 
+    @Impure
     @Override
-    public boolean contains(Object o) {
+    public boolean contains(@NotOwningCollection HollowPerfBackedSet<T> this, Object o) {
         if(hashKeyExtractor == null)
             throw new UnsupportedOperationException();
         
@@ -74,8 +83,9 @@ public class HollowPerfBackedSet<T> extends AbstractSet<T> {
         return dataAccess.findElement(ordinal, key) != -1;
     }
 
+    @Impure
     @Override
-    public int size() {
+    public int size(@NotOwningCollection HollowPerfBackedSet<T> this) {
         return dataAccess.size(ordinal);
     }
 

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.type.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.api.objects.delegate.HollowCachedDelegate;
 import com.netflix.hollow.api.objects.delegate.HollowObjectAbstractDelegate;
@@ -28,16 +30,19 @@ public class StringDelegateCachedImpl extends HollowObjectAbstractDelegate imple
     private final String value;
     private StringTypeAPI typeAPI;
 
+    @Impure
     public StringDelegateCachedImpl(StringTypeAPI typeAPI, int ordinal) {
         this.value = typeAPI.getValue(ordinal);
         this.typeAPI = typeAPI;
     }
 
+    @Pure
     @Override
     public String getValue(int ordinal) {
         return value;
     }
 
+    @Pure
     @Override
     public boolean isValueEqual(int ordinal, String testValue) {
         if(testValue == null)
@@ -45,21 +50,25 @@ public class StringDelegateCachedImpl extends HollowObjectAbstractDelegate imple
         return testValue.equals(value);
     }
 
+    @Impure
     @Override
     public HollowObjectSchema getSchema() {
         return typeAPI.getTypeDataAccess().getSchema();
     }
 
+    @Impure
     @Override
     public HollowObjectTypeDataAccess getTypeDataAccess() {
         return typeAPI.getTypeDataAccess();
     }
 
+    @Pure
     @Override
     public StringTypeAPI getTypeAPI() {
         return typeAPI;
     }
 
+    @Impure
     @Override
     public void updateTypeAPI(HollowTypeAPI typeAPI) {
         this.typeAPI = (StringTypeAPI) typeAPI;

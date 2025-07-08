@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.schema.HollowSchema;
 
 public class HollowHistoricalSchemaChange {
@@ -23,15 +25,18 @@ public class HollowHistoricalSchemaChange {
     private final HollowSchema beforeSchema;
     private final HollowSchema afterSchema;
 
+    @SideEffectFree
     public HollowHistoricalSchemaChange(HollowSchema beforeSchema, HollowSchema afterSchema) {
         this.beforeSchema = beforeSchema;
         this.afterSchema = afterSchema;
     }
 
+    @Pure
     public HollowSchema getBeforeSchema() {
         return beforeSchema;
     }
 
+    @Pure
     public HollowSchema getAfterSchema() {
         return afterSchema;
     }

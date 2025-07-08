@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write.copy;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.write.HollowHashableWriteRecord.HashBehavior.MIXED_HASHES;
 import static com.netflix.hollow.core.write.HollowHashableWriteRecord.HashBehavior.UNMIXED_HASHES;
 
@@ -28,10 +31,13 @@ import com.netflix.hollow.tools.combine.OrdinalRemapper;
 
 public class HollowMapCopier extends HollowRecordCopier {
 
+    @SideEffectFree
+    @Impure
     public HollowMapCopier(HollowMapTypeReadState readTypeState, OrdinalRemapper ordinalRemapper, boolean preserveHashPositions) {
         super(readTypeState, new HollowMapWriteRecord(preserveHashPositions ? UNMIXED_HASHES : MIXED_HASHES), ordinalRemapper, preserveHashPositions);
     }
 
+    @Impure
     @Override
     public HollowWriteRecord copy(int ordinal) {
         HollowMapWriteRecord rec = rec();
@@ -51,10 +57,12 @@ public class HollowMapCopier extends HollowRecordCopier {
         return rec;
     }
 
+    @Pure
     private HollowMapTypeReadState readState() {
         return (HollowMapTypeReadState)readTypeState;
     }
 
+    @Pure
     private HollowMapWriteRecord rec() {
         return (HollowMapWriteRecord)writeRecord;
     }

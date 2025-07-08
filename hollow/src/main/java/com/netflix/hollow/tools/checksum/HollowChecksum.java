@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.checksum;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -35,16 +38,20 @@ public class HollowChecksum {
     private int currentChecksum = 0;
     private Vector<TypeChecksum> sortedTypeChecksums;
 
+    @Impure
     public void setSortedTypeChecksums(Vector<TypeChecksum> sortedTypeChecksums) {
         this.sortedTypeChecksums = sortedTypeChecksums;
     }
 
+    @Pure
     public Vector<TypeChecksum> getSortedTypeChecksums() {
         return sortedTypeChecksums;
     }
 
+    @SideEffectFree
     public HollowChecksum() { }
 
+    @Impure
     public void applyType(TypeChecksum typeChecksum) {
         if (this.sortedTypeChecksums == null) {
             this.sortedTypeChecksums = new Vector<>();
@@ -53,20 +60,24 @@ public class HollowChecksum {
         applyInt(typeChecksum.checksum);
     }
 
+    @Impure
     public void applyInt(int value) {
         currentChecksum ^= HashCodes.hashInt(value);
         currentChecksum = HashCodes.hashInt(currentChecksum);
     }
 
+    @Impure
     public void applyLong(long value) {
         currentChecksum ^= HashCodes.hashLong(value);
         currentChecksum = HashCodes.hashInt(currentChecksum);
     }
 
+    @Pure
     public int intValue() {
         return currentChecksum;
     }
 
+    @Pure
     @Override
     public boolean equals(Object other) {
         if(other instanceof HollowChecksum)
@@ -74,19 +85,23 @@ public class HollowChecksum {
         return false;
     }
 
+    @Pure
     @Override
     public int hashCode() {
         return currentChecksum;
     }
 
+    @SideEffectFree
     public String toString() {
         return Integer.toHexString(currentChecksum);
     }
 
+    @Impure
     public static HollowChecksum forStateEngine(HollowReadStateEngine stateEngine) {
         return forStateEngineWithCommonSchemas(stateEngine, stateEngine);
     }
     
+    @Impure
     public static HollowChecksum forStateEngineWithCommonSchemas(HollowReadStateEngine stateEngine, HollowReadStateEngine commonSchemasWithState) {
         final Vector<TypeChecksum> typeChecksums = new Vector<TypeChecksum>();
         SimultaneousExecutor executor = new SimultaneousExecutor(HollowChecksum.class, "checksum-common-schemas");
@@ -96,6 +111,7 @@ public class HollowChecksum {
             if(commonSchemasWithType != null) {
                 final HollowSchema commonSchemasWith = commonSchemasWithType.getSchema();
                 executor.execute(new Runnable() {
+                    @Impure
                     public void run() {
                         HollowChecksum cksum = typeState.getChecksum(commonSchemasWith);
                         typeChecksums.addElement(new TypeChecksum(typeState.getSchema().getName(), cksum));
@@ -125,20 +141,24 @@ public class HollowChecksum {
         private final String type;
         private final int checksum;
 
+        @Impure
         public TypeChecksum(String type, HollowChecksum cksum) {
             this.type = type;
             this.checksum = cksum.intValue();
         }
 
+        @Pure
         public int getChecksum() {
             return checksum;
         }
 
+        @Pure
         @Override
         public int compareTo(TypeChecksum other) {
             return type.compareTo(other.type);
         }
 
+        @Pure
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -147,11 +167,13 @@ public class HollowChecksum {
             return checksum == that.checksum && Objects.equals(type, that.type);
         }
 
+        @Pure
         @Override
         public int hashCode() {
             return Objects.hash(type, checksum);
         }
 
+        @SideEffectFree
         @Override
         public String toString() {
             return "TypeChecksum{" +

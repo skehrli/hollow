@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.split;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.tools.combine.OrdinalRemapper;
@@ -28,6 +30,7 @@ public class HollowSplitterOrdinalRemapper implements OrdinalRemapper {
     private final HollowSplitterShardCopier shardCopier;
     private final Map<String, int[]> typeMappings = new HashMap<String, int[]>();
 
+    @Impure
     public HollowSplitterOrdinalRemapper(HollowReadStateEngine stateEngine, HollowSplitterShardCopier shardCopier) {
         this.shardCopier = shardCopier;
 
@@ -39,6 +42,7 @@ public class HollowSplitterOrdinalRemapper implements OrdinalRemapper {
         }
     }
 
+    @Impure
     @Override
     public int getMappedOrdinal(String type, int originalOrdinal) {
         int[] ordinalRemapping = typeMappings.get(type);
@@ -50,11 +54,13 @@ public class HollowSplitterOrdinalRemapper implements OrdinalRemapper {
         return ordinalRemapping[originalOrdinal];
     }
 
+    @Impure
     @Override
     public void remapOrdinal(String type, int originalOrdinal, int mappedOrdinal) {
         typeMappings.get(type)[originalOrdinal] = mappedOrdinal;
     }
 
+    @Pure
     @Override
     public boolean ordinalIsMapped(String type, int originalOrdinal) {
         return typeMappings.get(type)[originalOrdinal] != -1;

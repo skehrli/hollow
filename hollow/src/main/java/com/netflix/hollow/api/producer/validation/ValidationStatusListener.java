@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.listener.AnnouncementListener;
 import com.netflix.hollow.api.producer.listener.HollowProducerEventListener;
@@ -37,6 +38,7 @@ public interface ValidationStatusListener extends HollowProducerEventListener {
      *
      * @param version the version
      */
+    @SideEffectFree
     void onValidationStatusStart(long version);
 
     /**
@@ -55,5 +57,6 @@ public interface ValidationStatusListener extends HollowProducerEventListener {
      * @param version the version
      * @param elapsed the time elapsed between this event and {@link #onValidationStatusStart}
      */
+    @SideEffectFree
     void onValidationStatusComplete(ValidationStatus status, long version, Duration elapsed);
 }

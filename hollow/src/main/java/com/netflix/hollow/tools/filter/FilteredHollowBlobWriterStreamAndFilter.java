@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.filter;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.filter.HollowFilterConfig;
 import java.io.DataOutputStream;
 import java.io.OutputStream;
@@ -25,19 +28,23 @@ class FilteredHollowBlobWriterStreamAndFilter {
     private final DataOutputStream dos;
     private final HollowFilterConfig config;
 
+    @SideEffectFree
     FilteredHollowBlobWriterStreamAndFilter(DataOutputStream dos, HollowFilterConfig config) {
         this.dos = dos;
         this.config = config;
     }
 
+    @Pure
     public DataOutputStream getStream() {
         return dos;
     }
 
+    @Pure
     public HollowFilterConfig getConfig() {
         return config;
     }
 
+    @Impure
     public static DataOutputStream[] streamsOnly(FilteredHollowBlobWriterStreamAndFilter[] streamAndFilters) {
         DataOutputStream streams[] = new DataOutputStream[streamAndFilters.length];
 
@@ -47,6 +54,7 @@ class FilteredHollowBlobWriterStreamAndFilter {
         return streams;
     }
 
+    @Impure
     public static FilteredHollowBlobWriterStreamAndFilter[] combine(OutputStream streams[], HollowFilterConfig configs[]) {
         if(streams.length != configs.length)
             throw new IllegalArgumentException("Must provide exactly the same number of streams as configs");
@@ -59,6 +67,7 @@ class FilteredHollowBlobWriterStreamAndFilter {
         return streamAndFilters;
     }
 
+    @Impure
     public static FilteredHollowBlobWriterStreamAndFilter[] withType(String typeName, FilteredHollowBlobWriterStreamAndFilter[] allStreamAndFilters) {
         int countConfigsWithType = 0;
 

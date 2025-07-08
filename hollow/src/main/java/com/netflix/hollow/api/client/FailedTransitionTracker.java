@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import java.util.HashSet;
 
@@ -28,16 +31,19 @@ public class FailedTransitionTracker {
     private final HashSet<Long> failedSnapshotTransitions;
     private final HashSet<DeltaTransition> failedDeltaTransitions;
 
+    @Impure
     public FailedTransitionTracker() {
         this.failedSnapshotTransitions = new HashSet<Long>();
         this.failedDeltaTransitions = new HashSet<DeltaTransition>();
     }
 
+    @Impure
     public void markAllTransitionsAsFailed(HollowUpdatePlan plan) {
         for(HollowConsumer.Blob transition : plan)
             markFailedTransition(transition);
     }
 
+    @Impure
     public void markFailedTransition(HollowConsumer.Blob transition) {
         if(transition.isSnapshot()) {
             failedSnapshotTransitions.add(transition.getToVersion());
@@ -46,6 +52,7 @@ public class FailedTransitionTracker {
         }
     }
 
+    @Impure
     public boolean anyTransitionWasFailed(HollowUpdatePlan plan) {
         for(HollowConsumer.Blob transition : plan) {
             if(transitionWasFailed(transition))
@@ -57,6 +64,7 @@ public class FailedTransitionTracker {
     /**
      * @return the number of failed snapshot transitions.
      */
+    @Pure
     public int getNumFailedSnapshotTransitions() {
         return this.failedSnapshotTransitions.size();
     }
@@ -64,6 +72,7 @@ public class FailedTransitionTracker {
     /**
      * @return the number of failed delta transitions.
      */
+    @Pure
     public int getNumFailedDeltaTransitions() {
         return this.failedDeltaTransitions.size();
     }
@@ -71,11 +80,13 @@ public class FailedTransitionTracker {
     /**
      * Clear all failing transitions.
      */
+    @Impure
     public void clear() {
         failedSnapshotTransitions.clear();
         failedDeltaTransitions.clear();
     }
 
+    @Impure
     private boolean transitionWasFailed(HollowConsumer.Blob transition) {
         if(transition.isSnapshot())
             return failedSnapshotTransitions.contains(transition.getToVersion());
@@ -83,6 +94,8 @@ public class FailedTransitionTracker {
         return failedDeltaTransitions.contains(delta(transition));
     }
 
+    @SideEffectFree
+    @Impure
     private DeltaTransition delta(HollowConsumer.Blob transition) {
         return new DeltaTransition(transition.getFromVersion(), transition.getToVersion());
     }
@@ -91,11 +104,13 @@ public class FailedTransitionTracker {
         private final long fromState;
         private final long toState;
 
+        @SideEffectFree
         DeltaTransition(long fromState, long toState) {
             this.fromState = fromState;
             this.toState = toState;
         }
 
+        @Pure
         @Override
         public int hashCode() {
             return (int)fromState
@@ -104,6 +119,7 @@ public class FailedTransitionTracker {
                     ^ (int)(toState >> 32);
         }
 
+        @Pure
         @Override
         public boolean equals(Object obj) {
             if(obj instanceof DeltaTransition) {

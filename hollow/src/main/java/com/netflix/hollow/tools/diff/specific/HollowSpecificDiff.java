@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff.specific;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.index.traversal.HollowIndexerValueTraverser;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
@@ -49,6 +51,7 @@ public class HollowSpecificDiff {
      * @param to the to state
      * @param type the type to diff
      */
+    @Impure
     public HollowSpecificDiff(HollowReadStateEngine from, HollowReadStateEngine to, String type) {
         this.from = from;
         this.to = to;
@@ -65,6 +68,7 @@ public class HollowSpecificDiff {
      *
      * @param paths the key paths
      */
+    @Impure
     public void setRecordMatchPaths(String... paths) {
         for(String path : paths)
             matcher.addMatchPath(path);
@@ -75,6 +79,7 @@ public class HollowSpecificDiff {
      *
      * @param paths the paths for inspection
      */
+    @Impure
     public void setElementMatchPaths(String... paths) {
         resetResults();
         this.elementPaths = paths;
@@ -87,6 +92,7 @@ public class HollowSpecificDiff {
      *
      * @param paths the paths for matching
      */
+    @Impure
     public void setElementKeyPaths(String... paths) {
         resetResults();
         elementKeyPaths = new BitSet(elementPaths.length);
@@ -102,6 +108,7 @@ public class HollowSpecificDiff {
         elementNonKeyPaths.andNot(elementKeyPaths);
     }
 
+    @Pure
     public int getElementPathIdx(String path) {
         for(int i=0;i<elementPaths.length;i++) {
             if(elementPaths[i].equals(path))
@@ -113,6 +120,7 @@ public class HollowSpecificDiff {
     /**
      * Find the matching records (based on primary keys) across states
      */
+    @Impure
     public void prepareMatches() {
         matcher.calculateMatches();
     }
@@ -120,6 +128,7 @@ public class HollowSpecificDiff {
     /**
      * Calculate the differences
      */
+    @Impure
     public void calculate() {
         resetResults();
         SimultaneousExecutor executor = new SimultaneousExecutor(getClass(), "calculate");
@@ -128,6 +137,7 @@ public class HollowSpecificDiff {
         for(int i=0;i<numThreads;i++) {
             final int threadNumber = i;
             executor.execute(new Runnable() {
+                @Impure
                 public void run() {
                     HollowIndexerValueTraverser fromTraverser = new HollowIndexerValueTraverser(from, type, elementPaths);
                     HollowIndexerValueTraverser toTraverser = new HollowIndexerValueTraverser(to, type, elementPaths);
@@ -170,6 +180,7 @@ public class HollowSpecificDiff {
         }
     }
 
+    @Impure
     private void countMatches(HollowIndexerValueTraverser fromTraverser, HollowIndexerValueTraverser toTraverser, int[] hashedResults) {
         int numMatchedEqualElements = 0;
         int numModifiedElements = 0;
@@ -209,6 +220,7 @@ public class HollowSpecificDiff {
         totalUnmatchedToElements.addAndGet(toTraverser.getNumMatches() - numCommonMatches);
     }
 
+    @Impure
     private void populateHashTable(HollowIndexerValueTraverser fromTraverser, int[] hashedResults) {
         Arrays.fill(hashedResults, -1);
         int hashMask = hashedResults.length - 1;
@@ -226,10 +238,12 @@ public class HollowSpecificDiff {
         }
     }
 
+    @Pure
     private int hashTableSize(int numMatches) {
         return 1 << (32 - Integer.numberOfLeadingZeros((numMatches * 2) - 1));
     }
 
+    @Impure
     private void resetResults() {
         totalUnmatchedFromElements.set(0);
         totalUnmatchedToElements.set(0);
@@ -237,18 +251,22 @@ public class HollowSpecificDiff {
         totalModifiedElements.set(0);
     }
 
+    @Impure
     public long getTotalUnmatchedFromElements() {
         return totalUnmatchedFromElements.get();
     }
 
+    @Impure
     public long getTotalUnmatchedToElements() {
         return totalUnmatchedToElements.get();
     }
 
+    @Impure
     public long getTotalMatchedEqualElements() {
         return totalMatchedEqualElements.get();
     }
 
+    @Impure
     public long getTotalModifiedElements() {
         return totalModifiedElements.get();
     }

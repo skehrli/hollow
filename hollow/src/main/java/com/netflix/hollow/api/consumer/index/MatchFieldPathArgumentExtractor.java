@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.consumer.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static java.util.stream.Collectors.toList;
 
 import com.netflix.hollow.api.objects.HollowObject;
@@ -52,6 +55,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
         /**
          * Resolves a field path to a {@link FieldPaths.FieldPath}.
          */
+        @Pure
         FieldPaths.FieldPath<? extends FieldPaths.FieldSegment> resolve(
                 HollowDataset hollowDataAccess, String type, String fieldPath);
     }
@@ -60,6 +64,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
 
     final Function<Q, Object> extractor;
 
+    @SideEffectFree
     MatchFieldPathArgumentExtractor(
             FieldPaths.FieldPath<? extends FieldPaths.FieldSegment> fieldPath, Function<Q, ?> extractor) {
         this.fieldPath = fieldPath;
@@ -68,10 +73,12 @@ final class MatchFieldPathArgumentExtractor<Q> {
         this.extractor = erasedResultExtractor;
     }
 
+    @Impure
     Object extract(Q v) {
         return extractor.apply(v);
     }
 
+    @Impure
     static <Q> List<MatchFieldPathArgumentExtractor<Q>> fromHolderClass(
             HollowDataset dataset, Class<?> rootType, Class<Q> holder,
             FieldPathResolver fpResolver) {
@@ -113,6 +120,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
                 .collect(toList());
     }
 
+    @Impure
     static <Q> MatchFieldPathArgumentExtractor<Q> fromField(
             HollowDataset dataset, Class<?> rootType, Field f,
             FieldPathResolver fpResolver)
@@ -122,6 +130,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
                 fpResolver);
     }
 
+    @Impure
     static <Q> MatchFieldPathArgumentExtractor<Q> fromMethod(
             HollowDataset dataset, Class<?> rootType, Method m,
             FieldPathResolver fpResolver)
@@ -136,6 +145,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
                 fpResolver);
     }
 
+    @Impure
     static <Q> MatchFieldPathArgumentExtractor<Q> fromHandle(
             HollowDataset dataset, Class<?> rootType, String fieldPath, MethodHandle mh,
             FieldPathResolver fpResolver) {
@@ -143,6 +153,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
                 fpResolver);
     }
 
+    @Impure
     static <T> MatchFieldPathArgumentExtractor<T> fromPathAndType(
             HollowDataset dataset, Class<?> rootType, String fieldPath, Class<T> type,
             FieldPathResolver fpResolver) {
@@ -150,6 +161,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
                 fpResolver);
     }
 
+    @SideEffectFree
     static IllegalArgumentException incompatibleMatchType(
             Class<?> extractorType, String fieldPath,
             HollowObjectSchema.FieldType schemaFieldType) {
@@ -158,6 +170,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
                         extractorType.getName(), fieldPath, schemaFieldType));
     }
 
+    @SideEffectFree
     static IllegalArgumentException incompatibleMatchType(
             Class<?> extractorType, String fieldPath, String typeName) {
         return new IllegalArgumentException(
@@ -166,6 +179,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
                         extractorType.getName(), fieldPath, typeName));
     }
 
+    @Impure
     static <Q, T> MatchFieldPathArgumentExtractor<Q> fromFunction(
             HollowDataset dataset, Class<?> rootType, String fieldPath,
             Class<T> extractorType, Function<Q, T> extractorFunction,
@@ -268,6 +282,7 @@ final class MatchFieldPathArgumentExtractor<Q> {
         return new MatchFieldPathArgumentExtractor<>(fp, extractor);
     }
 
+    @Impure
     private static <Q, T> Function<Q, T> getterGenericExtractor(MethodHandle getter) {
         return h -> {
             try {
@@ -282,14 +297,17 @@ final class MatchFieldPathArgumentExtractor<Q> {
         };
     }
 
+    @Impure
     private static String getFieldPath(Field f) {
         return getFieldPath(f, f);
     }
 
+    @Impure
     private static String getFieldPath(Method m) {
         return getFieldPath(m, m);
     }
 
+    @Impure
     private static String getFieldPath(Member m, AnnotatedElement e) {
         FieldPath fpa = e.getDeclaredAnnotation(FieldPath.class);
         if (fpa == null) {

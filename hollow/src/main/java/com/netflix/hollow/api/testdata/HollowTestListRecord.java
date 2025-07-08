@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.api.testdata;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.mustcall.qual.Owning;
 import com.netflix.hollow.core.write.HollowListWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteStateEngine;
@@ -26,19 +30,24 @@ public abstract class HollowTestListRecord<T> extends HollowTestRecord<T> {
 
     private final List<HollowTestRecord<?>> elements = new ArrayList<>();
 
-    protected HollowTestListRecord(T parent) {
+    @SideEffectFree
+    @Impure
+    protected HollowTestListRecord(@Owning T parent) {
         super(parent);
     }
     
+    @Impure
     protected void addElement(HollowTestRecord<?> element) {
         elements.add(element);
     }
     
+    @Pure
     @SuppressWarnings({ "hiding", "unchecked" })
     public <T extends HollowTestRecord<?>> T getRecord(int idx) {
         return (T) elements.get(idx);
     }
 
+    @Impure
     public HollowWriteRecord toWriteRecord(HollowWriteStateEngine writeEngine) {
         HollowListWriteRecord rec = new HollowListWriteRecord();
         for(HollowTestRecord<?> e : elements) {

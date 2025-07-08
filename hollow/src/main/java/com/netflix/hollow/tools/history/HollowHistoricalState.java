@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.tools.history.keyindex.HollowHistoricalStateKeyOrdinalMapping;
 import com.netflix.hollow.tools.history.keyindex.HollowHistoryKeyIndex;
@@ -34,6 +37,7 @@ public class HollowHistoricalState {
     private final Map<String, String> headerEntries;
     private HollowHistoricalState nextState;
 
+    @SideEffectFree
     public HollowHistoricalState(long version, HollowHistoricalStateKeyOrdinalMapping keyOrdinalMapping, HollowHistoricalStateDataAccess dataAccess, Map<String, String> headerEntries) {
         this.version = version;
         this.dataAccess = dataAccess;
@@ -44,6 +48,7 @@ public class HollowHistoricalState {
     /**
      * @return The version of this state
      */
+    @Pure
     public long getVersion() {
         return version;
     }
@@ -52,6 +57,7 @@ public class HollowHistoricalState {
      * @return A {@link HollowDataAccess} which can be used to retrieve the data from this state.  For example,
      * you can use this with a generated Hollow API or the generic hollow object API.
      */
+    @Pure
     public HollowHistoricalStateDataAccess getDataAccess() {
         return dataAccess;
     }
@@ -69,6 +75,7 @@ public class HollowHistoricalState {
      * 
      * @return the historical state key ordinal mapping
      */
+    @Pure
     public HollowHistoricalStateKeyOrdinalMapping getKeyOrdinalMapping() {
         return keyOrdinalMapping;
     }
@@ -76,6 +83,7 @@ public class HollowHistoricalState {
     /**
      * @return The subsequent historical state which occurred after this one 
      */
+    @Pure
     public HollowHistoricalState getNextState() {
         return nextState;
     }
@@ -83,14 +91,17 @@ public class HollowHistoricalState {
     /**
      * @return The blob header entries from this state.
      */
+    @Pure
     public Map<String, String> getHeaderEntries() {
         return headerEntries;
     }
 
+    @Impure
     void setNextState(HollowHistoricalState nextState) {
         this.nextState = nextState;
     }
 
+    @Impure
     public long getApproximateHeapFootprintInBytes() {
         long total = 0L;
         for (HollowHistoricalTypeDataAccess typeDataAccess : dataAccess.getTypeDataAccessMap().values()) {

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.sampling;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.filter.HollowFilterConfig;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,45 +36,54 @@ public class HollowListSampler implements HollowSampler {
     private long getSamples;
     private long iteratorSamples;
 
+    @SideEffectFree
     public HollowListSampler(String typeName, HollowSamplingDirector director) {
         this.typeName = typeName;
         this.director = director;
     }
 
+    @Impure
     public void setSamplingDirector(HollowSamplingDirector director) {
         if(!"".equals(typeName))
             this.director = director;
     }
     
+    @Impure
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         if(!"".equals(typeName) && fieldSpec.doesIncludeType(typeName))
             this.director = director;
     }
     
+    @Impure
     @Override
     public void setUpdateThread(Thread t) {
         director.setUpdateThread(t);
     }
 
+    @Impure
     public void recordSize() {
         if(director.shouldRecord())
             sizeSamples++;
     }
 
+    @Impure
     public void recordGet() {
         if(director.shouldRecord())
             getSamples++;
     }
 
+    @Impure
     public void recordIterator() {
         if(director.shouldRecord())
             iteratorSamples++;
     }
 
+    @Pure
     public boolean hasSampleResults() {
         return sizeSamples > 0 || getSamples > 0 || iteratorSamples > 0;
     }
 
+    @Impure
     @Override
     public Collection<SampleResult> getSampleResults() {
         List<SampleResult> results = new ArrayList<SampleResult>();
@@ -81,6 +93,7 @@ public class HollowListSampler implements HollowSampler {
         return results;
     }
 
+    @Impure
     @Override
     public void reset() {
         sizeSamples = 0;

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.dataaccess.missing;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.sampling.HollowObjectSampler;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
@@ -36,71 +39,85 @@ public class HollowObjectMissingDataAccess implements HollowObjectTypeDataAccess
     private final HollowDataAccess dataAccess;
     private final String typeName;
 
+    @SideEffectFree
     public HollowObjectMissingDataAccess(HollowDataAccess dataAccess, String typeName) {
         this.dataAccess = dataAccess;
         this.typeName = typeName;
     }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         return dataAccess;
     }
 
+    @Impure
     @Override
     public HollowObjectSchema getSchema() {
         return (HollowObjectSchema) missingDataHandler().handleSchema(typeName);
     }
 
+    @Impure
     @Override
     public boolean isNull(int ordinal, int fieldIndex) {
         return missingDataHandler().handleIsNull(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public int readOrdinal(int ordinal, int fieldIndex) {
         return missingDataHandler().handleReferencedOrdinal(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public int readInt(int ordinal, int fieldIndex) {
         return missingDataHandler().handleInt(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public float readFloat(int ordinal, int fieldIndex) {
         return missingDataHandler().handleFloat(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public double readDouble(int ordinal, int fieldIndex) {
         return missingDataHandler().handleDouble(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public long readLong(int ordinal, int fieldIndex) {
         return missingDataHandler().handleLong(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public Boolean readBoolean(int ordinal, int fieldIndex) {
         return missingDataHandler().handleBoolean(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public byte[] readBytes(int ordinal, int fieldIndex) {
         return missingDataHandler().handleBytes(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public String readString(int ordinal, int fieldIndex) {
         return missingDataHandler().handleString(typeName, ordinal, fieldName(fieldIndex));
     }
 
+    @Impure
     @Override
     public boolean isStringFieldEqual(int ordinal, int fieldIndex, String testValue) {
         return missingDataHandler().handleStringEquals(typeName, ordinal, fieldName(fieldIndex), testValue);
     }
 
+    @Impure
     @Override
     public int findVarLengthFieldHashCode(int ordinal, int fieldIndex) {
         HollowObjectSchema schema = getSchema();
@@ -111,31 +128,38 @@ public class HollowObjectMissingDataAccess implements HollowObjectTypeDataAccess
         }
     }
 
+    @Impure
     private String fieldName(int fieldIndex) {
         return getSchema().getFieldName(fieldIndex);
     }
 
+    @Impure
     private MissingDataHandler missingDataHandler() {
         return dataAccess.getMissingDataHandler();
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         throw new UnsupportedOperationException("No HollowTypeReadState exists for " + typeName);
     }
 
+    @SideEffectFree
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
     }
     
+    @SideEffectFree
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
     }
 
+    @SideEffectFree
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         return HollowObjectSampler.NULL_SAMPLER;

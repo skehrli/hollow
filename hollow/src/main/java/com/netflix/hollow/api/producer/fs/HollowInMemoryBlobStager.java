@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer.fs;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.HollowProducer.Blob;
 import com.netflix.hollow.api.producer.HollowProducer.HeaderBlob;
@@ -34,29 +37,36 @@ public class HollowInMemoryBlobStager implements HollowProducer.BlobStager {
 
     private final ProducerOptionalBlobPartConfig optionalPartConfig;
 
+    @SideEffectFree
+    @Impure
     public HollowInMemoryBlobStager() {
         this(null);
     }
 
+    @SideEffectFree
     public HollowInMemoryBlobStager(ProducerOptionalBlobPartConfig optionalPartConfig) {
         this.optionalPartConfig = optionalPartConfig;
     }
 
+    @Impure
     @Override
     public Blob openSnapshot(long version) {
         return new InMemoryBlob(HollowConstants.VERSION_NONE, version, Blob.Type.SNAPSHOT, optionalPartConfig);
     }
 
+    @Impure
     @Override
     public Blob openDelta(long fromVersion, long toVersion) {
         return new InMemoryBlob(fromVersion, toVersion, Blob.Type.DELTA, optionalPartConfig);
     }
 
+    @Impure
     @Override
     public Blob openReverseDelta(long fromVersion, long toVersion) {
         return new InMemoryBlob(fromVersion, toVersion, Blob.Type.REVERSE_DELTA, optionalPartConfig);
     }
 
+    @Impure
     @Override
     public HollowProducer.HeaderBlob openHeader(long version) {
         return new InMemoryHeaderBlob(version);
@@ -65,14 +75,18 @@ public class HollowInMemoryBlobStager implements HollowProducer.BlobStager {
     public static class InMemoryHeaderBlob extends HeaderBlob {
         private byte[] data;
 
+        @SideEffectFree
+        @Impure
         protected InMemoryHeaderBlob(long version) {
             super(version);
         }
 
+        @SideEffectFree
         @Override
         public void cleanup() {
         }
 
+        @Impure
         @Override
         public void write(HollowBlobWriter blobWriter) throws IOException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -80,6 +94,7 @@ public class HollowInMemoryBlobStager implements HollowProducer.BlobStager {
             data = baos.toByteArray();
         }
 
+        @Impure
         @Override
         public InputStream newInputStream() throws IOException {
             return new ByteArrayInputStream(data);
@@ -91,14 +106,18 @@ public class HollowInMemoryBlobStager implements HollowProducer.BlobStager {
         private byte[] data;
         private Map<String, byte[]> optionalParts;
         
+        @Impure
         protected InMemoryBlob(long fromVersion, long toVersion, Type type) {
             super(fromVersion, toVersion, type);
         }
 
+        @SideEffectFree
+        @Impure
         protected InMemoryBlob(long fromVersion, long toVersion, Type type, ProducerOptionalBlobPartConfig optionalPartConfig) {
             super(fromVersion, toVersion, type, optionalPartConfig);
         }
 
+        @Impure
         @Override
         public void write(HollowBlobWriter writer) throws IOException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -137,21 +156,25 @@ public class HollowInMemoryBlobStager implements HollowProducer.BlobStager {
             }
         }
 
+        @Impure
         @Override
         public InputStream newInputStream() throws IOException {
             return new ByteArrayInputStream(data);
         }
 
+        @Impure
         @Override
         public InputStream newOptionalPartInputStream(String partName) throws IOException {
             return new ByteArrayInputStream(optionalParts.get(partName));
         }
 
+        @Pure
         @Override
         public Path getOptionalPartPath(String partName) {
             throw new UnsupportedOperationException("Path is not available");
         }
 
+        @SideEffectFree
         @Override
         public void cleanup() { }
 

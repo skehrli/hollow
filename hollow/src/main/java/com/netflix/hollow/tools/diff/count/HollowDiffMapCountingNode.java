@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.diff.count;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.map.HollowMapTypeReadState;
 import com.netflix.hollow.core.read.iterator.HollowMapEntryOrdinalIterator;
@@ -46,6 +47,7 @@ public class HollowDiffMapCountingNode extends HollowDiffCountingNode {
     private final boolean keyRequiresTraversalForMissingFields;
     private final boolean valueRequiresTraversalForMissingFields;
 
+    @Impure
     public HollowDiffMapCountingNode(HollowDiff diff, HollowTypeDiff topLevelTypeDiff, HollowDiffNodeIdentifier nodeId, HollowMapTypeReadState fromState, HollowMapTypeReadState toState) {
         super(diff, topLevelTypeDiff, nodeId);
         this.fromState = fromState;
@@ -68,6 +70,7 @@ public class HollowDiffMapCountingNode extends HollowDiffCountingNode {
         this.valueRequiresTraversalForMissingFields = equalityMapping.requiresMissingFieldTraversal(valueType);
     }
 
+    @Impure
     @Override
     public void prepare(int topLevelFromOrdinal, int topLevelToOrdinal) {
         keyNode.prepare(topLevelFromOrdinal, topLevelToOrdinal);
@@ -79,6 +82,7 @@ public class HollowDiffMapCountingNode extends HollowDiffCountingNode {
     private final IntList traversalFromValueOrdinals = new IntList();
     private final IntList traversalToValueOrdinals = new IntList();
 
+    @Impure
     @Override
     public int traverseDiffs(IntList fromOrdinals, IntList toOrdinals) {
         fillTraversalLists(fromOrdinals, toOrdinals);
@@ -103,6 +107,7 @@ public class HollowDiffMapCountingNode extends HollowDiffCountingNode {
         return score;
     }
 
+    @Impure
     @Override
     public int traverseMissingFields(IntList fromOrdinals, IntList toOrdinals) {
         fillTraversalLists(fromOrdinals, toOrdinals);
@@ -115,6 +120,7 @@ public class HollowDiffMapCountingNode extends HollowDiffCountingNode {
         return score;
     }
 
+    @Impure
     @Override
     public List<HollowFieldDiff> getFieldDiffs() {
         List<HollowFieldDiff> list = new ArrayList<HollowFieldDiff>();
@@ -126,6 +132,7 @@ public class HollowDiffMapCountingNode extends HollowDiffCountingNode {
     }
 
 
+    @Impure
     private void fillTraversalLists(IntList fromOrdinals, IntList toOrdinals) {
         traversalFromKeyOrdinals.clear();
         traversalToKeyOrdinals.clear();
@@ -145,6 +152,7 @@ public class HollowDiffMapCountingNode extends HollowDiffCountingNode {
         }
     }
 
+    @Impure
     private void fillListsWithReferencedOrdinals(HollowMapTypeReadState typeState, int ordinal, IntList fillKeyList, IntList fillValueList) {
         HollowMapEntryOrdinalIterator iter = typeState.ordinalIterator(ordinal);
         while(iter.next()) {

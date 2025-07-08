@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.dataaccess;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.map.HollowMapTypeReadState;
 import com.netflix.hollow.core.read.iterator.HollowMapEntryOrdinalIterator;
 import com.netflix.hollow.core.schema.HollowMapSchema;
@@ -28,24 +29,34 @@ import com.netflix.hollow.core.schema.HollowMapSchema;
  */
 public interface HollowMapTypeDataAccess extends HollowTypeDataAccess {
 
+    @Impure
     public HollowMapSchema getSchema();
 
+    @Impure
     public int size(int ordinal);
 
+    @Impure
     public int get(int ordinal, int keyOrdinal);
 
+    @Impure
     public int get(int ordinal, int keyOrdinal, int hashCode);
     
+    @Impure
     public int findKey(int ordinal, Object... hashKey);
     
+    @Impure
     public int findValue(int ordinal, Object... hashKey);
     
+    @Impure
     public long findEntry(int ordinal, Object... hashKey);
 
+    @Impure
     public HollowMapEntryOrdinalIterator potentialMatchOrdinalIterator(int ordinal, int hashCode);
 
+    @Impure
     public HollowMapEntryOrdinalIterator ordinalIterator(int ordinal);
 
+    @Impure
     public long relativeBucket(int ordinal, int bucketIndex);
 
 }

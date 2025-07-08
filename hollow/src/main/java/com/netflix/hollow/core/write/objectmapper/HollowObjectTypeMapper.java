@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.api.objects.generic.GenericHollowObject;
 import com.netflix.hollow.core.index.key.PrimaryKey;
@@ -60,6 +63,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
     
     private volatile int primaryKeyFieldPathIdx[][];
 
+    @Impure
     public HollowObjectTypeMapper(HollowObjectMapper parentMapper, Class<?> clazz, String declaredTypeName, Set<Type> visited) {
         this.parentMapper = parentMapper;
         this.clazz = clazz;
@@ -143,6 +147,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         this.hasAssignedOrdinalField = hasAssignedOrdinalField;
     }
 
+    @Impure
     private static String[] getKeyFieldPaths(Class<?> clazz) {
         HollowPrimaryKey primaryKey = clazz.getAnnotation(HollowPrimaryKey.class);
         while(primaryKey == null && clazz != Object.class && clazz.isInterface()) {
@@ -152,6 +157,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         return primaryKey == null ? null : primaryKey.fields();
     }
     
+    @Impure
     private static int getNumShardsByAnnotation(Class<?> clazz) {
         HollowShardLargeType numShardsAnnotation = clazz.getAnnotation(HollowShardLargeType.class);
         if(numShardsAnnotation != null)
@@ -159,11 +165,13 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         return -1;
     }
 
+    @Pure
     @Override
     public String getTypeName() {
         return typeName;
     }
 
+    @Impure
     @Override
     public int write(Object obj) {
         if (hasAssignedOrdinalField) {
@@ -181,12 +189,14 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         return assignedOrdinal;
     }
 
+    @Impure
     @Override
     public int writeFlat(Object obj, FlatRecordWriter flatRecordWriter) {
         HollowObjectWriteRecord rec = copyToWriteRecord(obj, flatRecordWriter);
         return flatRecordWriter.write(schema, rec);
     }
     
+    @Impure
     private HollowObjectWriteRecord copyToWriteRecord(Object obj, FlatRecordWriter flatRecordWriter) {
         if (obj.getClass() != clazz && !clazz.isAssignableFrom(obj.getClass()))
             throw new IllegalArgumentException("Attempting to write unexpected class!  Expected " + clazz + " but object was " + obj.getClass());
@@ -199,6 +209,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         return rec;
     }
 
+    @Impure
     @Override
     protected Object parseHollowRecord(HollowRecord record) {
         try {
@@ -242,6 +253,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         }
     }
 
+    @Impure
     @Override
     protected Object parseFlatRecord(FlatRecordTraversalNode node) {
         try {
@@ -285,6 +297,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         }
     }
 
+    @Impure
     Object[] extractPrimaryKey(Object obj) {
         int[][] primaryKeyFieldPathIdx = this.primaryKeyFieldPathIdx;
         
@@ -302,6 +315,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         return key;
     }
 
+    @Impure
     private int[][] calculatePrimaryKeyFieldPathIdx(int[][] primaryKeyFieldPathIdx) {
         if(schema.getPrimaryKey() == null)
             throw new IllegalArgumentException("Type " + typeName + " does not have a primary key defined");
@@ -314,6 +328,8 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         return primaryKeyFieldPathIdx;
     }
     
+    @Pure
+    @Impure
     String[] getDefaultElementHashKey() {
         PrimaryKey pKey = schema.getPrimaryKey();
         if (pKey != null) return pKey.getFieldPaths();
@@ -326,16 +342,19 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         return null;
     }
 
+    @Impure
     @Override
     protected HollowWriteRecord newWriteRecord() {
         return new HollowObjectWriteRecord(schema);
     }
 
+    @Pure
     @Override
     protected HollowTypeWriteState getTypeWriteState() {
         return writeState;
     }
 
+    @Impure
     private Object retrieveFieldValue(Object obj, int[] fieldPathIdx, int idx) {
         return mappedFields.get(fieldPathIdx[idx]).retrieveFieldValue(obj, fieldPathIdx, idx);
     }
@@ -352,10 +371,12 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         private final HollowShardLargeType numShardsAnnotation;
         private final boolean isInlinedField;
 
+        @Impure
         private MappedField(Field f) {
             this(f, new HashSet<Type>());
         }
         
+        @Impure
         @SuppressWarnings("deprecation")
         private MappedField(Field f, Set<Type> visitedTypes) {
             this.fieldOffset = unsafe.objectFieldOffset(f);
@@ -434,6 +455,8 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
             this.subTypeMapper = subTypeMapper;
         }
 
+        @SideEffectFree
+        @Impure
         private MappedField(MappedFieldType specialField) {
             this.fieldOffset = -1;
             this.type = null;
@@ -446,20 +469,25 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
             this.isInlinedField = false;
         }
 
+        @Pure
         public String getFieldName() {
             return fieldName;
         }
 
+        @Pure
         public MappedFieldType getFieldType() {
             return fieldType;
         }
 
+        @Pure
+        @Impure
         public String getReferencedTypeName() {
             if(typeNameAnnotation != null)
                 return typeNameAnnotation.name();
             return subTypeMapper.getTypeName();
         }
 
+        @Impure
         @SuppressWarnings("deprecation")
         public void copy(Object obj, HollowObjectWriteRecord rec, FlatRecordWriter flatRecordWriter) {
             Object fieldObject;
@@ -586,6 +614,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
             }
         }
 
+        @Impure
         public void copy(Object pojo, GenericHollowObject rec) {
             switch (fieldType) {
                 case BOOLEAN:
@@ -710,6 +739,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
             }
         }
 
+        @Impure
         private Object parseBoxedWrapper(GenericHollowObject record) {
             switch (fieldType) {
                 case BOOLEAN:
@@ -778,6 +808,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
             }
         }
 
+        @Impure
         private Object parseBoxedWrapper(FlatRecordTraversalObjectNode record) {
             switch (fieldType) {
                 case BOOLEAN:
@@ -830,6 +861,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
             }
         }
 
+        @Impure
         private void copy(Object obj, FlatRecordTraversalObjectNode node) {
             switch (fieldType) {
                 case BOOLEAN: {
@@ -989,6 +1021,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
             }
         }
 
+        @Impure
         public Object retrieveFieldValue(Object obj, int[] fieldPathIdx, int idx) {
             Object fieldObject;
 
@@ -1058,6 +1091,7 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
             }
         }
 
+        @SideEffectFree
         private String getStringFromField(Object obj, Object fieldObject) {
             if (obj instanceof String) {
                 return (String) obj;
@@ -1096,20 +1130,24 @@ public class HollowObjectTypeMapper extends HollowTypeMapper {
         private final FieldType schemaFieldType;
         private final String specialFieldName;
         
+        @Impure
         private MappedFieldType(FieldType schemaFieldType) {
             this.specialFieldName = null;
             this.schemaFieldType = schemaFieldType;
         }
         
+        @Impure
         private MappedFieldType(FieldType schemaFieldType, String specialFieldName) {
             this.schemaFieldType = schemaFieldType;
             this.specialFieldName = specialFieldName;
         }
         
+        @Pure
         public String getSpecialFieldName() {
             return specialFieldName;
         }
         
+        @Pure
         public FieldType getSchemaFieldType() {
             return schemaFieldType;
         }

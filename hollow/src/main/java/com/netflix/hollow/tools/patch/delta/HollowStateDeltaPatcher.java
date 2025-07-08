@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.patch.delta;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.ThreadSafeBitSet;
 import com.netflix.hollow.core.read.HollowReadFieldUtils;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -83,6 +85,7 @@ public class HollowStateDeltaPatcher {
      * @param from The earlier state
      * @param to The later state.
      */
+    @Impure
     public HollowStateDeltaPatcher(HollowReadStateEngine from, HollowReadStateEngine to) {
         this.from = from;
         this.to = to;
@@ -95,6 +98,7 @@ public class HollowStateDeltaPatcher {
      * Returns the HollowWriteStateEngine containing the state, use this to write the deltas and reverse deltas.
      * @return the HollowWriteStateEngine containing the state
      */
+    @Pure
     public HollowWriteStateEngine getStateEngine() {
         return writeEngine;
     }
@@ -102,6 +106,7 @@ public class HollowStateDeltaPatcher {
     /**
      * Call this method first.  After this returns, you can write a delta/reversedelta from/to the earlier state to/from the intermediate state.
      */
+    @Impure
     public void prepareInitialTransition() {
         writeEngine.overridePreviousStateRandomizedTag(from.getCurrentRandomizedTag());
         writeEngine.overridePreviousHeaderTags(from.getHeaderTags());
@@ -112,6 +117,7 @@ public class HollowStateDeltaPatcher {
     /**
      * Call this method second.  After this returns, you can write a delta/reversedelta from/to the intermediate state to/from the later state.
      */
+    @Impure
     public void prepareFinalTransition() {
         writeEngine.prepareForNextCycle();
         writeEngine.overrideNextStateRandomizedTag(to.getCurrentRandomizedTag());
@@ -120,10 +126,12 @@ public class HollowStateDeltaPatcher {
         remapTheChangedDataToDestinationOrdinals();
     }
     
+    @Impure
     private void copyUnchangedDataToIntermediateState() {
         SimultaneousExecutor executor = new SimultaneousExecutor(getClass(), "copy-unchanged");
         for(final HollowSchema schema : schemas) {
             executor.execute(new Runnable() {
+                @Impure
                 public void run() {
                     HollowTypeReadState fromTypeState = from.getTypeState(schema.getName());
                     HollowTypeWriteState writeTypeState = writeEngine.getTypeState(schema.getName());
@@ -153,6 +161,7 @@ public class HollowStateDeltaPatcher {
         }
     }
     
+    @Impure
     private void remapTheChangedDataToUnusedOrdinals() {
         PartialOrdinalRemapper remapper = new PartialOrdinalRemapper();
         
@@ -183,6 +192,7 @@ public class HollowStateDeltaPatcher {
         }
     }
     
+    @Impure
     private void copyUnchangedDataToDestinationState() {
         for(HollowSchema schema : schemas) {
             HollowTypeWriteState writeTypeState = writeEngine.getTypeState(schema.getName());
@@ -202,6 +212,7 @@ public class HollowStateDeltaPatcher {
         }
     }
     
+    @Impure
     private void remapTheChangedDataToDestinationOrdinals() {
         for(HollowSchema schema : schemas) {
             BitSet changedOrdinals = changedOrdinalsBetweenStates.get(schema.getName());
@@ -228,6 +239,7 @@ public class HollowStateDeltaPatcher {
         }
     }
 
+    @Impure
     private Map<String, BitSet> discoverChangedOrdinalsBetweenStates() {
         SimultaneousExecutor executor = new SimultaneousExecutor(getClass(), "discover-changed");
         Map<String, BitSet> excludeOrdinalsFromCopy = new HashMap<String, BitSet>();
@@ -243,6 +255,7 @@ public class HollowStateDeltaPatcher {
         return excludeOrdinalsFromCopy;
     }
     
+    @Impure
     private BitSet findOrdinalsPopulatedWithDifferentRecords(String typeName, SimultaneousExecutor executor) {
        final HollowTypeReadState fromTypeState = from.getTypeState(typeName);
        final HollowTypeReadState toTypeState = to.getTypeState(typeName);
@@ -262,6 +275,7 @@ public class HollowStateDeltaPatcher {
        for(int i=0;i<numThreads;i++) {
            final int threadNum = i;
            executor.execute(new Runnable() {
+               @Impure
                public void run() {
                    
                    EqualityCondition equalityCondition = null;
@@ -302,6 +316,7 @@ public class HollowStateDeltaPatcher {
        return toBitSet(populatedOrdinalsWithDifferentRecords);
     }
     
+    @Impure
     private BitSet toBitSet(ThreadSafeBitSet tsbs) {
         BitSet bs = new BitSet(tsbs.currentCapacity());
         
@@ -315,9 +330,11 @@ public class HollowStateDeltaPatcher {
     }
     
     private static interface EqualityCondition {
+        @Impure
         boolean recordsAreEqual(int ordinal);
     }
     
+    @Impure
     private EqualityCondition objectRecordEquality(HollowTypeReadState fromState, HollowTypeReadState toState) {
         final HollowObjectTypeReadState fromObjectState = (HollowObjectTypeReadState)fromState;
         final HollowObjectTypeReadState toObjectState = (HollowObjectTypeReadState)toState;
@@ -326,6 +343,7 @@ public class HollowStateDeltaPatcher {
 
         return new EqualityCondition() {
             
+            @Impure
             public boolean recordsAreEqual(int ordinal) {
                 for(int i=0;i<commonSchema.numFields();i++) {
                     int fromFieldPos = fromObjectState.getSchema().getPosition(commonSchema.getFieldName(i));
@@ -344,11 +362,13 @@ public class HollowStateDeltaPatcher {
         };
     }
     
+    @Impure
     private EqualityCondition listRecordEquality(HollowTypeReadState fromState, HollowTypeReadState toState) {
         final HollowListTypeReadState fromListState = (HollowListTypeReadState)fromState;
         final HollowListTypeReadState toListState = (HollowListTypeReadState)toState;
         
         return new EqualityCondition() {
+            @Impure
             public boolean recordsAreEqual(int ordinal) {
                 int size = fromListState.size(ordinal);
                 if(toListState.size(ordinal) != size)
@@ -364,6 +384,7 @@ public class HollowStateDeltaPatcher {
         };
     }
 
+    @Impure
     private EqualityCondition setRecordEquality(HollowTypeReadState fromState, HollowTypeReadState toState) {
         final HollowSetTypeReadState fromSetState = (HollowSetTypeReadState)fromState;
         final HollowSetTypeReadState toSetState = (HollowSetTypeReadState)toState;
@@ -372,6 +393,7 @@ public class HollowStateDeltaPatcher {
             final IntList fromScratch = new IntList();
             final IntList toScratch = new IntList();
             
+            @Impure
             public boolean recordsAreEqual(int ordinal) {
                 int size = fromSetState.size(ordinal);
                 if(toSetState.size(ordinal) != size)
@@ -402,6 +424,7 @@ public class HollowStateDeltaPatcher {
         };
     }
     
+    @Impure
     private EqualityCondition mapRecordEquality(HollowTypeReadState fromState, HollowTypeReadState toState) {
         final HollowMapTypeReadState fromMapState = (HollowMapTypeReadState) fromState;
         final HollowMapTypeReadState toMapState = (HollowMapTypeReadState) toState;
@@ -410,6 +433,7 @@ public class HollowStateDeltaPatcher {
             final LongList fromScratch = new LongList();
             final LongList toScratch = new LongList();
             
+            @Impure
             public boolean recordsAreEqual(int ordinal) {
                 int size = fromMapState.size(ordinal);
                 if(toMapState.size(ordinal) != size)
@@ -434,11 +458,13 @@ public class HollowStateDeltaPatcher {
         };
     }
     
+    @Impure
     private void ensureEqualSchemas(HollowTypeReadState fromState, HollowTypeReadState toState) {
         if(!fromState.getSchema().equals(toState.getSchema()))
             throw new IllegalStateException("FROM and TO schemas were not the same: " + fromState.getSchema().getName());
     }
     
+    @Impure
     private Set<HollowSchema> getCommonSchemas(HollowReadStateEngine from, HollowReadStateEngine to) {
         Set<HollowSchema> schemas = new HashSet<HollowSchema>();
         
@@ -458,6 +484,7 @@ public class HollowStateDeltaPatcher {
         return schemas;
     }
     
+    @Impure
     private boolean shouldPreserveHashPositions(HollowSchema schema) {
         switch(schema.getSchemaType()) {
         case MAP:

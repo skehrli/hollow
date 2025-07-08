@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.diff.exact;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.util.IntList;
 import java.util.Arrays;
@@ -32,6 +35,7 @@ public class DiffEqualOrdinalMap {
 
     private final long toOrdinalsIdentityMap[];
 
+    @Impure
     public DiffEqualOrdinalMap(int numMatches) {
         int hashTableSize = 1 << (32 - Integer.numberOfLeadingZeros(numMatches * 2 - 1));
 
@@ -42,6 +46,7 @@ public class DiffEqualOrdinalMap {
         Arrays.fill(toOrdinalsIdentityMap, -1L);
     }
 
+    @Impure
     public void putEqualOrdinal(int fromOrdinal, int toOrdinal) {
         long fromOrdinalMapEntry = (long)toOrdinal << 32 | fromOrdinal;
 
@@ -55,6 +60,7 @@ public class DiffEqualOrdinalMap {
         fromOrdinalsMap[bucket] = fromOrdinalMapEntry;
     }
 
+    @Impure
     public void putEqualOrdinals(int fromOrdinal, IntList toOrdinals) {
         long fromOrdinalMapEntry = (long)toOrdinals.get(0) << 32 | fromOrdinal;
 
@@ -79,6 +85,7 @@ public class DiffEqualOrdinalMap {
         fromOrdinalsMap[bucket] = fromOrdinalMapEntry;
     }
 
+    @Impure
     public void buildToOrdinalIdentityMapping() {
         for(int i=0;i<fromOrdinalsMap.length;i++) {
             if(fromOrdinalsMap[i] >= 0) {
@@ -98,6 +105,7 @@ public class DiffEqualOrdinalMap {
         }
     }
 
+    @Impure
     private void addToOrdinalIdentity(int toOrdinal, int identity) {
         int hashCode = HashCodes.hashInt(toOrdinal);
         int bucket = hashCode & (toOrdinalsIdentityMap.length - 1);
@@ -109,6 +117,7 @@ public class DiffEqualOrdinalMap {
         toOrdinalsIdentityMap[bucket] = ((long)identity << 32) | toOrdinal;
     }
 
+    @Impure
     public MatchIterator getEqualOrdinals(int fromOrdinal) {
         int hashCode = HashCodes.hashInt(fromOrdinal);
 
@@ -126,6 +135,7 @@ public class DiffEqualOrdinalMap {
         return EmptyMatchIterator.INSTANCE;
     }
 
+    @Impure
     public int getIdentityFromOrdinal(int fromOrdinal) {
         int hashCode = HashCodes.hashInt(fromOrdinal);
 
@@ -143,6 +153,7 @@ public class DiffEqualOrdinalMap {
         return -1;
     }
 
+    @Impure
     public int getIdentityToOrdinal(int toOrdinal) {
         int hashCode = HashCodes.hashInt(toOrdinal);
 
@@ -158,39 +169,48 @@ public class DiffEqualOrdinalMap {
     }
 
     public static interface OrdinalIdentityTranslator {
+        @Impure
         public int getIdentityOrdinal(int ordinal);
     }
 
     private final OrdinalIdentityTranslator fromIdentityTranslator = new OrdinalIdentityTranslator() {
+        @Impure
         public int getIdentityOrdinal(int ordinal) {
             return getIdentityFromOrdinal(ordinal);
         }
     };
 
     private final OrdinalIdentityTranslator toIdentityTranslator = new OrdinalIdentityTranslator() {
+        @Impure
         public int getIdentityOrdinal(int ordinal) {
             return getIdentityToOrdinal(ordinal);
         }
     };
 
+    @Pure
     public OrdinalIdentityTranslator getFromOrdinalIdentityTranslator() {
         return fromIdentityTranslator;
     }
 
+    @Pure
     public OrdinalIdentityTranslator getToOrdinalIdentityTranslator() {
         return toIdentityTranslator;
     }
 
     public static interface MatchIterator {
+        @Pure
         public boolean hasNext();
+        @Impure
         public int next();
     }
 
     public static class EmptyMatchIterator implements MatchIterator {
         static EmptyMatchIterator INSTANCE = new EmptyMatchIterator();
 
+        @Pure
         public boolean hasNext() { return false; }
 
+        @Pure
         public int next() { return -1; }
     }
 
@@ -198,14 +218,17 @@ public class DiffEqualOrdinalMap {
         private final int singleMatch;
         private boolean exhausted;
 
+        @SideEffectFree
         public SingleMatchIterator(int singleMatch) {
             this.singleMatch = singleMatch;
         }
 
+        @Pure
         public boolean hasNext() {
             return !exhausted;
         }
 
+        @Impure
         public int next() {
             exhausted = true;
             return singleMatch;
@@ -216,14 +239,17 @@ public class DiffEqualOrdinalMap {
         private int currentMatchListPosition;
         private boolean exhausted;
 
+        @SideEffectFree
         public PivotedMatchIterator(int matchListPosition) {
             this.currentMatchListPosition = matchListPosition;
         }
 
+        @Pure
         public boolean hasNext() {
             return !exhausted;
         }
 
+        @Impure
         public int next() {
             int nextVal = pivotedToOrdinalClusters.get(currentMatchListPosition++);
 

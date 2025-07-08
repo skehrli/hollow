@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.api.objects.generic.GenericHollowList;
 import com.netflix.hollow.core.schema.HollowListSchema;
@@ -47,6 +50,7 @@ public class HollowListTypeMapper extends HollowTypeMapper {
 
     private final HollowTypeMapper elementMapper;
 
+    @Impure
     public HollowListTypeMapper(HollowObjectMapper parentMapper, ParameterizedType type, String declaredName, int numShards,
                                 boolean ignoreListOrdering, Set<Type> visited) {
         this.elementMapper = parentMapper.getTypeMapper(type.getActualTypeArguments()[0], null, null, -1, visited);
@@ -58,11 +62,14 @@ public class HollowListTypeMapper extends HollowTypeMapper {
         this.writeState = existingTypeState != null ? existingTypeState : new HollowListTypeWriteState(schema, numShards);
     }
 
+    @Pure
+    @Impure
     @Override
     public String getTypeName() {
         return schema.getName();
     }
 
+    @Impure
     @Override
     public int write(Object obj) {
         if(obj instanceof MemoizedList) {
@@ -85,11 +92,13 @@ public class HollowListTypeMapper extends HollowTypeMapper {
         return assignedOrdinal;
     }
 
+    @Impure
     public int writeFlat(Object obj, FlatRecordWriter flatRecordWriter) {
     	HollowListWriteRecord rec = copyToWriteRecord((List<?>)obj, flatRecordWriter);
     	return flatRecordWriter.write(schema, rec);
     }
 
+    @Impure
     private HollowListWriteRecord copyToWriteRecord(List<?> l, FlatRecordWriter flatRecordWriter) {
         HollowListWriteRecord rec = (HollowListWriteRecord) writeRecord();
         if (ignoreListOrdering) {
@@ -116,6 +125,7 @@ public class HollowListTypeMapper extends HollowTypeMapper {
         return rec;
     }
 
+    @Impure
     @Override
     protected Object parseHollowRecord(HollowRecord record) {
         GenericHollowList hollowList = (GenericHollowList) record;
@@ -126,6 +136,7 @@ public class HollowListTypeMapper extends HollowTypeMapper {
         return list;
     }
 
+    @Impure
     @Override
     protected Object parseFlatRecord(FlatRecordTraversalNode node) {
         List<Object> collection = new ArrayList<>();
@@ -138,11 +149,14 @@ public class HollowListTypeMapper extends HollowTypeMapper {
         return collection;
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     protected HollowWriteRecord newWriteRecord() {
         return new HollowListWriteRecord();
     }
 
+    @Impure
     private IntList getIntList() {
         IntList list = intList.get();
         if(list == null) {
@@ -153,6 +167,7 @@ public class HollowListTypeMapper extends HollowTypeMapper {
         return list;
     }
 
+    @Pure
     @Override
     protected HollowTypeWriteState getTypeWriteState() {
         return writeState;

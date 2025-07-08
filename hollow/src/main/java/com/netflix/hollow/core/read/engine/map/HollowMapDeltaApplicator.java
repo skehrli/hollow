@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.engine.map;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.encoding.FixedLengthElementArray;
 import com.netflix.hollow.core.memory.encoding.GapEncodedVariableLengthIntegerReader;
 
@@ -42,12 +44,14 @@ class HollowMapDeltaApplicator {
     private GapEncodedVariableLengthIntegerReader removalsReader;
     private GapEncodedVariableLengthIntegerReader additionsReader;
 
+    @SideEffectFree
     HollowMapDeltaApplicator(HollowMapTypeDataElements from, HollowMapTypeDataElements delta, HollowMapTypeDataElements target) {
         this.from = from;
         this.delta = delta;
         this.target = target;
     }
 
+    @Impure
     public void applyDelta() {
         removalsReader = from.encodedRemovals == null ? GapEncodedVariableLengthIntegerReader.EMPTY_READER : from.encodedRemovals;
         additionsReader = delta.encodedAdditions;
@@ -88,12 +92,14 @@ class HollowMapDeltaApplicator {
         removalsReader.destroy();
     }
 
+    @Impure
     private void slowDelta() {
         for(int i=0; i<=target.maxOrdinal; i++) {
             mergeOrdinal(i);
         }
     }
 
+    @Impure
     private void fastDelta() {
         int i=0;
         int bulkCopyEndOrdinal = Math.min(from.maxOrdinal, target.maxOrdinal);
@@ -115,6 +121,7 @@ class HollowMapDeltaApplicator {
         }
     }
 
+    @Impure
     private void fastCopyRecords(int recordsToCopy) {
         long mapPointerAndSizeBitsToCopy = (long)recordsToCopy * target.bitsPerFixedLengthMapPortion;
         long eachMapPointerDifference = currentWriteStartBucket - currentFromStateStartBucket;
@@ -135,6 +142,7 @@ class HollowMapDeltaApplicator {
         currentWriteStartBucket += bucketsToCopy;
     }
 
+    @Impure
     private void mergeOrdinal(int ordinal) {
         boolean addFromDelta = additionsReader.nextElement() == ordinal;
         boolean removeData = removalsReader.nextElement() == ordinal;
@@ -178,6 +186,7 @@ class HollowMapDeltaApplicator {
         currentWriteStartBit += target.bitsPerFixedLengthMapPortion;
     }
 
+    @Impure
     private void addFromDelta(GapEncodedVariableLengthIntegerReader additionsReader) {
         long deltaDataEndBucket = delta.mapPointerAndSizeData.getElementValue(currentDeltaCopyStartBit, delta.bitsPerMapPointer);
         for(long bucketIdx=currentDeltaStartBucket; bucketIdx<deltaDataEndBucket; bucketIdx++) {

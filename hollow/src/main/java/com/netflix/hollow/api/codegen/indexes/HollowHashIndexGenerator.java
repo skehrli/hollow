@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.indexes;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.substituteInvalidChars;
 
 import com.netflix.hollow.api.codegen.CodeGeneratorConfig;
@@ -42,6 +43,7 @@ public class HollowHashIndexGenerator extends HollowIndexGenerator {
     private final HollowDataset dataset;
     private final boolean isListenToDataRefreah;
 
+    @Impure
     public HollowHashIndexGenerator(String packageName, String apiClassname, HollowDataset dataset, CodeGeneratorConfig config) {
         super(packageName, apiClassname, dataset, config);
         this.className = apiClassname + "HashIndex";
@@ -49,6 +51,7 @@ public class HollowHashIndexGenerator extends HollowIndexGenerator {
         this.isListenToDataRefreah = config.isListenToDataRefresh();
     }
 
+    @Impure
     @Override
     public String generate() {
         List<HollowSchema> schemaList = HollowSchemaSorter.dependencyOrderedSchemaList(dataset);
@@ -97,6 +100,7 @@ public class HollowHashIndexGenerator extends HollowIndexGenerator {
         return builder.toString();
     }
 
+    @Impure
     private void genDeprecatedJavaDoc(List<HollowSchema> schemaList, StringBuilder builder) {
         if (schemaList.isEmpty()) return;
 

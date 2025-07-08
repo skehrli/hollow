@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.Objects;
 
 /**
@@ -32,6 +34,7 @@ public final class ValidationStatusException extends RuntimeException {
      * @throws IllegalArgumentException if {@code status} contains results that all passed
      * @throws NullPointerException if {@code status} is {@code null}
      */
+    @Impure
     public ValidationStatusException(ValidationStatus status, String message) {
         super(message);
 
@@ -48,6 +51,7 @@ public final class ValidationStatusException extends RuntimeException {
      *
      * @return the validation status.
      */
+    @Pure
     public ValidationStatus getValidationStatus() {
         return status;
     }

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.objects;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.typeAPIClassname;
 
 import com.netflix.hollow.api.codegen.CodeGeneratorConfig;
@@ -46,6 +47,7 @@ public class HollowMapJavaGenerator extends HollowCollectionsGenerator {
     private final boolean parameterizeKey;
     private final boolean parameterizeValue;
 
+    @Impure
     public HollowMapJavaGenerator(String packageName, String apiClassname, HollowMapSchema schema,
             HollowDataset dataset, Set<String> parameterizedTypes, boolean parameterizeClassNames,
             CodeGeneratorConfig config) {
@@ -58,6 +60,7 @@ public class HollowMapJavaGenerator extends HollowCollectionsGenerator {
     }
 
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder builder = new StringBuilder();
@@ -96,6 +99,7 @@ public class HollowMapJavaGenerator extends HollowCollectionsGenerator {
         return builder.toString();
     }
 
+    @Impure
     private void appendConstructor(StringBuilder classBuilder) {
         classBuilder.append("    public " + className + "(HollowMapDelegate delegate, int ordinal) {\n");
         classBuilder.append("        super(delegate, ordinal);\n");
@@ -103,6 +107,7 @@ public class HollowMapJavaGenerator extends HollowCollectionsGenerator {
     }
 
 
+    @Impure
     private void appendInstantiateMethods(StringBuilder classBuilder) {
         String keyReturnType = parameterizeKey ? "K" : keyClassName;
         String valueReturnType = parameterizeValue ? "V" : valueClassName;
@@ -118,6 +123,7 @@ public class HollowMapJavaGenerator extends HollowCollectionsGenerator {
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendGetByHashKeyMethod(StringBuilder classBuilder) {
         if(schema.getHashKey() != null) {
             String valueReturnType = parameterizeValue ? "V" : valueClassName;
@@ -135,6 +141,7 @@ public class HollowMapJavaGenerator extends HollowCollectionsGenerator {
         }
     }
 
+    @Impure
     private void appendEqualityMethods(StringBuilder classBuilder) {
         classBuilder.append("    @Override\n");
         classBuilder.append("    public boolean equalsKey(int keyOrdinal, Object testObject) {\n");
@@ -147,12 +154,14 @@ public class HollowMapJavaGenerator extends HollowCollectionsGenerator {
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendAPIAccessor(StringBuilder classBuilder) {
         classBuilder.append("    public " + apiClassname + " api() {\n");
         classBuilder.append("        return typeApi().getAPI();\n");
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendTypeAPIAccessor(StringBuilder classBuilder) {
         String typeAPIClassname = typeAPIClassname(schema.getName());
         classBuilder.append("    public " + typeAPIClassname + " typeApi() {\n");
@@ -160,6 +169,7 @@ public class HollowMapJavaGenerator extends HollowCollectionsGenerator {
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private String getKeyFieldType(String fieldPath) {
         try {
             HollowObjectSchema keySchema = (HollowObjectSchema)dataset.getSchema(schema.getKeyType());

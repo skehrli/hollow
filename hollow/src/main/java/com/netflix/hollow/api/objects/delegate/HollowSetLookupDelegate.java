@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.custom.HollowSetTypeAPI;
 import com.netflix.hollow.api.objects.HollowSet;
 import com.netflix.hollow.core.read.dataaccess.HollowSetTypeDataAccess;
@@ -32,24 +35,31 @@ public class HollowSetLookupDelegate<T> implements HollowSetDelegate<T> {
     private final HollowSetTypeDataAccess dataAccess;
     protected final HollowSetTypeAPI typeAPI;
 
+    @SideEffectFree
+    @Impure
     public HollowSetLookupDelegate(HollowSetTypeDataAccess dataAccess) {
         this(dataAccess, null);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowSetLookupDelegate(HollowSetTypeAPI typeAPI) {
         this(typeAPI.getTypeDataAccess(), typeAPI);
     }
 
+    @SideEffectFree
     private HollowSetLookupDelegate(HollowSetTypeDataAccess dataAccess, HollowSetTypeAPI typeAPI) {
         this.dataAccess = dataAccess;
         this.typeAPI = typeAPI;
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         return dataAccess.size(ordinal);
     }
 
+    @Impure
     @Override
     public boolean contains(HollowSet<T> set, int ordinal, Object o) {
         HollowOrdinalIterator iter;
@@ -70,6 +80,7 @@ public class HollowSetLookupDelegate<T> implements HollowSetDelegate<T> {
         return false;
     }
     
+    @Impure
     @Override
     public T findElement(HollowSet<T> set, int ordinal, Object... keys) {
         int elementOrdinal = dataAccess.findElement(ordinal, keys);
@@ -78,21 +89,25 @@ public class HollowSetLookupDelegate<T> implements HollowSetDelegate<T> {
         return null;
     }
 
+    @Impure
     @Override
     public HollowOrdinalIterator iterator(int ordinal) {
         return dataAccess.ordinalIterator(ordinal);
     }
 
+    @Impure
     @Override
     public HollowSetSchema getSchema() {
         return dataAccess.getSchema();
     }
 
+    @Pure
     @Override
     public HollowSetTypeDataAccess getTypeDataAccess() {
         return dataAccess;
     }
 
+    @Pure
     @Override
     public HollowSetTypeAPI getTypeAPI() {
         return typeAPI;

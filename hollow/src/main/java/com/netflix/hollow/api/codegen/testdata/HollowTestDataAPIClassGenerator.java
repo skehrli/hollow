@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen.testdata;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.schema.HollowSchema;
 import java.util.ArrayList;
@@ -28,12 +30,14 @@ class HollowTestDataAPIClassGenerator {
     private final String apiClassName;
     private final String packageName;
     
+    @SideEffectFree
     public HollowTestDataAPIClassGenerator(HollowDataset dataset, String apiClassName, String packageName) {
         this.dataset = dataset;
         this.apiClassName = apiClassName;
         this.packageName = packageName;
     }
 
+    @Impure
     public String generate() {
         StringBuilder builder = new StringBuilder();
         

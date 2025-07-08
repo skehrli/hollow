@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.consumer.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.api.objects.HollowRecord;
 import java.util.Objects;
@@ -37,6 +39,7 @@ import java.util.Objects;
  */
 public class HashIndex<T extends HollowRecord, Q> extends HashIndexSelect<T, T, Q> {
 
+    @Impure
     HashIndex(
             HollowConsumer consumer,
             Class<T> rootType,
@@ -47,6 +50,7 @@ public class HashIndex<T extends HollowRecord, Q> extends HashIndexSelect<T, T, 
                 matchedFieldsType);
     }
 
+    @Impure
     HashIndex(
             HollowConsumer consumer,
             Class<T> rootType,
@@ -65,6 +69,7 @@ public class HashIndex<T extends HollowRecord, Q> extends HashIndexSelect<T, T, 
      * @param <T> the root type
      * @return a builder
      */
+    @Impure
     public static <T extends HollowRecord> Builder<T> from(HollowConsumer consumer, Class<T> rootType) {
         Objects.requireNonNull(consumer);
         Objects.requireNonNull(rootType);
@@ -80,6 +85,7 @@ public class HashIndex<T extends HollowRecord, Q> extends HashIndexSelect<T, T, 
         final HollowConsumer consumer;
         final Class<T> rootType;
 
+        @SideEffectFree
         Builder(HollowConsumer consumer, Class<T> rootType) {
             this.consumer = consumer;
             this.rootType = rootType;
@@ -95,6 +101,7 @@ public class HashIndex<T extends HollowRecord, Q> extends HashIndexSelect<T, T, 
          * @throws IllegalArgumentException if the query type declares one or more invalid field paths
          * or invalid types given resolution of corresponding field paths
          */
+        @Impure
         public <Q> HashIndex<T, Q> usingBean(Class<Q> queryType) {
             Objects.requireNonNull(queryType);
             return new HashIndex<>(consumer, rootType, queryType);
@@ -111,6 +118,7 @@ public class HashIndex<T extends HollowRecord, Q> extends HashIndexSelect<T, T, 
          * @throws IllegalArgumentException if the query field type is invalid given resolution of the
          * query field path
          */
+        @Impure
         public <Q> HashIndex<T, Q> usingPath(String queryFieldPath, Class<Q> queryFieldType) {
             Objects.requireNonNull(queryFieldPath);
             if (queryFieldPath.isEmpty()) {
@@ -129,6 +137,7 @@ public class HashIndex<T extends HollowRecord, Q> extends HashIndexSelect<T, T, 
          * @param <S> the select type
          * @return a builder of a {@link HashIndexSelect}
          */
+        @Impure
         public <S extends HollowRecord> BuilderWithSelect<T, S> selectField(
                 String selectFieldPath, Class<S> selectFieldType) {
             Objects.requireNonNull(selectFieldPath);

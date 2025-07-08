@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.memory.pool;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.mustcall.qual.Owning;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
@@ -31,10 +34,12 @@ public class RecyclingRecycler implements ArraySegmentRecycler {
     private final Recycler<long[]> longSegmentRecycler;
     private final Recycler<byte[]> byteSegmentRecycler;
 
+    @Impure
     public RecyclingRecycler() {
         this(DEFAULT_LOG2_BYTE_ARRAY_SIZE, DEFAULT_LOG2_LONG_ARRAY_SIZE);
     }
 
+    @Impure
     public RecyclingRecycler(final int log2ByteArraySize, final int log2LongArraySize) {
         this.log2OfByteSegmentSize = log2ByteArraySize;
         this.log2OfLongSegmentSize = log2LongArraySize;
@@ -44,33 +49,40 @@ public class RecyclingRecycler implements ArraySegmentRecycler {
         longSegmentRecycler = new Recycler<>(() -> new long[(1 << log2LongArraySize) + 1]);
     }
 
+    @Pure
     public int getLog2OfByteSegmentSize() {
         return log2OfByteSegmentSize;
     }
 
+    @Pure
     public int getLog2OfLongSegmentSize() {
         return log2OfLongSegmentSize;
     }
 
+    @Impure
     public long[] getLongArray() {
         long[] arr = longSegmentRecycler.get();
         Arrays.fill(arr, 0);
         return arr;
     }
 
+    @Impure
     public void recycleLongArray(long[] arr) {
         longSegmentRecycler.recycle(arr);
     }
 
+    @Impure
     public byte[] getByteArray() {
         // @@@ should the array be filled?
         return byteSegmentRecycler.get();
     }
 
+    @Impure
     public void recycleByteArray(byte[] arr) {
         byteSegmentRecycler.recycle(arr);
     }
 
+    @Impure
     public void swap() {
         longSegmentRecycler.swap();
         byteSegmentRecycler.swap();
@@ -82,6 +94,7 @@ public class RecyclingRecycler implements ArraySegmentRecycler {
         private Deque<T> currentSegments;
         private Deque<T> nextSegments;
 
+        @Impure
         Recycler(Creator<T> creator) {
             // Use an ArrayDeque instead of a LinkedList
             // This will avoid memory churn allocating and collecting internal nodes
@@ -90,6 +103,7 @@ public class RecyclingRecycler implements ArraySegmentRecycler {
             this.creator = creator;
         }
 
+        @Impure
         T get() {
             if (!currentSegments.isEmpty()) {
                 return currentSegments.removeFirst();
@@ -98,10 +112,12 @@ public class RecyclingRecycler implements ArraySegmentRecycler {
             return creator.create();
         }
 
-        void recycle(T reuse) {
+        @Impure
+        void recycle(@Owning T reuse) {
             nextSegments.addLast(reuse);
         }
 
+        @Impure
         void swap() {
             // Swap the deque references to reduce addition and clearing cost
             if (nextSegments.size() > currentSegments.size()) {
@@ -116,6 +132,7 @@ public class RecyclingRecycler implements ArraySegmentRecycler {
     }
 
     private interface Creator<T> {
+        @Pure
         T create();
     }
 

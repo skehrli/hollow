@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.stringifier;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.read.HollowReadFieldUtils.compareFieldValues;
 import static com.netflix.hollow.core.read.iterator.HollowOrdinalIterator.NO_MORE_ORDINALS;
 
@@ -52,14 +54,17 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
     private final boolean collapseSingleFieldObjects;
     private final boolean sortSingleFieldSetElements;
 
+    @Impure
     public HollowRecordStringifier() {
         this(false, false, true, false);
     }
 
+    @Impure
     public HollowRecordStringifier(boolean showOrdinals, boolean showTypes, boolean collapseSingleFieldObjects) {
         this(showOrdinals, showTypes, collapseSingleFieldObjects, false);
     }
 
+    @SideEffectFree
     public HollowRecordStringifier(boolean showOrdinals, boolean showTypes, boolean collapseSingleFieldObjects, boolean sortSingleFieldSetElements) {
         this.showOrdinals = showOrdinals;
         this.showTypes = showTypes;
@@ -67,6 +72,7 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
         this.sortSingleFieldSetElements = sortSingleFieldSetElements;
     }
 
+    @Impure
     @Override
     public HollowRecordStringifier addExcludeObjectTypes(String... types) {
         for (String type : types) {
@@ -76,18 +82,21 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
     }
 
 
+    @Impure
     @Override
     public String stringify(HollowRecord record) {
         return stringify(record.getTypeDataAccess().getDataAccess(),
                 record.getSchema().getName(), record.getOrdinal());
     }
 
+    @Impure
     @Override
     public void stringify(Writer writer, HollowRecord record) throws IOException {
         stringify(writer, record.getTypeDataAccess().getDataAccess(), record.getSchema().getName(),
                 record.getOrdinal());
     }
 
+    @Impure
     @Override
     public void stringify(Writer writer, Iterable<HollowRecord> records) throws IOException {
         writer.write("[");
@@ -101,6 +110,7 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
         writer.write("\n]");
     }
 
+    @Impure
     @Override
     public String stringify(HollowDataAccess dataAccess, String type, int ordinal) {
         try {
@@ -112,11 +122,13 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
         }
     }
 
+    @Impure
     @Override
     public void stringify(Writer writer, HollowDataAccess dataAccess, String type, int ordinal) throws IOException {
         appendStringify(writer, dataAccess, type, ordinal, 0);
     }
 
+    @Impure
     private void appendStringify(Writer writer, HollowDataAccess dataAccess, String type, int ordinal,
             int indentation) throws IOException {
         if (excludeObjectTypes.contains(type)) {
@@ -144,6 +156,7 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
 
     }
 
+    @Impure
     private void appendMapStringify(Writer writer, HollowDataAccess dataAccess,
             HollowMapTypeDataAccess typeDataAccess, int ordinal, int indentation) throws IOException {
         HollowMapSchema schema = typeDataAccess.getSchema();
@@ -175,6 +188,7 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
 
     }
 
+    @Impure
     private void appendSetStringify(Writer writer, HollowDataAccess dataAccess,
             HollowSetTypeDataAccess typeDataAccess, int ordinal, int indentation) throws IOException {
         HollowSetSchema schema = typeDataAccess.getSchema();
@@ -217,6 +231,7 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
         }
     }
 
+    @Impure
     private void appendListStringify(Writer writer, HollowDataAccess dataAccess,
             HollowListTypeDataAccess typeDataAccess, int ordinal, int indentation) throws IOException {
         HollowListSchema schema = typeDataAccess.getSchema();
@@ -244,6 +259,7 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
         }
     }
 
+    @Impure
     private void appendObjectStringify(Writer writer, HollowDataAccess dataAccess,
             HollowObjectTypeDataAccess typeDataAccess, int ordinal, int indentation) throws IOException {
         HollowObjectSchema schema = typeDataAccess.getSchema();
@@ -274,6 +290,7 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
         }
     }
 
+    @Impure
     private void appendFieldStringify(Writer writer, HollowDataAccess dataAccess, int indentation,
             HollowObjectSchema schema, GenericHollowObject obj, int i, String fieldName) throws IOException {
         if(obj.isNull(fieldName)) {
@@ -309,6 +326,7 @@ public class HollowRecordStringifier implements HollowStringifier<HollowRecordSt
         }
     }
 
+    @Impure
     private void appendIndentation(Writer writer, int indentation) throws IOException {
         for(int i=0;i<indentation;i++) {
             writer.append(INDENT);

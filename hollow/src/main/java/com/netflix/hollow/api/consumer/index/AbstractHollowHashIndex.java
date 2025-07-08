@@ -15,6 +15,9 @@
  */
 package com.netflix.hollow.api.consumer.index;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.core.index.HollowHashIndex;
@@ -38,6 +41,7 @@ public abstract class AbstractHollowHashIndex<API> {
     protected boolean isListenToDataRefresh;
     protected RefreshListener refreshListener;
 
+    @Impure
     public AbstractHollowHashIndex(HollowConsumer consumer, boolean isListenToDataRefreah, String queryType, String selectFieldPath, String... matchFieldPaths) {
         this.consumer = consumer;
         this.queryType = queryType;
@@ -60,25 +64,30 @@ public abstract class AbstractHollowHashIndex<API> {
 
     }
 
+    @Pure
     @SuppressWarnings("unchecked")
     private API castAPI(HollowAPI api) {
         return (API) api;
     }
 
+    @Pure
     @Deprecated
     public boolean isListenToDataRefreah() {
         return isListenToDataRefresh;
     }
 
+    @Impure
     @Deprecated
     public void listenToDataRefreah() {
         listenToDataRefresh();
     }
 
+    @Pure
     public boolean isListenToDataRefresh() {
         return isListenToDataRefresh;
     }
 
+    @Impure
     public void listenToDataRefresh() {
         if (isListenToDataRefresh) return;
 
@@ -87,6 +96,7 @@ public abstract class AbstractHollowHashIndex<API> {
         consumer.addRefreshListener(refreshListener);
     }
 
+    @Impure
     public void detachFromDataRefresh() {
         isListenToDataRefresh = false;
         idx.detachFromDeltaUpdates();
@@ -94,6 +104,7 @@ public abstract class AbstractHollowHashIndex<API> {
     }
 
     private class RefreshListener implements HollowConsumer.RefreshListener {
+        @Impure
         @Override
         public void snapshotUpdateOccurred(HollowAPI refreshAPI, HollowReadStateEngine stateEngine, long version) {
             idx.detachFromDeltaUpdates();
@@ -103,14 +114,19 @@ public abstract class AbstractHollowHashIndex<API> {
             api = castAPI(refreshAPI);
         }
 
+        @Impure
         @Override
         public void deltaUpdateOccurred(HollowAPI refreshAPI, HollowReadStateEngine stateEngine, long version) {
             api = castAPI(refreshAPI);
         }
 
+        @SideEffectFree
         @Override public void refreshStarted(long currentVersion, long requestedVersion) { }
+        @SideEffectFree
         @Override public void blobLoaded(HollowConsumer.Blob transition) { }
+        @SideEffectFree
         @Override public void refreshSuccessful(long beforeVersion, long afterVersion, long requestedVersion) { }
+        @SideEffectFree
         @Override public void refreshFailed(long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause) { }
     }
 }

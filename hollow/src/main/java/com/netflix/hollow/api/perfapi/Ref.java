@@ -15,6 +15,9 @@
  *
  */
 package com.netflix.hollow.api.perfapi;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * Utility methods on hollow references.
@@ -33,46 +36,59 @@ public final class Ref {
 
     public static final long NULL = -1;
 
+    @SideEffectFree
     private Ref() {
     }
 
+    @Pure
     public static boolean isNonNull(long ref) {
         return ref != -1;
     }
 
+    @Pure
     public static boolean isNull(long ref) {
         return ref == -1;
     }
 
+    @Impure
     public static boolean isRefOfType(int type, long ref) {
         return isRefOfTypeMasked(toTypeMasked(type), ref);
     }
 
+    @Pure
+    @Impure
     public static boolean isRefOfTypeMasked(long typeMasked, long ref) {
         return typeMasked(ref) == typeMasked;
     }
 
+    @Pure
     public static int ordinal(long ref) {
         return (int) ref;
     }
 
+    @Pure
     public static int type(long ref) {
         return (int) (ref >>> 32);
     }
 
+    @Pure
     public static long typeMasked(long ref) {
         return ref & TYPE_MASK;
     }
 
+    @Pure
+    @Impure
     public static long toRef(int type, int ordinal) {
         return toTypeMasked(type) | ordinal;
     }
 
+    @Pure
     public static long toRefWithTypeMasked(long typeMasked, int ordinal) {
         // @@@ This erases the type
         return typeMasked | ordinal;
     }
 
+    @Pure
     public static long toTypeMasked(int type) {
         return ((long) type << 32) & TYPE_MASK;
     }

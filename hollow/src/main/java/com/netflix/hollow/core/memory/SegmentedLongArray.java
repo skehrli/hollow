@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
 import com.netflix.hollow.core.read.HollowBlobInput;
@@ -44,6 +46,7 @@ public class SegmentedLongArray {
     protected final int log2OfSegmentSize;
     protected final int bitmask;
 
+    @Impure
     public SegmentedLongArray(ArraySegmentRecycler memoryRecycler, long numLongs) {
         this.log2OfSegmentSize = memoryRecycler.getLog2OfLongSegmentSize();
         int numSegments = (int)((numLongs - 1) >>> log2OfSegmentSize) + 1;
@@ -69,6 +72,7 @@ public class SegmentedLongArray {
      * @param index the index (eg. the long at index 0 occupies bytes 0-7, long at index 1 occupies bytes 8-15, etc.)
      * @param value the long value
      */
+    @Impure
     public void set(long index, long value) {
         int segmentIndex = (int)(index >> log2OfSegmentSize);
         int longInSegment = (int)(index & bitmask);
@@ -86,6 +90,7 @@ public class SegmentedLongArray {
      * @param index the index (eg. the long at index 0 occupies bytes 0-7, long at index 1 occupies bytes 8-15, etc.)
      * @return the long value
      */
+    @Pure
     public long get(long index) {
         int segmentIndex = (int)(index >>> log2OfSegmentSize);
         long ret = segments[segmentIndex][(int)(index & bitmask)];
@@ -93,6 +98,7 @@ public class SegmentedLongArray {
         return ret;
     }
 
+    @Impure
     public void fill(long value) {
         for(int i=0;i<segments.length;i++) {
             long offset = Unsafe.ARRAY_LONG_BASE_OFFSET;
@@ -103,6 +109,7 @@ public class SegmentedLongArray {
         }
     }
 
+    @Impure
     public void writeTo(DataOutputStream dos, long numLongs) throws IOException {
         VarInt.writeVLong(dos, numLongs);
 
@@ -111,6 +118,7 @@ public class SegmentedLongArray {
         }
     }
 
+    @Impure
     public void destroy(ArraySegmentRecycler memoryRecycler) {
         for(int i=0;i<segments.length;i++) {
             if(segments[i] != null)
@@ -118,6 +126,7 @@ public class SegmentedLongArray {
         }
     }
 
+    @Impure
     protected void readFrom(HollowBlobInput in, ArraySegmentRecycler memoryRecycler, long numLongs) throws
             IOException {
         int segmentSize = 1 << memoryRecycler.getLog2OfLongSegmentSize();

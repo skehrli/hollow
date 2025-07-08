@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.core.read;
 
+import org.checkerframework.framework.qual.EnsuresQualifier;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.MemoryMode;
 import java.io.BufferedInputStream;
 import java.io.Closeable;
@@ -34,20 +38,25 @@ public class OptionalBlobPartInput implements Closeable {
     private final Map<String, Object> inputsByPartName;
     private final List<InputStream> streamsToClose;
 
+    @Impure
+    @EnsuresQualifier(expression="this.streamsToClose", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
     public OptionalBlobPartInput() {
         this.inputsByPartName = new HashMap<>();
         this.streamsToClose = new ArrayList<>();
     }
     
+    @Impure
     public void addInput(String partName, File file) {
         inputsByPartName.put(partName, file);
     }
 
+    @Impure
     public void addInput(String partName, InputStream in) {
         streamsToClose.add(in);
         inputsByPartName.put(partName, in);
     }
 
+    @Pure
     public File getFile(String partName) {
         Object f = inputsByPartName.get(partName);
         if(f instanceof File)
@@ -55,6 +64,7 @@ public class OptionalBlobPartInput implements Closeable {
         throw new UnsupportedOperationException();
     }
     
+    @Impure
     public InputStream getInputStream(String partName) throws IOException {
         Object o = inputsByPartName.get(partName);
         if(o instanceof File) {
@@ -65,10 +75,12 @@ public class OptionalBlobPartInput implements Closeable {
         return (InputStream)o;
     }
     
+    @SideEffectFree
     public Set<String> getPartNames() {
         return inputsByPartName.keySet();
     }
     
+    @Impure
     public Map<String, HollowBlobInput> getInputsByPartName(MemoryMode mode) throws IOException {
         Map<String, HollowBlobInput> map = new HashMap<>(inputsByPartName.size());
         
@@ -80,6 +92,7 @@ public class OptionalBlobPartInput implements Closeable {
 
     }
     
+    @Impure
     public Map<String, InputStream> getInputStreamsByPartName() throws IOException {
         Map<String, InputStream> map = new HashMap<>(inputsByPartName.size());
         
@@ -90,6 +103,8 @@ public class OptionalBlobPartInput implements Closeable {
         return map;
     }
 
+    @Impure
+    @EnsuresQualifier(expression="this.streamsToClose", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
     @Override
     public void close() throws IOException {
         IOException thrownException = null;

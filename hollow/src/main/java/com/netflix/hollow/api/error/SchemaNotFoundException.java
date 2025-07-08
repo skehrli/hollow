@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.error;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.Collection;
 
 /**
@@ -25,20 +28,25 @@ public class SchemaNotFoundException extends HollowException {
     private final String typeName;
     private final Collection<String> availableTypes;
 
+    @SideEffectFree
+    @Impure
     public SchemaNotFoundException(String typeName, Collection<String> availableTypes) {
         super("Could not find schema for " + typeName + " - " + getMessageSuffix(availableTypes));
         this.typeName = typeName;
         this.availableTypes = availableTypes;
     }
 
+    @Pure
     public String getTypeName() {
         return this.typeName;
     }
 
+    @Pure
     public Collection<String> getAvailableTypes() {
         return this.availableTypes;
     }
 
+    @Pure
     private static String getMessageSuffix(Collection<String> availableTypes) {
         if (availableTypes.isEmpty()) {
             return "empty type state, make sure your namespace has published versions";

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.consumer.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.api.objects.HollowObject;
 import com.netflix.hollow.api.objects.HollowRecord;
@@ -40,6 +43,7 @@ final class SelectFieldPathResultExtractor<T> {
 
     final BiObjectIntFunction<HollowAPI, T> extractor;
 
+    @SideEffectFree
     SelectFieldPathResultExtractor(
             FieldPaths.FieldPath<FieldPaths.FieldSegment> fieldPath,
             BiObjectIntFunction<HollowAPI, T> extractor) {
@@ -48,13 +52,17 @@ final class SelectFieldPathResultExtractor<T> {
     }
 
     interface BiObjectIntFunction<T, R> {
+        @Pure
         R apply(T t, int i);
     }
 
+    @Pure
+    @Impure
     T extract(HollowAPI api, int ordinal) {
         return extractor.apply(api, ordinal);
     }
 
+    @SideEffectFree
     static IllegalArgumentException incompatibleSelectType(
             Class<?> selectType, String fieldPath, HollowObjectSchema.FieldType schemaFieldType) {
         return new IllegalArgumentException(
@@ -62,6 +70,7 @@ final class SelectFieldPathResultExtractor<T> {
                         selectType.getName(), fieldPath, schemaFieldType));
     }
 
+    @SideEffectFree
     static IllegalArgumentException incompatibleSelectType(Class<?> selectType, String fieldPath, String typeName) {
         return new IllegalArgumentException(
                 String.format(
@@ -69,6 +78,7 @@ final class SelectFieldPathResultExtractor<T> {
                         selectType.getName(), fieldPath, typeName));
     }
 
+    @Impure
     static <T> SelectFieldPathResultExtractor<T> from(
             Class<? extends HollowAPI> apiType, HollowDataset dataset, Class<?> rootType, String fieldPath,
             Class<T> selectType) {

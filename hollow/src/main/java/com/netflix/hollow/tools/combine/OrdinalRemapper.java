@@ -15,6 +15,7 @@
  *
  */
 package com.netflix.hollow.tools.combine;
+import org.checkerframework.dataflow.qual.Impure;
 
 /**
  * Remaps ordinals various operations.  Not intended for external consumption.
@@ -27,6 +28,7 @@ public interface OrdinalRemapper {
      * @param originalOrdinal the original ordinal
      * @return the remapped ordinal
      */
+    @Impure
     public int getMappedOrdinal(String type, int originalOrdinal);
     
     /**
@@ -35,6 +37,7 @@ public interface OrdinalRemapper {
      * @param originalOrdinal the original ordinal
      * @param mappedOrdinal the mapped ordinal
      */
+    @Impure
     public void remapOrdinal(String type, int originalOrdinal, int mappedOrdinal);
     
     /**
@@ -42,6 +45,7 @@ public interface OrdinalRemapper {
      * @param type the type name
      * @param originalOrdinal the original ordinal
      */
+    @Impure
     public boolean ordinalIsMapped(String type, int originalOrdinal);
     
 }

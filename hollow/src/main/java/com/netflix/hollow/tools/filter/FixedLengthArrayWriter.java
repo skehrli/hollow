@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.filter;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.encoding.FixedLengthElementArray;
 
 class FixedLengthArrayWriter {
@@ -23,10 +25,12 @@ class FixedLengthArrayWriter {
     private final FixedLengthElementArray arr;
     private long bitCursor;
 
+    @SideEffectFree
     public FixedLengthArrayWriter(FixedLengthElementArray arr) {
         this.arr = arr;
     }
 
+    @Impure
     public void writeField(long value, int numBits) {
         arr.setElementValue(bitCursor, numBits, value);
         bitCursor += numBits;

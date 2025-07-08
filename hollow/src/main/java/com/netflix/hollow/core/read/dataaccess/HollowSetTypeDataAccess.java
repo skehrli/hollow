@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.dataaccess;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.set.HollowSetTypeReadState;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 import com.netflix.hollow.core.schema.HollowSetSchema;
@@ -28,6 +29,7 @@ import com.netflix.hollow.core.schema.HollowSetSchema;
  */
 public interface HollowSetTypeDataAccess extends HollowCollectionTypeDataAccess {
 
+    @Impure
     HollowSetSchema getSchema();
 
     /**
@@ -39,6 +41,7 @@ public interface HollowSetTypeDataAccess extends HollowCollectionTypeDataAccess 
      * @param value the value
      * @return whether or not the <b>unhashed</b> set at the specified ordinal contains the specified element ordinal.
      */
+    @Impure
     boolean contains(int ordinal, int value);
 
     /**
@@ -49,6 +52,7 @@ public interface HollowSetTypeDataAccess extends HollowCollectionTypeDataAccess 
      * @param hashCode the hash code
      * @return whether or not the set at the specified ordinal contains the specified element ordinal with the specified hashCode.
      */
+    @Impure
     boolean contains(int ordinal, int value, int hashCode);
     
     /**
@@ -58,8 +62,10 @@ public interface HollowSetTypeDataAccess extends HollowCollectionTypeDataAccess 
      * @param hashKey the hash keys
      * @return the matching element's ordinal, or {@link com.netflix.hollow.core.HollowConstants#ORDINAL_NONE} if no such element exists.
      */
+    @Impure
     int findElement(int ordinal, Object... hashKey);
 
+    @Impure
     int relativeBucketValue(int ordinal, int bucketIndex);
 
     /**
@@ -67,6 +73,7 @@ public interface HollowSetTypeDataAccess extends HollowCollectionTypeDataAccess 
      * @param hashCode the hash code
      * @return a {@link HollowOrdinalIterator} over any elements from the set at the specified which potentially match the specified hashCode.
      */
+    @Impure
     HollowOrdinalIterator potentialMatchOrdinalIterator(int ordinal, int hashCode);
 
 }

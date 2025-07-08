@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff.exact.mapper;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.read.HollowReadFieldUtils;
 import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
@@ -36,6 +38,7 @@ public class DiffEqualityObjectMapper extends DiffEqualityTypeMapper{
 
     private final DiffEqualOrdinalMap[] commonReferenceFieldEqualOrdinalMaps;
 
+    @Impure
     public DiffEqualityObjectMapper(DiffEqualityMapping mapping, HollowObjectTypeReadState fromState, HollowObjectTypeReadState toState, boolean oneToOne) {
         super(fromState, toState, oneToOne);
         this.commonSchema = fromState.getSchema().findCommonSchema(toState.getSchema());
@@ -65,6 +68,7 @@ public class DiffEqualityObjectMapper extends DiffEqualityTypeMapper{
         this.requiresTraversalForMissingFields = requiresTraversalForMissingFields;
     }
 
+    @Impure
     private int[] buildCommonSchemaFieldMapping(HollowObjectTypeReadState state) {
         int[] commonFieldMapping = new int[commonSchema.numFields()];
         for(int i=0;i<commonFieldMapping.length;i++) {
@@ -74,18 +78,22 @@ public class DiffEqualityObjectMapper extends DiffEqualityTypeMapper{
         return commonFieldMapping;
     }
 
+    @Pure
     public boolean requiresTraversalForMissingFields() {
         return requiresTraversalForMissingFields;
     }
 
+    @Impure
     protected int fromRecordHashCode(int ordinal) {
         return recordHashCode(fromState(), ordinal, fromSchemaCommonFieldMapping, true);
     }
 
+    @Impure
     protected int toRecordHashCode(int ordinal) {
         return recordHashCode(toState(), ordinal, toSchemaCommonFieldMapping, false);
     }
 
+    @Impure
     private int recordHashCode(HollowObjectTypeReadState typeState, int ordinal, int[] commonSchemaFieldMapping, boolean fromState) {
         int hashCode = 0;
         for(int i=0;i<commonSchemaFieldMapping.length;i++) {
@@ -108,8 +116,10 @@ public class DiffEqualityObjectMapper extends DiffEqualityTypeMapper{
         return hashCode;
     }
 
+    @Impure
     public EqualityDeterminer getEqualityDeterminer() {
         return new EqualityDeterminer() {
+            @Impure
             public boolean recordsAreEqual(int fromOrdinal, int toOrdinal) {
                 for(int i=0;i<fromSchemaCommonFieldMapping.length;i++) {
                     if(commonSchema.getFieldType(i) == FieldType.REFERENCE) {
@@ -131,10 +141,12 @@ public class DiffEqualityObjectMapper extends DiffEqualityTypeMapper{
         };
     }
 
+    @Pure
     private HollowObjectTypeReadState fromState() {
         return (HollowObjectTypeReadState) fromState;
     }
 
+    @Pure
     private HollowObjectTypeReadState toState() {
         return (HollowObjectTypeReadState) toState;
     }

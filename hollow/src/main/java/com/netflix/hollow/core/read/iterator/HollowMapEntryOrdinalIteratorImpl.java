@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.iterator;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
 
@@ -29,26 +31,31 @@ public class HollowMapEntryOrdinalIteratorImpl implements HollowMapEntryOrdinalI
     private int key;
     private int value;
 
+    @Impure
     public HollowMapEntryOrdinalIteratorImpl(int mapOrdinal, HollowMapTypeDataAccess dataAccess) {
         this.mapOrdinal = mapOrdinal;
         this.dataAccess = dataAccess;
         this.numBuckets = HashCodes.hashTableSize(dataAccess.size(mapOrdinal));
     }
 
+    @Pure
     @Override
     public int getKey() {
         return key;
     }
 
+    @Pure
     @Override
     public int getValue() {
         return value;
     }
 
+    @Pure
     public int getCurrentBucket() {
         return currentBucket;
     }
 
+    @Impure
     @Override
     public boolean next() {
         key = -1;

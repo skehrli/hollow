@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.listener;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.Status;
 import java.time.Duration;
@@ -34,6 +36,7 @@ public interface PopulateListener extends HollowProducerEventListener {
      *
      * @param version current version of the cycle
      */
+    @SideEffectFree
     void onPopulateStart(long version);
 
     /**
@@ -45,5 +48,6 @@ public interface PopulateListener extends HollowProducerEventListener {
      * @param version current version of the cycle
      * @param elapsed Time taken to populate hollow.
      */
+    @Impure
     void onPopulateComplete(Status status, long version, Duration elapsed);
 }

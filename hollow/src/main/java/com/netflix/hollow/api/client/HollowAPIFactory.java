@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.codegen.HollowAPIClassJavaGenerator;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -37,18 +39,23 @@ import java.util.Set;
  */
 public interface HollowAPIFactory {
 
+    @Impure
     public HollowAPI createAPI(HollowDataAccess dataAccess);
 
+    @Impure
     public HollowAPI createAPI(HollowDataAccess dataAccess, HollowAPI previousCycleAPI);
 
 
     public static HollowAPIFactory DEFAULT_FACTORY = new HollowAPIFactory() {
 
+        @SideEffectFree
+        @Impure
         @Override
         public HollowAPI createAPI(HollowDataAccess dataAccess) {
             return new HollowAPI(dataAccess);
         }
 
+        @Impure
         @Override
         public HollowAPI createAPI(HollowDataAccess dataAccess, HollowAPI previousCycleAPI) {
             return createAPI(dataAccess);
@@ -61,16 +68,19 @@ public interface HollowAPIFactory {
         private final Class<T> generatedAPIClass;
         private final Set<String> cachedTypes;
         
+        @Impure
         public ForGeneratedAPI(Class<T> generatedAPIClass) {
             this(generatedAPIClass, new String[0]);
         }
         
+        @Impure
         public ForGeneratedAPI(Class<T> generatedAPIClass, String... cachedTypes) {
             this.generatedAPIClass = generatedAPIClass;
             this.cachedTypes = new HashSet<String>(Arrays.asList(cachedTypes));
         }
 
         
+        @Impure
         @Override
         public T createAPI(HollowDataAccess dataAccess) {
             try {
@@ -86,6 +96,7 @@ public interface HollowAPIFactory {
             }
         }
 
+        @Impure
         @Override
         public T createAPI(HollowDataAccess dataAccess, HollowAPI previousCycleAPI) {
             try {

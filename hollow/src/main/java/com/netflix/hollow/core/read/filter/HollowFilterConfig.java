@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.filter;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.core.read.engine.HollowBlobReader;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -73,6 +75,7 @@ public class HollowFilterConfig implements TypeFilter {
     /**
      * Create a new <i>include</i> filter.
      */
+    @Impure
     public HollowFilterConfig() {
         this(false);
     }
@@ -81,6 +84,7 @@ public class HollowFilterConfig implements TypeFilter {
      * Create a new filter
      * @param isExcludeFilter true for an <i>exclude</i> filter, false for an <i>include</i> filter.
      */
+    @Impure
     public HollowFilterConfig(boolean isExcludeFilter) {
         this.isExcludeFilter = isExcludeFilter;
         this.specifiedTypes = new HashSet<String>();
@@ -93,6 +97,7 @@ public class HollowFilterConfig implements TypeFilter {
      *
      * @param type the type name
      */
+    @Impure
     public void addType(String type) {
         specifiedTypes.add(type);
     }
@@ -106,6 +111,7 @@ public class HollowFilterConfig implements TypeFilter {
      * @param type A type from the data model.
      * @param schemas All schemas from the data model.
      */
+    @Impure
     public void addTypeRecursive(String type, Collection<HollowSchema> schemas) {
         addTypeRecursive(type, mapSchemas(schemas));
     }
@@ -120,6 +126,7 @@ public class HollowFilterConfig implements TypeFilter {
      * @param type A type from the data model.
      * @param schemas A map of typeName to schema including all schemas for this data model.
      */
+    @Impure
     public void addTypeRecursive(String type, Map<String, HollowSchema> schemas) {
         addType(type);
         HollowSchema schema = schemas.get(type);
@@ -149,6 +156,7 @@ public class HollowFilterConfig implements TypeFilter {
      * @param type The OBJECT type from the data model
      * @param objectField The field in the specified type to either include or exclude.
      */
+    @Impure
     public void addField(String type, String objectField) {
         ObjectFilterConfig typeConfig = specifiedFieldConfigs.get(type);
         if(typeConfig == null) {
@@ -166,6 +174,7 @@ public class HollowFilterConfig implements TypeFilter {
      * @param objectField The field in the specified type to either include or exclude.
      * @param schemas All schemas from the data model.
      */
+    @Impure
     public void addFieldRecursive(String type, String objectField, Collection<HollowSchema> schemas) {
         addFieldRecursive(type, objectField, mapSchemas(schemas));
     }
@@ -178,6 +187,7 @@ public class HollowFilterConfig implements TypeFilter {
      * @param objectField The field in the specified type to either include or exclude.
      * @param schemas A map of typeName to schema including all schemas for this data model.
      */
+    @Impure
     public void addFieldRecursive(String type, String objectField, Map<String, HollowSchema> schemas) {
         addField(type, objectField);
         HollowObjectSchema schema = (HollowObjectSchema)schemas.get(type);
@@ -190,6 +200,7 @@ public class HollowFilterConfig implements TypeFilter {
      * @param type A type from the data model
      * @return whether or not this filter includes the specified type.
      */
+    @Pure
     public boolean doesIncludeType(String type) {
         if(isExcludeFilter)
             return !specifiedTypes.contains(type);
@@ -200,18 +211,22 @@ public class HollowFilterConfig implements TypeFilter {
     /**
      * @return true if this is an <i>exclude</i> filter.  False otherwise.
      */
+    @Pure
     public boolean isExcludeFilter() {
         return isExcludeFilter;
     }
 
+    @Pure
     public int numSpecifiedTypes() {
         return specifiedTypes.size();
     }
     
+    @Pure
     public Set<String> getSpecifiedTypes() {
         return specifiedTypes;
     }
 
+    @Pure
     public ObjectFilterConfig getObjectTypeConfig(String type) {
         ObjectFilterConfig typeConfig = specifiedFieldConfigs.get(type);
         if(typeConfig != null)
@@ -228,11 +243,15 @@ public class HollowFilterConfig implements TypeFilter {
         }
     }
 
+    @Pure
+    @Impure
     @Override
     public boolean includes(String type) {
         return doesIncludeType(type);
     }
 
+    @Pure
+    @Impure
     @Override
     public boolean includes(String type, String field) {
         return getObjectTypeConfig(type).includesField(field);
@@ -242,19 +261,23 @@ public class HollowFilterConfig implements TypeFilter {
         private final Boolean alwaysAnswer;
         private final Set<String> specifiedFields;
 
+        @Impure
         public ObjectFilterConfig() {
             this(null);
         }
 
+        @Impure
         public ObjectFilterConfig(Boolean alwaysAnswer) {
             this.specifiedFields = new HashSet<String>();
             this.alwaysAnswer = alwaysAnswer;
         }
 
+        @Impure
         private void addField(String fieldName) {
             specifiedFields.add(fieldName);
         }
 
+        @Pure
         public boolean includesField(String field) {
             if(alwaysAnswer != null)
                 return alwaysAnswer.booleanValue();
@@ -264,6 +287,7 @@ public class HollowFilterConfig implements TypeFilter {
             return specifiedFields.contains(field);
         }
 
+        @Pure
         public int numIncludedFields() {
             return specifiedFields.size();
         }
@@ -275,6 +299,7 @@ public class HollowFilterConfig implements TypeFilter {
      * This can be used to serialize a configuration.  The returned String can be used to
      * recreate the {@link HollowFilterConfig} using {@link HollowFilterConfig#fromString(String)}
      */
+    @Impure
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(isExcludeFilter ? "EXCLUDE" : "INCLUDE");
@@ -309,6 +334,7 @@ public class HollowFilterConfig implements TypeFilter {
      * @param conf the configuration as a string
      * @return the filter configuration
      */
+    @Impure
     public static HollowFilterConfig fromString(String conf) {
         String lines[] = conf.split("\n");
 
@@ -328,6 +354,7 @@ public class HollowFilterConfig implements TypeFilter {
         return config;
     }
 
+    @Impure
     private Map<String, HollowSchema> mapSchemas(Collection<HollowSchema> schemas) {
         Map<String, HollowSchema> schemaMap = new HashMap<String, HollowSchema>();
         for(HollowSchema schema : schemas) {

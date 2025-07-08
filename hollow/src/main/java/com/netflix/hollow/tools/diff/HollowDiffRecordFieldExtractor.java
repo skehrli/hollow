@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.diff;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowCollectionTypeDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
@@ -32,12 +33,14 @@ import java.util.List;
  */
 public class HollowDiffRecordFieldExtractor {
 
+    @Impure
     public List<Object> extractValues(HollowDataAccess dataAccess, HollowDiffNodeIdentifier fieldIdentifier, int ordinal) {
         IntList ordinalList = new IntList(1);
         ordinalList.add(ordinal);
         return traverse(dataAccess.getTypeDataAccess(getType(fieldIdentifier)), ordinalList, fieldIdentifier, 0);
     }
 
+    @Impure
     private List<Object> traverse(HollowTypeDataAccess typeDataAccess, IntList ordinals, HollowDiffNodeIdentifier fieldIdentifier, int level) {
 
         if(level == fieldIdentifier.getParents().size() - 1) {
@@ -80,6 +83,7 @@ public class HollowDiffRecordFieldExtractor {
         }
     }
 
+    @Impure
     private List<Object> extractValues(HollowTypeDataAccess typeDataAccess, IntList ordinals, HollowDiffNodeIdentifier fieldIdentifier) {
         List<Object> values = new ArrayList<Object>();
 
@@ -117,6 +121,7 @@ public class HollowDiffRecordFieldExtractor {
         return values;
     }
 
+    @Impure
     private final String getType(HollowDiffNodeIdentifier nodeId) {
         return nodeId.getParents().get(0).getNodeName();
     }

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,10 +34,12 @@ public class HollowDiffNodeIdentifier {
     private final String viaFieldName;
     private final String nodeName;
 
+    @Impure
     public HollowDiffNodeIdentifier(String typeName) {
         this(null, null, typeName);
     }
 
+    @Impure
     public HollowDiffNodeIdentifier(HollowDiffNodeIdentifier parent, String viaFieldName, String typeName) {
         this.parents = parent == null ?
                 Collections.<HollowDiffNodeIdentifier>emptyList()
@@ -44,18 +48,22 @@ public class HollowDiffNodeIdentifier {
         this.nodeName = typeName;
     }
 
+    @Pure
     public List<HollowDiffNodeIdentifier> getParents() {
         return parents;
     }
 
+    @Pure
     public String getViaFieldName() {
         return viaFieldName;
     }
 
+    @Pure
     public String getNodeName() {
         return nodeName;
     }
 
+    @Impure
     private List<HollowDiffNodeIdentifier> buildParentsList(HollowDiffNodeIdentifier immediateParent) {
         List<HollowDiffNodeIdentifier> parents = new ArrayList<HollowDiffNodeIdentifier>(immediateParent.getParents().size() + 1);
         parents.addAll(immediateParent.getParents());
@@ -63,6 +71,7 @@ public class HollowDiffNodeIdentifier {
         return parents;
     }
 
+    @Impure
     public int hashCode() {
         int hashCode = 0;
 
@@ -80,6 +89,7 @@ public class HollowDiffNodeIdentifier {
         return hashCode;
     }
 
+    @Impure
     public boolean equals(Object other) {
         if(this == other)
             return true;
@@ -103,6 +113,7 @@ public class HollowDiffNodeIdentifier {
     /**
      * @return a human-readable representation of this field location
      */
+    @Impure
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
@@ -121,6 +132,7 @@ public class HollowDiffNodeIdentifier {
         return builder.toString();
     }
 
+    @Impure
     private boolean shallowEquals(HollowDiffNodeIdentifier other) {
         if(viaFieldName == null ?
                 other.getViaFieldName() == null

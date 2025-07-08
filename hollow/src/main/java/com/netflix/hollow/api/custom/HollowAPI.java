@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.custom;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.codegen.HollowAPIGenerator;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
 import com.netflix.hollow.api.sampling.SampleResult;
@@ -37,19 +40,23 @@ public class HollowAPI {
 
     protected HollowSamplingDirector samplingDirector;
 
+    @SideEffectFree
     public HollowAPI(HollowDataAccess dataAccess) {
         this.dataAccess = dataAccess;
         this.typeAPIs = new ArrayList<HollowTypeAPI>();
     }
 
+    @Pure
     public HollowDataAccess getDataAccess() {
         return dataAccess;
     }
 
+    @Pure
     public HollowSamplingDirector getSamplingDirector() {
         return samplingDirector;
     }
 
+    @Impure
     public void setSamplingDirector(HollowSamplingDirector samplingDirector) {
         this.samplingDirector = samplingDirector;
         for(HollowTypeAPI typeAPI : typeAPIs) {
@@ -57,18 +64,21 @@ public class HollowAPI {
         }
     }
     
+    @Impure
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         for(HollowTypeAPI typeAPI : typeAPIs) {
             typeAPI.setFieldSpecificSamplingDirector(fieldSpec, director);
         }
     }
     
+    @Impure
     public void ignoreUpdateThreadForSampling(Thread t) {
         for(HollowTypeAPI typeAPI : typeAPIs) {
             typeAPI.ignoreUpdateThreadForSampling(t);
         }
     }
 
+    @Impure
     public List<SampleResult> getAccessSampleResults() {
         List<SampleResult> sampleResults = new ArrayList<SampleResult>();
         for(HollowTypeAPI typeAPI : typeAPIs) {
@@ -80,6 +90,7 @@ public class HollowAPI {
         return sampleResults;
     }
 
+    @Impure
     public List<SampleResult> getBoxedSampleResults() {
         List<SampleResult> sampleResults = new ArrayList<SampleResult>();
         for(HollowTypeAPI typeAPI : typeAPIs) {
@@ -93,8 +104,10 @@ public class HollowAPI {
         return sampleResults;
     }
 
+    @SideEffectFree
     public void detachCaches() { }
 
+    @Impure
     protected void addTypeAPI(HollowTypeAPI typeAPI) {
         this.typeAPIs.add(typeAPI);
     }

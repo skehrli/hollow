@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.diff.count;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowCollectionTypeReadState;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.map.HollowMapTypeReadState;
@@ -44,6 +45,7 @@ public abstract class HollowDiffCountingNode {
     protected final HollowDiffNodeIdentifier nodeId;
 
 
+    @Impure
     public HollowDiffCountingNode(HollowDiff diff, HollowTypeDiff topLevelTypeDiff, HollowDiffNodeIdentifier nodeId) {
         this.diff = diff;
         this.topLevelTypeDiff = topLevelTypeDiff;
@@ -51,13 +53,18 @@ public abstract class HollowDiffCountingNode {
         this.nodeId = nodeId;
     }
 
+    @Impure
     public abstract void prepare(int topLevelFromOrdinal, int topLevelToOrdinal);
 
+    @Impure
     public abstract int traverseDiffs(IntList fromOrdinals, IntList toOrdinals);
+    @Impure
     public abstract int traverseMissingFields(IntList fromOrdinals, IntList toOrdinals);
 
+    @Impure
     public abstract List<HollowFieldDiff> getFieldDiffs();
 
+    @Impure
     protected HollowDiffCountingNode getHollowDiffCountingNode(HollowTypeReadState refFromState, HollowTypeReadState refToState, String viaFieldName) {
         if(refFromState == null && refToState == null)
             return HollowDiffMissingCountingNode.INSTANCE;

@@ -15,6 +15,7 @@
  */
 package com.netflix.hollow.api.consumer.data;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.api.objects.delegate.HollowObjectGenericDelegate;
 import com.netflix.hollow.api.objects.generic.GenericHollowObject;
@@ -29,22 +30,27 @@ import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
  */
 public class GenericHollowRecordDataAccessor extends AbstractHollowDataAccessor<GenericHollowObject> {
 
+    @Impure
     public GenericHollowRecordDataAccessor(HollowConsumer consumer, String type) {
         super(consumer.getStateEngine(), type);
     }
 
+    @Impure
     public GenericHollowRecordDataAccessor(HollowReadStateEngine rStateEngine, String type) {
         super(rStateEngine, type, (PrimaryKey) null);
     }
 
+    @Impure
     public GenericHollowRecordDataAccessor(HollowReadStateEngine rStateEngine, String type, String... fieldPaths) {
         super(rStateEngine, type, new PrimaryKey(type, fieldPaths));
     }
 
+    @Impure
     public GenericHollowRecordDataAccessor(HollowReadStateEngine rStateEngine, String type, PrimaryKey primaryKey) {
         super(rStateEngine, type, primaryKey);
     }
 
+    @Impure
     @Override
     public GenericHollowObject getRecord(int ordinal) {
         HollowObjectTypeReadState typeState = (HollowObjectTypeReadState) rStateEngine.getTypeDataAccess(type).getTypeState();

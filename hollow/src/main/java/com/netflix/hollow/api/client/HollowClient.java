@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.client.HollowAPIFactory.DEFAULT_FACTORY;
 import static com.netflix.hollow.api.client.HollowClientConsumerBridge.consumerBlobRetrieverFor;
 import static com.netflix.hollow.api.client.HollowClientConsumerBridge.consumerRefreshListenerFor;
@@ -79,10 +80,12 @@ public class HollowClient {
     
     private final HollowClientDoubleSnapshotConfig doubleSnapshotConfig;
 
+    @Impure
     public HollowClient(HollowBlobRetriever blobRetriever) {
         this(blobRetriever, new HollowAnnouncementWatcher.DefaultWatcher(), DEFAULT_LISTENER, DEFAULT_FACTORY, new DefaultHashCodeFinder(), DEFAULT_CONFIG);
     }
 
+    @Impure
     public HollowClient(HollowBlobRetriever blobRetriever,
             HollowAnnouncementWatcher announcementWatcher,
             HollowUpdateListener updateListener,
@@ -93,6 +96,7 @@ public class HollowClient {
     }
 
     
+    @Impure
     public HollowClient(HollowBlobRetriever blobRetriever,
                         HollowAnnouncementWatcher announcementWatcher,
                         HollowUpdateListener updateListener,
@@ -121,6 +125,7 @@ public class HollowClient {
      *
      * This is a blocking call.
      */
+    @Impure
     public void triggerRefresh() {
         try {
             updater.updateTo(announcementWatcher.getLatestVersionInfo());
@@ -135,6 +140,7 @@ public class HollowClient {
      *
      * This is an asynchronous call.
      */
+    @Impure
     public void triggerAsyncRefresh() {
         announcementWatcher.triggerAsyncRefresh();
     }
@@ -149,6 +155,7 @@ public class HollowClient {
      *
      * @param version the version to update to
      */
+    @Impure
     public void triggerRefreshTo(long version) {
         announcementWatcher.setLatestVersion(version);
         triggerRefresh();
@@ -157,6 +164,7 @@ public class HollowClient {
     /**
      * Will force a double snapshot refresh on the next update.
      */
+    @Impure
     public void forceDoubleSnapshotNextUpdate() {
         updater.forceDoubleSnapshotNextUpdate();
     }
@@ -167,6 +175,7 @@ public class HollowClient {
      *
      * @param filter the filter configuration
      */
+    @Impure
     public void setFilter(HollowFilterConfig filter) {
         updater.setFilter(filter);
     }
@@ -182,6 +191,7 @@ public class HollowClient {
      *
      * @param maxDeltas the maximum number of deltas
      */
+    @Impure
     public void setMaxDeltas(int maxDeltas) {
         doubleSnapshotConfig.setMaxDeltasBeforeDoubleSnapshot(maxDeltas);
     }
@@ -189,10 +199,12 @@ public class HollowClient {
     /**
      * Clear any failed transitions from the {@link FailedTransitionTracker}, so that they may be reattempted when an update is triggered.
      */
+    @Impure
     public void clearFailedTransitions() {
         updater.clearFailedTransitions();
     }
 
+    @Impure
     public StackTraceRecorder getStaleReferenceUsageStackTraceRecorder() {
         return updater.getStaleReferenceUsageStackTraceRecorder();
     }
@@ -200,6 +212,7 @@ public class HollowClient {
     /**
      * @return the {@link HollowReadStateEngine} which is holding the underlying hollow dataset.
      */
+    @Impure
     public HollowReadStateEngine getStateEngine() {
         return updater.getStateEngine();
     }
@@ -207,6 +220,7 @@ public class HollowClient {
     /**
      * @return the api which wraps the underlying dataset.
      */
+    @Impure
     public HollowAPI getAPI() {
         return updater.getAPI();
     }
@@ -214,6 +228,7 @@ public class HollowClient {
     /**
      * @return the current version of the dataset.  This is the unique identifier of the data's state.
      */
+    @Impure
     public long getCurrentVersionId() {
         return updater.getCurrentVersionId();
     }
@@ -225,36 +240,43 @@ public class HollowClient {
         private HollowAPIFactory apiFactory = DEFAULT_FACTORY;
         private HollowClientMemoryConfig memoryConfig = DEFAULT_CONFIG;
         
+        @Impure
         public HollowClient.Builder withBlobRetriever(HollowBlobRetriever blobRetriever) {
             this.blobRetriever = blobRetriever;
             return this;
         }
         
+        @Impure
         public HollowClient.Builder withAnnouncementWatcher(HollowAnnouncementWatcher announcementWatcher) {
             this.announcementWatcher = announcementWatcher;
             return this;
         }
         
+        @Impure
         public HollowClient.Builder withUpdateListener(HollowUpdateListener updateListener) {
             this.updateListener = updateListener;
             return this;
         }
         
+        @Impure
         public HollowClient.Builder withAPIFactory(HollowAPIFactory apiFactory) {
             this.apiFactory = apiFactory;
             return this;
         }
         
+        @Impure
         public <T extends HollowAPI> HollowClient.Builder withGeneratedAPIClass(Class<T> generatedAPIClass) {
             this.apiFactory = new HollowAPIFactory.ForGeneratedAPI<T>(generatedAPIClass);
             return this;
         }
         
+        @Impure
         public HollowClient.Builder withMemoryConfig(HollowClientMemoryConfig memoryConfig) {
             this.memoryConfig = memoryConfig;
             return this;
         }
         
+        @Impure
         public HollowClient build() {
             if(blobRetriever == null) 
                 throw new IllegalArgumentException("A HollowBlobRetriever must be specified when building a HollowClient");

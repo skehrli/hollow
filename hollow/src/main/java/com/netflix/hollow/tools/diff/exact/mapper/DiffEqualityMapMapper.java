@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff.exact.mapper;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.read.engine.map.HollowMapTypeReadState;
 import com.netflix.hollow.core.read.iterator.HollowMapEntryOrdinalIterator;
@@ -35,6 +37,7 @@ public class DiffEqualityMapMapper extends DiffEqualityTypeMapper {
 
     private final boolean requiresTraversalForMissingFields;
 
+    @Impure
     public DiffEqualityMapMapper(DiffEqualityMapping mapping, HollowMapTypeReadState fromState, HollowMapTypeReadState toState, boolean oneToOne) {
         super(fromState, toState, oneToOne);
 
@@ -48,21 +51,25 @@ public class DiffEqualityMapMapper extends DiffEqualityTypeMapper {
                 || mapping.requiresMissingFieldTraversal(schema.getValueType());
     }
 
+    @Pure
     @Override
     public boolean requiresTraversalForMissingFields() {
         return requiresTraversalForMissingFields;
     }
 
+    @Impure
     @Override
     protected int fromRecordHashCode(int ordinal) {
         return recordHashCode(fromState(), ordinal, keyEqualOrdinalMap.getFromOrdinalIdentityTranslator(), valueEqualOrdinalMap.getFromOrdinalIdentityTranslator());
     }
 
+    @Impure
     @Override
     protected int toRecordHashCode(int ordinal) {
         return recordHashCode(toState(), ordinal, keyEqualOrdinalMap.getToOrdinalIdentityTranslator(), valueEqualOrdinalMap.getToOrdinalIdentityTranslator());
     }
 
+    @Impure
     private int recordHashCode(HollowMapTypeReadState typeState, int ordinal, OrdinalIdentityTranslator keyTranslator, OrdinalIdentityTranslator valueTranslator) {
         HollowMapEntryOrdinalIterator iter = typeState.ordinalIterator(ordinal);
 
@@ -83,6 +90,7 @@ public class DiffEqualityMapMapper extends DiffEqualityTypeMapper {
         return hashCode;
     }
 
+    @Impure
     @Override
     protected EqualityDeterminer getEqualityDeterminer() {
         return new EqualityDeterminer() {
@@ -91,6 +99,7 @@ public class DiffEqualityMapMapper extends DiffEqualityTypeMapper {
             private final IntList toKeysIntList = new IntList();
             private final IntList toValuesIntList = new IntList();
 
+            @Impure
             @Override
             public boolean recordsAreEqual(int fromOrdinal, int toOrdinal) {
                 if(!populateIntLists(fromKeysIntList, fromValuesIntList, fromState().ordinalIterator(fromOrdinal), keyEqualOrdinalMap.getFromOrdinalIdentityTranslator(), valueEqualOrdinalMap.getFromOrdinalIdentityTranslator()))
@@ -101,6 +110,7 @@ public class DiffEqualityMapMapper extends DiffEqualityTypeMapper {
                 return fromKeysIntList.equals(toKeysIntList) && fromValuesIntList.equals(toValuesIntList);
             }
 
+            @Impure
             private boolean populateIntLists(IntList keysList, IntList valuesList, HollowMapEntryOrdinalIterator iter, OrdinalIdentityTranslator keyTranslator, OrdinalIdentityTranslator valueTranslator) {
                 keysList.clear();
                 valuesList.clear();
@@ -126,10 +136,12 @@ public class DiffEqualityMapMapper extends DiffEqualityTypeMapper {
         };
     }
 
+    @Pure
     private HollowMapTypeReadState fromState() {
         return (HollowMapTypeReadState) fromState;
     }
 
+    @Pure
     private HollowMapTypeReadState toState() {
         return (HollowMapTypeReadState) toState;
     }

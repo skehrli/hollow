@@ -15,6 +15,8 @@
  *
  */
 package com.netflix.hollow.core.memory.pool;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 
 /**
  * A WastefulRecycler is an {@link ArraySegmentRecycler} which doesn't <i>really</i> pool arrays, it instead
@@ -28,41 +30,49 @@ public class WastefulRecycler implements ArraySegmentRecycler {
     private final int log2OfByteSegmentSize;
     private final int log2OfLongSegmentSize;
 
+    @SideEffectFree
     public WastefulRecycler(int log2OfByteSegmentSize, int log2OfLongSegmentSize) {
         this.log2OfByteSegmentSize = log2OfByteSegmentSize;
         this.log2OfLongSegmentSize = log2OfLongSegmentSize;
     }
 
+    @Pure
     @Override
     public int getLog2OfByteSegmentSize() {
         return log2OfByteSegmentSize;
     }
 
+    @Pure
     @Override
     public int getLog2OfLongSegmentSize() {
         return log2OfLongSegmentSize;
     }
 
+    @Pure
     @Override
     public long[] getLongArray() {
         return new long[(1 << log2OfLongSegmentSize) + 1];
     }
 
+    @Pure
     @Override
     public byte[] getByteArray() {
         return new byte[(1 << log2OfByteSegmentSize)];
     }
 
+    @SideEffectFree
     @Override
     public void recycleLongArray(long[] arr) {
         /// do nothing
     }
 
+    @SideEffectFree
     @Override
     public void recycleByteArray(byte[] arr) {
         /// do nothing
     }
 
+    @SideEffectFree
     @Override
     public void swap() {
         // do nothing

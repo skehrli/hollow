@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.custom.HollowMapTypeAPI;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.api.objects.HollowMap;
@@ -39,14 +41,17 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
     protected HollowMapTypeAPI typeAPI;
     private HollowMapTypeDataAccess dataAccess;
 
+    @Impure
     public HollowMapCachedDelegate(HollowMapTypeDataAccess dataAccess, int ordinal) {
         this(dataAccess, null, ordinal);
     }
 
+    @Impure
     public HollowMapCachedDelegate(HollowMapTypeAPI typeAPI, int ordinal) {
         this(typeAPI.getTypeDataAccess(), typeAPI, ordinal);
     }
 
+    @Impure
     private HollowMapCachedDelegate(HollowMapTypeDataAccess dataAccess, HollowMapTypeAPI typeAPI, int ordinal) {
         int size = dataAccess.size(ordinal);
 
@@ -66,11 +71,13 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
         this.typeAPI = typeAPI;
     }
 
+    @Pure
     @Override
     public int size(int ordinal) {
         return size;
     }
 
+    @Impure
     @Override
     public V get(HollowMap<K, V> map, int ordinal, Object key) {
         if(getSchema().getHashKey() != null) {
@@ -95,6 +102,7 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
         return null;
     }
 
+    @Impure
     @Override
     public boolean containsKey(HollowMap<K, V> map, int ordinal, Object key) {
         if(getSchema().getHashKey() != null) {
@@ -119,6 +127,7 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
         return false;
     }
 
+    @Impure
     @Override
     public boolean containsValue(HollowMap<K, V> map, int ordinal, Object value) {
         HollowMapEntryOrdinalIterator iter = iterator(ordinal);
@@ -129,6 +138,7 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
         return false;
     }
     
+    @Impure
     @Override
     public K findKey(HollowMap<K, V> map, int ordinal, Object... hashKey) {
         int keyOrdinal = dataAccess.findKey(ordinal, hashKey);
@@ -137,6 +147,7 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
         return null;
     }
 
+    @Impure
     @Override
     public V findValue(HollowMap<K, V> map, int ordinal, Object... hashKey) {
         int valueOrdinal = dataAccess.findValue(ordinal, hashKey);
@@ -145,21 +156,25 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
         return null;
     }
 
+    @Impure
     @Override
     public Entry<K, V> findEntry(final HollowMap<K, V> map, int ordinal, Object... hashKey) {
         final long entryOrdinals = dataAccess.findEntry(ordinal, hashKey);
         if(entryOrdinals != -1L)
             return new Map.Entry<K, V>() {
+                @Impure
                 @Override
                 public K getKey() {
                     return map.instantiateKey((int)(entryOrdinals >> 32));
                 }
 
+                @Impure
                 @Override
                 public V getValue() {
                     return map.instantiateValue((int)entryOrdinals);
                 }
 
+                @Pure
                 @Override
                 public V setValue(V value) {
                     throw new UnsupportedOperationException();
@@ -169,11 +184,13 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
         return null;
     }
 
+    @Impure
     @Override
     public HollowMapEntryOrdinalIterator iterator(int ordinal) {
         return new HollowMapEntryOrdinalIterator() {
             private int bucket = -2;
 
+            @Impure
             @Override
             public boolean next() {
                 do {
@@ -182,11 +199,13 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
                 return bucket < ordinals.length;
             }
 
+            @Pure
             @Override
             public int getValue() {
                 return ordinals[bucket + 1];
             }
 
+            @Pure
             @Override
             public int getKey() {
                 return ordinals[bucket];
@@ -195,21 +214,25 @@ public class HollowMapCachedDelegate<K, V> implements HollowMapDelegate<K, V>, H
 
     }
 
+    @Impure
     @Override
     public HollowMapSchema getSchema() {
         return dataAccess.getSchema();
     }
 
+    @Pure
     @Override
     public HollowMapTypeDataAccess getTypeDataAccess() {
         return dataAccess;
     }
 
+    @Pure
     @Override
     public HollowMapTypeAPI getTypeAPI() {
         return typeAPI;
     }
 
+    @Impure
     @Override
     public void updateTypeAPI(HollowTypeAPI typeAPI) {
         this.typeAPI = (HollowMapTypeAPI) typeAPI;

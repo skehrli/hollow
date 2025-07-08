@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -40,10 +43,12 @@ public class ProducerOptionalBlobPartConfig {
 
     private final Map<String, Set<String>> parts;
     
+    @Impure
     public ProducerOptionalBlobPartConfig() {
         this.parts = new HashMap<>();
     }
     
+    @Impure
     public void addTypesToPart(String partName, String... types) {
         if(types.length == 0)
             return;
@@ -55,14 +60,17 @@ public class ProducerOptionalBlobPartConfig {
         }
     }
     
+    @SideEffectFree
     public Set<String> getParts() {
         return parts.keySet();
     }
     
+    @Impure
     public OptionalBlobPartOutputStreams newStreams() {
         return new OptionalBlobPartOutputStreams();
     }
     
+    @Impure
     public OptionalBlobPartOutputStreams newStreams(Function<String, OutputStream> streamCreator) {
         OptionalBlobPartOutputStreams s = newStreams();
         for(String part : getParts()) {
@@ -75,10 +83,12 @@ public class ProducerOptionalBlobPartConfig {
         
         private final Map<String, ConfiguredOutputStream> partStreams;
         
+        @Impure
         private OptionalBlobPartOutputStreams() {
             this.partStreams = new HashMap<>();
         }
         
+        @Impure
         public void addOutputStream(String partName, OutputStream os) {
             Set<String> types = parts.get(partName);
             
@@ -88,6 +98,7 @@ public class ProducerOptionalBlobPartConfig {
             partStreams.put(partName, new ConfiguredOutputStream(partName, types, new DataOutputStream(os)));
         }
         
+        @Impure
         public Map<String, DataOutputStream> getStreamsByType() {
             if(!allPartsHaveStreams())
                 throw new IllegalStateException("Not all configured parts have streams!");
@@ -105,6 +116,7 @@ public class ProducerOptionalBlobPartConfig {
             return streamsByType;
         }
         
+        @Impure
         public Map<String, String> getPartNameByType() {
             if(!allPartsHaveStreams())
                 throw new IllegalStateException("Not all configured parts have streams!");
@@ -122,22 +134,26 @@ public class ProducerOptionalBlobPartConfig {
             return streamsByType;
         }
         
+        @Impure
         public Map<String, ConfiguredOutputStream> getPartStreams() {
             return Collections.unmodifiableMap(partStreams);
         }
         
+        @Impure
         public void flush() throws IOException {
             for(Map.Entry<String, ConfiguredOutputStream> entry : partStreams.entrySet()) {
                 entry.getValue().getStream().flush();
             }
         }
         
+        @Impure
         public void close() throws IOException {
             for(Map.Entry<String, ConfiguredOutputStream> entry : partStreams.entrySet()) {
                 entry.getValue().getStream().close();
             }
         }
         
+        @SideEffectFree
         private boolean allPartsHaveStreams() {
             return parts.keySet().equals(partStreams.keySet());
         }
@@ -148,20 +164,24 @@ public class ProducerOptionalBlobPartConfig {
         private final Set<String> types;
         private final DataOutputStream stream;
         
+        @SideEffectFree
         public ConfiguredOutputStream(String partName, Set<String> types, DataOutputStream stream) {
             this.partName = partName;
             this.types = Collections.unmodifiableSet(types);
             this.stream = stream;
         }
         
+        @Pure
         public String getPartName() {
             return partName;
         }
         
+        @Pure
         public Set<String> getTypes() {
             return types;
         }
         
+        @Pure
         public DataOutputStream getStream() {
             return stream;
         }

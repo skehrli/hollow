@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.testdata;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.util.StateEngineRoundTripper;
@@ -36,15 +37,18 @@ public abstract class HollowTestDataset {
     private long currentState = 0L;
     
     
+    @Impure
     public HollowTestDataset() {
         this.writeEngine = new HollowWriteStateEngine();
         this.recsToAdd = new ArrayList<>();
     }
     
+    @Impure
     public void add(HollowTestRecord<Void> rec) {
         recsToAdd.add(rec);
     }
     
+    @Impure
     public HollowConsumer.Builder<?> newConsumerBuilder() {
     	blobRetriever = new HollowTestBlobRetriever();
     	
@@ -53,6 +57,7 @@ public abstract class HollowTestDataset {
     			.withBlobRetriever(blobRetriever);
     }
 
+    @Impure
     public void buildHeader(HollowConsumer consumer) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -63,6 +68,7 @@ public abstract class HollowTestDataset {
         }
     }
 
+    @Impure
     public void buildSnapshot(HollowConsumer consumer) {
         for(HollowTestRecord<Void> rec : recsToAdd) {
             rec.addTo(writeEngine);
@@ -81,6 +87,7 @@ public abstract class HollowTestDataset {
         }
     }
     
+    @Impure
     public void buildDelta(HollowConsumer consumer) {
         for(HollowTestRecord<Void> rec : recsToAdd) {
             rec.addTo(writeEngine);
@@ -100,6 +107,7 @@ public abstract class HollowTestDataset {
         }
     }
     
+    @Impure
     public HollowReadStateEngine buildSnapshot() {
         for(HollowTestRecord<Void> rec : recsToAdd) {
             rec.addTo(writeEngine);
@@ -112,6 +120,7 @@ public abstract class HollowTestDataset {
         }
     }
     
+    @Impure
     public void buildDelta(HollowReadStateEngine readEngine) {
         for(HollowTestRecord<Void> rec : recsToAdd) {
             rec.addTo(writeEngine);

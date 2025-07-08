@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index.key;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.index.FieldPaths;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -45,6 +48,7 @@ public class PrimaryKey {
      * @param fieldPaths       field paths for fields that make up the primary key. If no fields are passed in, then create using schema definition of primary key
      * @return populated primary key
      */
+    @Impure
     public static PrimaryKey create(HollowDataAccess hollowDataAccess, String type, String... fieldPaths) {
         if (fieldPaths != null && fieldPaths.length != 0) {
             return new PrimaryKey(type, fieldPaths);
@@ -68,6 +72,7 @@ public class PrimaryKey {
      * For example, the field definition <i>movie.country.id</i> may be used to traverse a child record referenced by the field <i>movie</i>,
      * its child record referenced by the field <i>country</i>, and finally the country's field <i>id</i>.
      */
+    @SideEffectFree
     public PrimaryKey(String type, String... fieldPaths) {
         if (fieldPaths == null || fieldPaths.length == 0) {
             throw new IllegalArgumentException("fieldPaths can't not be null or empty");
@@ -77,26 +82,32 @@ public class PrimaryKey {
         this.fieldPaths = fieldPaths.clone();
     }
 
+    @Pure
     public String getType() {
         return type;
     }
 
+    @Pure
     public int numFields() {
         return fieldPaths.length;
     }
 
+    @Pure
     public String getFieldPath(int idx) {
         return fieldPaths[idx];
     }
 
+    @Pure
     public String[] getFieldPaths() {
         return fieldPaths;
     }
 
+    @Impure
     public FieldType getFieldType(HollowDataset dataset, int fieldPathIdx) {
         return getFieldType(dataset, type, fieldPaths[fieldPathIdx]);
     }
 
+    @Impure
     public HollowObjectSchema getFieldSchema(HollowDataset dataset, int fieldPathIdx) {
         return getFieldSchema(dataset, type, fieldPaths[fieldPathIdx]);
     }
@@ -108,6 +119,7 @@ public class PrimaryKey {
      * @param fieldPathIdx the index to a field path string
      * @return the field path index
      */
+    @Impure
     public int[] getFieldPathIndex(HollowDataset dataset, int fieldPathIdx) {
         return getFieldPathIndex(dataset, type, fieldPaths[fieldPathIdx]);
     }
@@ -120,6 +132,7 @@ public class PrimaryKey {
      * @param fieldPath the field path
      * @return the field type
      */
+    @Impure
     public static FieldType getFieldType(HollowDataset dataAccess, String type, String fieldPath) {
         HollowObjectSchema schema = (HollowObjectSchema)dataAccess.getSchema(type);
         int pathIndexes[] = getFieldPathIndex(dataAccess, type, fieldPath);
@@ -136,6 +149,7 @@ public class PrimaryKey {
      * @param fieldPath the field path
      * @return the field schema
      */
+    @Impure
     public static HollowObjectSchema getFieldSchema(HollowDataset dataAccess, String type, String fieldPath) {
         HollowObjectSchema schema = (HollowObjectSchema)dataAccess.getSchema(type);
         int pathIndexes[] = getFieldPathIndex(dataAccess, type, fieldPath);
@@ -153,6 +167,7 @@ public class PrimaryKey {
      * @param fieldPath the field path
      * @return the separated field path
      */
+    @Impure
     public static String[] getCompleteFieldPathParts(HollowDataset dataset, String type, String fieldPath) {
         int fieldPathIdx[] = getFieldPathIndex(dataset, type, fieldPath);
         String fieldPathParts[] = new String[fieldPathIdx.length];
@@ -174,12 +189,14 @@ public class PrimaryKey {
      * @param fieldPath the field path string
      * @return the field path index
      */
+    @Impure
     public static int[] getFieldPathIndex(HollowDataset dataset, String type, String fieldPath) {
         return FieldPaths.createFieldPathForPrimaryKey(dataset, type, fieldPath).getSegments().stream()
                 .mapToInt(FieldPaths.ObjectFieldSegment::getIndex)
                 .toArray();
     }
 
+    @Pure
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -189,6 +206,7 @@ public class PrimaryKey {
         return result;
     }
 
+    @Pure
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -208,6 +226,7 @@ public class PrimaryKey {
         return true;
     }
 
+    @SideEffectFree
     @Override
     public String toString() {
         return "PrimaryKey [type=" + type + ", fieldPaths=" + Arrays.toString(fieldPaths) + "]";

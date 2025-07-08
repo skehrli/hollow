@@ -15,12 +15,17 @@
  *
  */
 package com.netflix.hollow.api.perfapi;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 
 @FunctionalInterface
 public interface HashKeyExtractor {
 
+    @Pure
     public Object extract(Object extractFrom);
     
+    @Pure
+    @Impure
     public default Object[] extractArray(Object extractFrom) {
         Object obj = extract(extractFrom);
         if(obj.getClass().isArray()) {

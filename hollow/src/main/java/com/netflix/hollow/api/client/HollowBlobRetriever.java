@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.core.HollowBlobHeader;
 
@@ -33,24 +35,28 @@ public interface HollowBlobRetriever {
      * @param desiredVersion the desired version
      * @return the snapshot for the state with an identifier equal to or less than the desired version
      */
+    @Pure
     HollowBlob retrieveSnapshotBlob(long desiredVersion);
 
     /**
      * @param currentVersion the current version
      * @return a delta transition which can be applied to the currentVersion
      */
+    @Pure
     HollowBlob retrieveDeltaBlob(long currentVersion);
 
     /**
      * @param currentVersion the current version
      * @return a reverse delta transition which can be applied to the currentVersion
      */
+    @Pure
     HollowBlob retrieveReverseDeltaBlob(long currentVersion);
 
     /**
      * @param currentVersion the desired version
      * @return the header for the state with an identifier equal to currentVersion
      */
+    @Impure
     default HollowBlobHeader retrieveHeaderBlob(long currentVersion) {
         return new HollowBlobHeader();
     }

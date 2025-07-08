@@ -15,6 +15,8 @@
  */
 package com.netflix.hollow.api.codegen.indexes;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.codegen.CodeGeneratorConfig;
 import com.netflix.hollow.api.codegen.HollowConsumerJavaFileGenerator;
 import com.netflix.hollow.core.HollowDataset;
@@ -24,6 +26,8 @@ public abstract class HollowIndexGenerator extends HollowConsumerJavaFileGenerat
 
     protected final String apiClassname;
 
+    @SideEffectFree
+    @Impure
     public HollowIndexGenerator(String packageName, String apiClassname, HollowDataset dataset,
             CodeGeneratorConfig config) {
         super(packageName, SUB_PACKAGE_NAME, dataset, config);

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.consumer.metrics;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.consumer.HollowConsumer.Blob.BlobType;
 import java.util.List;
 import java.util.OptionalLong;
@@ -44,54 +47,70 @@ public class ConsumerRefreshMetrics {
         List<BlobType> transitionSequence;
         int numSuccessfulTransitions;
 
+        @Pure
         public long getBeforeVersion() {
             return beforeVersion;
         }
+        @Pure
         public long getDesiredVersion() {
             return desiredVersion;
         }
+        @Pure
         public List<BlobType> getTransitionSequence() {
             return transitionSequence;
         }
+        @Pure
         public int getNumSuccessfulTransitions() {
             return numSuccessfulTransitions;
         }
     }
 
+    @Pure
     public long getDurationMillis() {
         return durationMillis;
     }
+    @Pure
     public boolean getIsRefreshSuccess() {
         return isRefreshSuccess;
     }
+    @Pure
     public boolean getIsInitialLoad() {
         return isInitialLoad;
     }
+    @Pure
     public BlobType getOverallRefreshType() {
         return overallRefreshType;
     }
+    @Pure
     public UpdatePlanDetails getUpdatePlanDetails() {
         return updatePlanDetails;
     }
+    @Pure
     public long getConsecutiveFailures() {
         return consecutiveFailures;
     }
+    @Pure
     public OptionalLong getRefreshSuccessAgeMillisOptional() {
         return refreshSuccessAgeMillisOptional;
     }
+    @Pure
     public long getRefreshEndTimeNano() {
         return refreshEndTimeNano;
     }
+    @Pure
     public OptionalLong getCycleStartTimestamp() {
         return cycleStartTimestamp;
     }
+    @Pure
     public OptionalLong getAnnouncementTimestamp() {
         return announcementTimestamp;
     }
+    @Pure
     public OptionalLong getDeltaChainVersionCounter() {
         return deltaChainVersionCounter;
     }
 
+    @SideEffectFree
     private ConsumerRefreshMetrics(Builder builder) {
         this.durationMillis = builder.durationMillis;
         this.isRefreshSuccess = builder.isRefreshSuccess;
@@ -119,6 +138,7 @@ public class ConsumerRefreshMetrics {
         private OptionalLong announcementTimestamp;
         private OptionalLong deltaChainVersionCounter;
 
+        @SideEffectFree
         public Builder() {
             refreshSuccessAgeMillisOptional = OptionalLong.empty();
             cycleStartTimestamp = OptionalLong.empty();
@@ -126,53 +146,66 @@ public class ConsumerRefreshMetrics {
             deltaChainVersionCounter = OptionalLong.empty();
         }
 
+        @Impure
         public Builder setDurationMillis(long durationMillis) {
             this.durationMillis = durationMillis;
             return this;
         }
+        @Impure
         public Builder setIsRefreshSuccess(boolean isRefreshSuccess) {
             this.isRefreshSuccess = isRefreshSuccess;
             return this;
         }
+        @Impure
         public Builder setIsInitialLoad(boolean isInitialLoad) {
             this.isInitialLoad = isInitialLoad;
             return this;
         }
+        @Impure
         public Builder setOverallRefreshType(BlobType overallRefreshType) {
             this.overallRefreshType = overallRefreshType;
             return this;
         }
+        @Impure
         public Builder setUpdatePlanDetails(
                 UpdatePlanDetails updatePlanDetails) {
             this.updatePlanDetails = updatePlanDetails;
             return this;
         }
+        @Impure
         public Builder setConsecutiveFailures(long consecutiveFailures) {
             this.consecutiveFailures = consecutiveFailures;
             return this;
         }
+        @Impure
         public Builder setRefreshSuccessAgeMillisOptional(long refreshSuccessAgeMillis) {
             this.refreshSuccessAgeMillisOptional = OptionalLong.of(refreshSuccessAgeMillis);
             return this;
         }
+        @Impure
         public Builder setRefreshEndTimeNano(long refreshEndTimeNano) {
             this.refreshEndTimeNano = refreshEndTimeNano;
             return this;
         }
+        @Impure
         public Builder setCycleStartTimestamp(long cycleStartTimestamp) {
             this.cycleStartTimestamp = OptionalLong.of(cycleStartTimestamp);
             return this;
         }
 
+        @Impure
         public Builder setAnnouncementTimestamp(long announcementTimestamp) {
             this.announcementTimestamp = OptionalLong.of(announcementTimestamp);
             return this;
         }
+        @Impure
         public Builder setDeltaChainVersionCounter(long deltaChainVersionCounter) {
             this.deltaChainVersionCounter = OptionalLong.of(deltaChainVersionCounter);
             return this;
         }
 
+        @SideEffectFree
+        @Impure
         public ConsumerRefreshMetrics build() {
             return new ConsumerRefreshMetrics(this);
         }

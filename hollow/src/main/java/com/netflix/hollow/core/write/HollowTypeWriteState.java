@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.write.HollowHashableWriteRecord.HashBehavior.IGNORED_HASHES;
 import static com.netflix.hollow.core.write.HollowHashableWriteRecord.HashBehavior.UNMIXED_HASHES;
 
@@ -71,6 +74,7 @@ public abstract class HollowTypeWriteState {
     protected int revMaxShardOrdinal[];
 
 
+    @Impure
     public HollowTypeWriteState(HollowSchema schema, int numShards) {
         this.schema = schema;
         this.ordinalMap = new ByteArrayOrdinalMap();
@@ -91,6 +95,7 @@ public abstract class HollowTypeWriteState {
      * @param rec the record to add to this state
      * @return the ordinal of the added record
      */
+    @Impure
     public int add(HollowWriteRecord rec) {
         if(!ordinalMap.isReadyForAddingObjects())
             throw new RuntimeException("The HollowWriteStateEngine is not ready to add more Objects.  Did you remember to call stateEngine.prepareForNextCycle()?");
@@ -108,6 +113,7 @@ public abstract class HollowTypeWriteState {
         return ordinal;
     }
 
+    @Impure
     private int assignOrdinal(HollowWriteRecord rec) {
         ByteDataArray scratch = scratch();
         rec.writeDataTo(scratch);
@@ -117,6 +123,7 @@ public abstract class HollowTypeWriteState {
     }
 
 
+    @Impure
     private int reuseOrdinalFromRestoredState(HollowWriteRecord rec) {
         ByteDataArray scratch = scratch();
 
@@ -150,6 +157,7 @@ public abstract class HollowTypeWriteState {
     /**
      * Resets this write state to empty (i.e. as if prepareForNextCycle() had just been called)
      */
+    @Impure
     public void resetToLastPrepareForNextCycle() {
         numShards = resetToLastNumShards;
         if(restoredReadState == null) {
@@ -165,6 +173,7 @@ public abstract class HollowTypeWriteState {
         }
     }
 
+    @Impure
     public void addAllObjectsFromPreviousCycle() {
         if(!ordinalMap.isReadyForAddingObjects())
             throw new RuntimeException("The HollowWriteStateEngine is not ready to add more Objects.  Did you remember to call stateEngine.prepareForNextCycle()?");
@@ -172,6 +181,7 @@ public abstract class HollowTypeWriteState {
         currentCyclePopulated = ThreadSafeBitSet.orAll(previousCyclePopulated, currentCyclePopulated);
     }
     
+    @Impure
     public void addOrdinalFromPreviousCycle(int ordinal) {
         if(!ordinalMap.isReadyForAddingObjects())
             throw new RuntimeException("The HollowWriteStateEngine is not ready to add more Objects.  Did you remember to call stateEngine.prepareForNextCycle()?");
@@ -182,6 +192,7 @@ public abstract class HollowTypeWriteState {
         currentCyclePopulated.set(ordinal);
     }
 
+    @Impure
     public void removeOrdinalFromThisCycle(int ordinalToRemove) {
         if(!ordinalMap.isReadyForAddingObjects())
             throw new RuntimeException("The HollowWriteStateEngine is not ready to add more Objects.  Did you remember to call stateEngine.prepareForNextCycle()?");
@@ -189,6 +200,7 @@ public abstract class HollowTypeWriteState {
         currentCyclePopulated.clear(ordinalToRemove);
     }
     
+    @Impure
     public void removeAllOrdinalsFromThisCycle() {
         if(!ordinalMap.isReadyForAddingObjects())
             throw new RuntimeException("The HollowWriteStateEngine is not ready to add more Objects.  Did you remember to call stateEngine.prepareForNextCycle()?");
@@ -211,6 +223,7 @@ public abstract class HollowTypeWriteState {
      * @param markPreviousCycle true if the previous populated cycle should be updated
      * @param markCurrentCycle true if the current populated cycle should be updated
      */
+    @Impure
     public void mapOrdinal(HollowWriteRecord rec, int newOrdinal, boolean markPreviousCycle, boolean markCurrentCycle) {
         if(!ordinalMap.isReadyForAddingObjects())
             throw new RuntimeException("The HollowWriteStateEngine is not ready to add more Objects.  Did you remember to call stateEngine.prepareForNextCycle()?");
@@ -228,34 +241,42 @@ public abstract class HollowTypeWriteState {
     /**
      * Correct the free ordinal list after using mapOrdinal()
      */
+    @Impure
     public void recalculateFreeOrdinals() {
         ordinalMap.recalculateFreeOrdinals();
     }
 
+    @Pure
     public ThreadSafeBitSet getPopulatedBitSet() {
         return currentCyclePopulated;
     }
 
+    @Pure
     public ThreadSafeBitSet getPreviousCyclePopulatedBitSet() {
         return previousCyclePopulated;
     }
     
+    @Pure
     public HollowSchema getSchema() {
         return schema;
     }
     
+    @Pure
     public int getNumShards() {
         return numShards;
     }
 
+    @Pure
     boolean isNumShardsPinned() {
         return isNumShardsPinned;
     }
 
+    @Pure
     int getRevNumShards() {
         return revNumShards;
     }
 
+    @Impure
     public void setNumShards(int numShards) {
         if(this.numShards == -1) {
             this.numShards = numShards;
@@ -265,6 +286,7 @@ public abstract class HollowTypeWriteState {
         }
     }
 
+    @Impure
     public void resizeOrdinalMap(int size) {
         ordinalMap.resize(size);
     }
@@ -275,6 +297,7 @@ public abstract class HollowTypeWriteState {
      * Precondition: We are writing the previously added objects to a FastBlob.<br>
      * Postcondition: We are ready to add objects to this state engine for the next server cycle.
      */
+    @Impure
     public void prepareForNextCycle() {
         ordinalMap.compact(currentCyclePopulated, numShards, stateEngine.isFocusHoleFillInFewestShards());
 
@@ -291,6 +314,7 @@ public abstract class HollowTypeWriteState {
         resetToLastNumShards = numShards; // -1 if first cycle else previous numShards. See {@code testNumShardsMaintainedWhenNoResharding}
     }
 
+    @Impure
     public void prepareForWrite(boolean canReshard) {
         /// write all of the unused objects to the current ordinalMap, without updating the current cycle bitset,
         /// this way we can do a reverse delta.
@@ -310,6 +334,7 @@ public abstract class HollowTypeWriteState {
         wroteData = true;
     }
 
+    @Pure
     public boolean hasChangedSinceLastCycle() {
         if (!currentCyclePopulated.equals(previousCyclePopulated)) {
             return true;
@@ -322,36 +347,47 @@ public abstract class HollowTypeWriteState {
 
     }
     
+    @Pure
+    @Impure
     public boolean isRestored() {
         return ordinalMap.getUnusedPreviousOrdinals() != null;
     }
 
+    @Impure
     public abstract void calculateSnapshot();
 
+    @Impure
     public abstract void writeSnapshot(DataOutputStream dos) throws IOException;
 
+    @Impure
     public void calculateDelta() {
         calculateDelta(previousCyclePopulated, currentCyclePopulated, false);
     }
 
+    @Impure
     public void calculateReverseDelta() {
         calculateDelta(currentCyclePopulated, previousCyclePopulated, true);
     }
 
+    @Impure
     public void writeDelta(DataOutputStream dos) throws IOException {
         LOG.log(Level.FINE, String.format("Writing delta with num shards = %s, max shard ordinals = %s", numShards, Arrays.toString(maxShardOrdinal)));
         writeCalculatedDelta(dos, false, maxShardOrdinal);
     }
 
+    @Impure
     public void writeReverseDelta(DataOutputStream dos) throws IOException {
         LOG.log(Level.FINE, String.format("Writing reversedelta with num shards = %s, max shard ordinals = %s", revNumShards, Arrays.toString(revMaxShardOrdinal)));
         writeCalculatedDelta(dos, true, revMaxShardOrdinal);
     }
 
+    @Impure
     public abstract void calculateDelta(ThreadSafeBitSet fromCyclePopulated, ThreadSafeBitSet toCyclePopulated, boolean isReverse);
 
+    @Impure
     public abstract void writeCalculatedDelta(DataOutputStream os, boolean isReverse, int[] maxShardOrdinal) throws IOException;
 
+    @Impure
     protected void restoreFrom(HollowTypeReadState readState) {
         if(previousCyclePopulated.cardinality() != 0 || currentCyclePopulated.cardinality() != 0)
             throw new IllegalStateException("Attempting to restore into a non-empty state (type " + schema.getName() + ")");
@@ -381,6 +417,7 @@ public abstract class HollowTypeWriteState {
         ordinalMap.reservePreviouslyPopulatedOrdinals(populatedOrdinals);
     }
 
+    @Impure
     protected void restoreOrdinal(int ordinal, HollowRecordCopier copier, ByteArrayOrdinalMap destinationMap, HashBehavior hashBehavior) {
         HollowWriteRecord rec = copier.copy(ordinal);
 
@@ -399,6 +436,7 @@ public abstract class HollowTypeWriteState {
      * are referenced via a ThreadLocal variable.
      * @return the scratch byte array
      */
+    @Impure
     protected ByteDataArray scratch() {
         ByteDataArray scratch = serializedScratchSpace.get();
         if(scratch == null) {
@@ -408,14 +446,17 @@ public abstract class HollowTypeWriteState {
         return scratch;
     }
     
+    @Impure
     void setStateEngine(HollowWriteStateEngine writeEngine) {
         this.stateEngine = writeEngine;
     }
     
+    @Pure
     public HollowWriteStateEngine getStateEngine() {
         return stateEngine;
     }
 
+    @Impure
     protected static int[] calcMaxShardOrdinal(int maxOrdinal, int numShards) {
         int[] maxShardOrdinal = new int[numShards];
         int minRecordLocationsPerShard = (maxOrdinal + 1) / numShards;
@@ -424,6 +465,8 @@ public abstract class HollowTypeWriteState {
         return maxShardOrdinal;
     }
 
+    @SideEffectFree
+    @Impure
     public boolean allowTypeResharding() {
         boolean isAllowed = stateEngine.allowTypeResharding();
         if (isAllowed) {
@@ -437,6 +480,7 @@ public abstract class HollowTypeWriteState {
         return isAllowed;
     }
 
+    @Impure
     public void gatherShardingStats(int maxOrdinal, boolean canReshard) {
         if(numShards == -1) {
             numShards = typeStateNumShards(maxOrdinal);
@@ -460,6 +504,7 @@ public abstract class HollowTypeWriteState {
         }
     }
 
+    @Impure
     protected abstract int typeStateNumShards(int maxOrdinal);
 
     /**
@@ -467,6 +512,7 @@ public abstract class HollowTypeWriteState {
      * the type(s) that were re-sharded along with the before and after num shards in the fwd delta direction.
      * For e.g. Movie:(2,4) Actor:(8,4)
      */
+    @Impure
     protected void addReshardingHeader(int prevNumShards, int newNumShards) {
         String existing = stateEngine.getHeaderTag(HollowStateEngine.HEADER_TAG_TYPE_RESHARDING_INVOKED);
         String appendTo = "";

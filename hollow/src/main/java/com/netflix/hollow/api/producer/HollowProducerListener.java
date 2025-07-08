@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer.ReadState;
 import com.netflix.hollow.api.producer.listener.AnnouncementListener;
 import com.netflix.hollow.api.producer.listener.CycleListener;
@@ -50,6 +53,7 @@ public interface HollowProducerListener extends
 
     // Called when HollowProducer.initializeDataModel is called
 
+    @Impure
     @Override
     default void onProducerInit(Duration elapsed) {
         onProducerInit(elapsed.toMillis(), TimeUnit.MILLISECONDS);
@@ -60,6 +64,7 @@ public interface HollowProducerListener extends
      * @param elapsed the elapsed duration
      * @param unit the units of duration
      */
+    @SideEffectFree
     void onProducerInit(long elapsed, TimeUnit unit);
 
 
@@ -73,9 +78,11 @@ public interface HollowProducerListener extends
      *
      * @param restoreVersion Version from which the state for {@code HollowProducer} was restored.
      */
+    @SideEffectFree
     @Override
     void onProducerRestoreStart(long restoreVersion);
 
+    @Impure
     @Override
     default void onProducerRestoreComplete(com.netflix.hollow.api.producer.Status status, long versionDesired, long versionReached, Duration elapsed) {
         onProducerRestoreComplete(new RestoreStatus(status, versionDesired, versionReached),
@@ -91,6 +98,7 @@ public interface HollowProducerListener extends
      * @param elapsed duration of the restore in {@code unit} units
      * @param unit units of the {@code elapsed} duration
      */
+    @SideEffectFree
     void onProducerRestoreComplete(RestoreStatus status, long elapsed, TimeUnit unit);
 
 
@@ -100,6 +108,7 @@ public interface HollowProducerListener extends
 
     // See also HollowProducerListenerV2.onCycleSkip
 
+    @Impure
     @Override
     default void onCycleSkip(CycleSkipReason reason) {
     }
@@ -114,6 +123,7 @@ public interface HollowProducerListener extends
      *
      * @param version the version of the state that will become the first of a new delta chain
      */
+    @SideEffectFree
     @Override
     void onNewDeltaChain(long version);
 
@@ -122,9 +132,11 @@ public interface HollowProducerListener extends
      *
      * @param version Version produced by the {@code HollowProducer} for new cycle about to start.
      */
+    @Impure
     @Override
     void onCycleStart(long version);
 
+    @Impure
     @Override
     default void onCycleComplete(com.netflix.hollow.api.producer.Status status, ReadState readState, long version, Duration elapsed) {
         onCycleComplete(new ProducerStatus(status, readState, version),
@@ -141,6 +153,7 @@ public interface HollowProducerListener extends
      * @param elapsed duration of the cycle in {@code unit} units
      * @param unit units of the {@code elapsed} duration
      */
+    @Impure
     void onCycleComplete(ProducerStatus status, long elapsed, TimeUnit unit);
 
 
@@ -153,9 +166,11 @@ public interface HollowProducerListener extends
      *
      * @param version Current version of the cycle
      */
+    @SideEffectFree
     @Override
     void onPopulateStart(long version);
 
+    @Impure
     @Override
     default void onPopulateComplete(com.netflix.hollow.api.producer.Status status, long version, Duration elapsed) {
         onPopulateComplete(new ProducerStatus(status, version),
@@ -169,6 +184,7 @@ public interface HollowProducerListener extends
      * @param elapsed Time taken to populate hollow.
      * @param unit unit of {@code elapsed} duration.
      */
+    @SideEffectFree
     void onPopulateComplete(ProducerStatus status, long elapsed, TimeUnit unit);
 
 
@@ -186,6 +202,7 @@ public interface HollowProducerListener extends
      *
      * @param version Current version of the cycle.
      */
+    @SideEffectFree
     @Override
     void onNoDeltaAvailable(long version);
 
@@ -194,12 +211,14 @@ public interface HollowProducerListener extends
      *
      * @param version Version to be published.
      */
+    @SideEffectFree
     @Override
     void onPublishStart(long version);
 
     // Called during publish start-complete cycle for each blob
     // Can be merged in to PublishListener?
 
+    @Impure
     @Override
     default void onBlobPublish(com.netflix.hollow.api.producer.Status status, HollowProducer.Blob blob, Duration elapsed) {
         onArtifactPublish(new PublishStatus(status, blob),
@@ -215,8 +234,10 @@ public interface HollowProducerListener extends
      * @param unit unit of elapsed.
      */
     // TODO(hollow3): "artifact" as a term is redundant with "blob", probably don't need both. #onBlobPublish(...)?
+    @SideEffectFree
     void onArtifactPublish(PublishStatus publishStatus, long elapsed, TimeUnit unit);
 
+    @Impure
     @Override
     default void onPublishComplete(com.netflix.hollow.api.producer.Status status, long version, Duration elapsed) {
         onPublishComplete(new ProducerStatus(status, version), elapsed.toMillis(), TimeUnit.MILLISECONDS);
@@ -231,6 +252,7 @@ public interface HollowProducerListener extends
      * @param elapsed duration of the publish stage in {@code unit} units
      * @param unit units of the {@code elapsed} duration
      */
+    @SideEffectFree
     void onPublishComplete(ProducerStatus status, long elapsed, TimeUnit unit);
 
 
@@ -246,9 +268,11 @@ public interface HollowProducerListener extends
      *
      * @param version Version to be checked
      */
+    @SideEffectFree
     @Override
     void onIntegrityCheckStart(long version);
 
+    @Impure
     @Override
     default void onIntegrityCheckComplete(com.netflix.hollow.api.producer.Status status, ReadState readState, long version, Duration elapsed) {
         onIntegrityCheckComplete(new ProducerStatus(status, readState, version),
@@ -264,6 +288,7 @@ public interface HollowProducerListener extends
      * @param elapsed duration of the integrity check stage in {@code unit} units
      * @param unit units of the {@code elapsed} duration
      */
+    @SideEffectFree
     void onIntegrityCheckComplete(ProducerStatus status, long elapsed, TimeUnit unit);
 
 
@@ -280,6 +305,7 @@ public interface HollowProducerListener extends
      *
      * @param version Version to be validated
      */
+    @SideEffectFree
     void onValidationStart(long version);
 
     /**
@@ -291,6 +317,7 @@ public interface HollowProducerListener extends
      * @param elapsed duration of the validation stage in {@code unit} units
      * @param unit units of the {@code elapsed} duration
      */
+    @SideEffectFree
     void onValidationComplete(ProducerStatus status, long elapsed, TimeUnit unit);
 
 
@@ -305,9 +332,11 @@ public interface HollowProducerListener extends
      *
      * @param version of {@code HollowBlob} that will be announced.
      */
+    @Impure
     @Override
     void onAnnouncementStart(long version);
 
+    @Impure
     @Override
     default void onAnnouncementComplete(com.netflix.hollow.api.producer.Status status, ReadState readState, long version, Duration elapsed) {
         onAnnouncementComplete(new ProducerStatus(status, readState, version),
@@ -323,6 +352,7 @@ public interface HollowProducerListener extends
      * @param elapsed duration of the announcement stage in {@code unit} units
      * @param unit units of the {@code elapsed} duration
      */
+    @SideEffectFree
     void onAnnouncementComplete(ProducerStatus status, long elapsed, TimeUnit unit);
 
 
@@ -338,10 +368,13 @@ public interface HollowProducerListener extends
         private final Throwable throwable;
         private final HollowProducer.ReadState readState;
 
+        @Impure
         ProducerStatus(com.netflix.hollow.api.producer.Status s, long version) {
             this(s, null, version);
         }
 
+        @SideEffectFree
+        @Impure
         ProducerStatus(com.netflix.hollow.api.producer.Status s, ReadState readState, long version) {
             this.status = Status.of(s.getType());
             this.throwable = s.getCause();
@@ -349,6 +382,7 @@ public interface HollowProducerListener extends
             this.version = version;
         }
 
+        @SideEffectFree
         ProducerStatus(Status status, Throwable throwable, long version, HollowProducer.ReadState readState) {
             this.status = status;
             this.version = version;
@@ -361,6 +395,7 @@ public interface HollowProducerListener extends
          *
          * @return Current version of the {@code HollowProducer}.
          */
+        @Pure
         public long getVersion() {
             return version;
         }
@@ -370,6 +405,7 @@ public interface HollowProducerListener extends
          *
          * @return SUCCESS or FAIL.
          */
+        @Pure
         public Status getStatus() {
             return status;
         }
@@ -379,6 +415,7 @@ public interface HollowProducerListener extends
          *
          * @return Throwable if {@code Status.equals(FAIL)} else null.
          */
+        @Pure
         public Throwable getCause() {
             return throwable;
         }
@@ -388,6 +425,7 @@ public interface HollowProducerListener extends
          *
          * @return Resulting read state engine only if data is added successfully else null.
          */
+        @Pure
         public ReadState getReadState() {
             return readState;
         }
@@ -405,6 +443,8 @@ public interface HollowProducerListener extends
         private final long versionReached;
         private final Throwable throwable;
 
+        @SideEffectFree
+        @Impure
         RestoreStatus(com.netflix.hollow.api.producer.Status s, long versionDesired, long versionReached) {
             this.status = Status.of(s.getType());
             this.throwable = s.getCause();
@@ -419,6 +459,7 @@ public interface HollowProducerListener extends
          * @return the latest announced version or {@code HollowConstants.VERSION_NONE} if latest announced version couldn't be
          * retrieved
          */
+        @Pure
         public long getDesiredVersion() {
             return versionDesired;
         }
@@ -432,6 +473,7 @@ public interface HollowProducerListener extends
          * @return the version restored to when successful, otherwise {@code HollowConstants.VERSION_NONE} if no version was
          * reached or the version of an intermediate state reached before restore completed unsuccessfully.
          */
+        @Pure
         public long getVersionReached() {
             return versionReached;
         }
@@ -441,6 +483,7 @@ public interface HollowProducerListener extends
          *
          * @return SUCCESS or FAIL.
          */
+        @Pure
         public Status getStatus() {
             return status;
         }
@@ -451,6 +494,7 @@ public interface HollowProducerListener extends
          * @return the {@code Throwable} cause of a failure, otherwise {@code null} if restore succeeded or it failed
          * without an exception.
          */
+        @Pure
         public Throwable getCause() {
             return throwable;
         }
@@ -461,6 +505,8 @@ public interface HollowProducerListener extends
         private final HollowProducer.Blob blob;
         private final Throwable throwable;
 
+        @SideEffectFree
+        @Impure
         PublishStatus(com.netflix.hollow.api.producer.Status s, HollowProducer.Blob blob) {
             this.status = Status.of(s.getType());
             this.throwable = s.getCause();
@@ -472,6 +518,7 @@ public interface HollowProducerListener extends
          *
          * @return {@code Success} or {@code Fail}
          */
+        @Pure
         public Status getStatus() {
             return status;
         }
@@ -481,6 +528,7 @@ public interface HollowProducerListener extends
          *
          * @return Blob that was published.
          */
+        @Pure
         public HollowProducer.Blob getBlob() {
             return blob;
         }
@@ -488,6 +536,7 @@ public interface HollowProducerListener extends
         /**
          * @return Throwable that contains the error cause if publishing failed.
          */
+        @Pure
         public Throwable getCause() {
             return throwable;
         }
@@ -501,12 +550,14 @@ public interface HollowProducerListener extends
         @Deprecated
         SKIP;
 
+        @Pure
         static Status of(com.netflix.hollow.api.producer.Status.StatusType st) {
             return st == com.netflix.hollow.api.producer.Status.StatusType.SUCCESS
                     ? Status.SUCCESS
                     : Status.FAIL;
         }
 
+        @Pure
         static com.netflix.hollow.api.producer.Status.StatusType from(Status s) {
             return s == Status.SUCCESS
                     ? com.netflix.hollow.api.producer.Status.StatusType.SUCCESS

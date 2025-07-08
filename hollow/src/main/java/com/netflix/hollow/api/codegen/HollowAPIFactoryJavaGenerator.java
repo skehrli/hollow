@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.client.HollowAPIFactory;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.api.objects.provider.HollowFactory;
@@ -35,6 +36,7 @@ public class HollowAPIFactoryJavaGenerator extends HollowConsumerJavaFileGenerat
 
     private final String apiClassname;
 
+    @Impure
     public HollowAPIFactoryJavaGenerator(String packageName, String apiClassname, HollowDataset dataset,
             CodeGeneratorConfig config) {
         super(packageName, SUB_PACKAGE_NAME, dataset, config);
@@ -42,6 +44,7 @@ public class HollowAPIFactoryJavaGenerator extends HollowConsumerJavaFileGenerat
         this.className = apiClassname + "Factory";
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder builder = new StringBuilder();

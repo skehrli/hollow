@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.dataaccess.disabled;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -28,93 +30,112 @@ public class HollowObjectDisabledDataAccess implements HollowObjectTypeDataAcces
 
     public static final HollowObjectDisabledDataAccess INSTANCE = new HollowObjectDisabledDataAccess();
 
+    @SideEffectFree
     private HollowObjectDisabledDataAccess() { }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @SideEffectFree
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @SideEffectFree
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         throw new IllegalStateException("Data Access is Disabled");
     }
     
+    @SideEffectFree
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         throw new IllegalStateException("DataAccess is Disabled");
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowObjectSchema getSchema() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public boolean isNull(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int readOrdinal(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int readInt(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public float readFloat(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public double readDouble(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public long readLong(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public Boolean readBoolean(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public byte[] readBytes(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public String readString(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public boolean isStringFieldEqual(int ordinal, int fieldIndex, String testValue) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int findVarLengthFieldHashCode(int ordinal, int fieldIndex) {
         throw new IllegalStateException("Data Access is Disabled");

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.core.HollowConstants;
 import java.util.logging.Logger;
@@ -31,15 +33,19 @@ public class HollowUpdatePlanner {
     private final HollowConsumer.DoubleSnapshotConfig doubleSnapshotConfig;
     private final HollowConsumer.UpdatePlanBlobVerifier updatePlanBlobVerifier;
     
+    @Impure
     @Deprecated
     public HollowUpdatePlanner(HollowBlobRetriever blobRetriever) {
         this(HollowClientConsumerBridge.consumerBlobRetrieverFor(blobRetriever));
     }
 
+    @Impure
     public HollowUpdatePlanner(HollowConsumer.BlobRetriever blobRetriever) {
         this(blobRetriever, HollowConsumer.DoubleSnapshotConfig.DEFAULT_CONFIG);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowUpdatePlanner(HollowConsumer.BlobRetriever transitionCreator, HollowConsumer.DoubleSnapshotConfig doubleSnapshotConfig) {
         this(transitionCreator, doubleSnapshotConfig, HollowConsumer.UpdatePlanBlobVerifier.DEFAULT_INSTANCE);
     }
@@ -49,6 +55,7 @@ public class HollowUpdatePlanner {
      * @param doubleSnapshotConfig Double snapshot config
      * @param updatePlanBlobVerifier Update plan config
      */
+    @SideEffectFree
     public HollowUpdatePlanner(HollowConsumer.BlobRetriever transitionCreator,
                                HollowConsumer.DoubleSnapshotConfig doubleSnapshotConfig,
                                HollowConsumer.UpdatePlanBlobVerifier updatePlanBlobVerifier) {
@@ -60,6 +67,7 @@ public class HollowUpdatePlanner {
     /**
      * @deprecated use {@link #planInitializingUpdate(HollowConsumer.VersionInfo)} instead.
      */
+    @Impure
     @Deprecated
     public HollowUpdatePlan planInitializingUpdate(long desiredVersion) throws Exception {
         return planInitializingUpdate(new HollowConsumer.VersionInfo(desiredVersion));
@@ -70,6 +78,7 @@ public class HollowUpdatePlanner {
      * @param desiredVersionInfo - The version to which the hollow state engine should be updated once the resultant steps are applied.
      * @throws Exception if the plan cannot be initialized
      */
+    @Impure
     public HollowUpdatePlan planInitializingUpdate(HollowConsumer.VersionInfo desiredVersionInfo) throws Exception {
         return planUpdate(HollowConstants.VERSION_NONE, desiredVersionInfo, true);
     }
@@ -77,6 +86,7 @@ public class HollowUpdatePlanner {
     /**
      * @deprecated use {@link #planUpdate(long, HollowConsumer.VersionInfo, boolean)} instead.
      */
+    @Impure
     @Deprecated
     public HollowUpdatePlan planUpdate(long currentVersion, long desiredVersion, boolean allowSnapshot) throws Exception {
         return planUpdate(currentVersion, new HollowConsumer.VersionInfo(desiredVersion), allowSnapshot);
@@ -93,6 +103,7 @@ public class HollowUpdatePlanner {
      * @return the sequence of steps necessary to bring a hollow state engine up to date.
      * @throws Exception if the plan cannot be updated
      */
+    @Impure
     public HollowUpdatePlan planUpdate(long currentVersion, HollowConsumer.VersionInfo desiredVersionInfo, boolean allowSnapshot) throws Exception {
         long desiredVersion = desiredVersionInfo.getVersion();
 
@@ -128,6 +139,7 @@ public class HollowUpdatePlanner {
      * @return An update plan containing 1 snapshot transition and 0+ delta transitions if requested versions were found,
      *         or an empty plan, {@code HollowUpdatePlan.DO_NOTHING}, if no previous versions were found
      */
+    @Impure
     private HollowUpdatePlan snapshotPlan(HollowConsumer.VersionInfo desiredVersionInfo) {
         HollowUpdatePlan plan = new HollowUpdatePlan();
         long desiredVersion = desiredVersionInfo.getVersion();
@@ -147,6 +159,7 @@ public class HollowUpdatePlanner {
         return plan;
     }
 
+    @Impure
     private HollowUpdatePlan deltaPlan(long currentVersion, long desiredVersion, int maxDeltas) {
         HollowUpdatePlan plan = new HollowUpdatePlan();
         if(currentVersion < desiredVersion) {
@@ -158,6 +171,7 @@ public class HollowUpdatePlanner {
         return plan;
     }
 
+    @Impure
     private long applyForwardDeltasToPlan(long currentVersion, long desiredVersion, HollowUpdatePlan plan, int maxDeltas) {
         int transitionCounter = 0;
 
@@ -168,6 +182,7 @@ public class HollowUpdatePlanner {
         return currentVersion;
     };
 
+    @Impure
     private long applyReverseDeltasToPlan(long currentVersion, long desiredVersion, HollowUpdatePlan plan, int maxDeltas) {
         long achievedVersion = currentVersion;
         int transitionCounter = 0;
@@ -185,6 +200,7 @@ public class HollowUpdatePlanner {
     /**
      * Includes the next delta only if it will not take us *after* the desired version
      */
+    @Impure
     private long includeNextDelta(HollowUpdatePlan plan, long currentVersion, long desiredVersion) {
         HollowConsumer.Blob transition = transitionCreator.retrieveDeltaBlob(currentVersion);
 
@@ -199,6 +215,7 @@ public class HollowUpdatePlanner {
         return HollowConstants.VERSION_LATEST;
     }
 
+    @Impure
     private long includeNextReverseDelta(HollowUpdatePlan plan, long currentVersion) {
         HollowConsumer.Blob transition = transitionCreator.retrieveReverseDeltaBlob(currentVersion);
         if(transition != null) {
@@ -209,6 +226,7 @@ public class HollowUpdatePlanner {
         return HollowConstants.VERSION_NONE;
     }
 
+    @Impure
     private long includeNearestSnapshot(HollowUpdatePlan plan, HollowConsumer.VersionInfo desiredVersionInfo) {
         long desiredVersion = desiredVersionInfo.getVersion();
         HollowConsumer.Blob transition = transitionCreator.retrieveSnapshotBlob(desiredVersion);

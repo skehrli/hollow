@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import java.io.DataOutputStream;
@@ -23,6 +24,7 @@ import java.io.IOException;
 
 public class IOUtils {
 
+    @Impure
     public static void copyBytes(HollowBlobInput in, DataOutputStream[] os, long numBytes) throws IOException {
         byte buf[] = new byte[4096];
 
@@ -40,6 +42,7 @@ public class IOUtils {
         }
     }
 
+    @Impure
     public static void copySegmentedLongArray(HollowBlobInput in, DataOutputStream[] os) throws IOException {
         long numLongsToWrite = VarInt.readVLong(in);
         for(int i=0;i<os.length;i++)
@@ -48,6 +51,7 @@ public class IOUtils {
         copyBytes(in, os, numLongsToWrite * 8);
     }
 
+    @Impure
     public static int copyVInt(HollowBlobInput in, DataOutputStream[] os) throws IOException {
         int value = VarInt.readVInt(in);
         for(int i=0;i<os.length;i++)
@@ -55,6 +59,7 @@ public class IOUtils {
         return value;
     }
 
+    @Impure
     public static long copyVLong(HollowBlobInput in, DataOutputStream[] os) throws IOException {
         long value = VarInt.readVLong(in);
         for(int i=0;i<os.length;i++)

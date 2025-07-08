@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.engine.set;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.encoding.FixedLengthElementArray;
 import com.netflix.hollow.core.memory.encoding.GapEncodedVariableLengthIntegerReader;
 
@@ -42,6 +44,7 @@ class HollowSetDeltaApplicator {
     private GapEncodedVariableLengthIntegerReader removalsReader;
     private GapEncodedVariableLengthIntegerReader additionsReader;
 
+    @SideEffectFree
     HollowSetDeltaApplicator(HollowSetTypeDataElements from, HollowSetTypeDataElements delta, HollowSetTypeDataElements target) {
         this.from = from;
         this.delta = delta;
@@ -49,6 +52,7 @@ class HollowSetDeltaApplicator {
     }
 
 
+    @Impure
     public void applyDelta() {
         removalsReader = from.encodedRemovals == null ? GapEncodedVariableLengthIntegerReader.EMPTY_READER : from.encodedRemovals;
         additionsReader = delta.encodedAdditions;
@@ -81,12 +85,14 @@ class HollowSetDeltaApplicator {
 
     }
 
+    @Impure
     private void slowDelta() {
         for(int i=0; i<=target.maxOrdinal; i++) {
             mergeOrdinal(i);
         }
     }
 
+    @Impure
     private void fastDelta() {
         int i=0;
         int bulkCopyEndOrdinal = Math.min(from.maxOrdinal, target.maxOrdinal);
@@ -108,6 +114,7 @@ class HollowSetDeltaApplicator {
         }
     }
 
+    @Impure
     private void fastCopyRecords(int recordsToCopy) {
         long setPointerAndSizeBitsToCopy = (long)recordsToCopy * target.bitsPerFixedLengthSetPortion;
         long eachSetPointerDifference = currentWriteStartBucket - currentFromStateStartBucket;
@@ -128,6 +135,7 @@ class HollowSetDeltaApplicator {
         currentWriteStartBucket += bucketsToCopy;
     }
 
+    @Impure
     private void mergeOrdinal(int i) {
         boolean addFromDelta = additionsReader.nextElement() == i;
         boolean removeData = removalsReader.nextElement() == i;
@@ -162,6 +170,7 @@ class HollowSetDeltaApplicator {
 
 
 
+    @Impure
     private void addFromDelta(GapEncodedVariableLengthIntegerReader additionsReader) {
         long deltaDataEndBucket = delta.setPointerAndSizeData.getElementValue(currentDeltaCopyStartBit, delta.bitsPerSetPointer);
         for(long bucketIdx=currentDeltaStartBucket; bucketIdx<deltaDataEndBucket; bucketIdx++) {

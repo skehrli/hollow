@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.HollowProducer.VersionMinter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,6 +41,7 @@ public class VersionMinterWithCounter implements VersionMinter {
      *
      * @return a new state version
      */
+    @Impure
     public long mint() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));

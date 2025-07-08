@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory.encoding;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static java.lang.Math.ceil;
 
 import com.netflix.hollow.core.memory.FixedLengthData;
@@ -48,6 +50,7 @@ public class EncodedLongBuffer implements FixedLengthData {
     private BlobByteBuffer bufferView;
     private long maxByteIndex = -1;
 
+    @SideEffectFree
     public EncodedLongBuffer() {}
 
     /**
@@ -57,6 +60,7 @@ public class EncodedLongBuffer implements FixedLengthData {
      * @param in Hollow Blob Input to read data (a var int and then that many longs) from
      * @return new EncodedLongBuffer containing data read from input
      */
+    @Impure
     public static EncodedLongBuffer newFrom(HollowBlobInput in) throws IOException {
         long numLongs = VarInt.readVLong(in);
         return newFrom(in, numLongs);
@@ -68,12 +72,14 @@ public class EncodedLongBuffer implements FixedLengthData {
      * @param in Hollow Blob Input to read numLongs longs from
      * @return new EncodedLongBuffer containing data read from input
      */
+    @Impure
     public static EncodedLongBuffer newFrom(HollowBlobInput in, long numLongs) throws IOException {
         EncodedLongBuffer buf = new EncodedLongBuffer();
         buf.loadFrom(in, numLongs);
         return buf;
     }
 
+    @Impure
     private void loadFrom(HollowBlobInput in, long numLongs) throws IOException {
         BlobByteBuffer buffer = in.getBuffer();
         if(numLongs == 0)
@@ -86,11 +92,13 @@ public class EncodedLongBuffer implements FixedLengthData {
         in.seek(in.getFilePointer() + (numLongs  * Long.BYTES));
     }
 
+    @Impure
     @Override
     public long getElementValue(long index, int bitsPerElement) {
         return getElementValue(index, bitsPerElement, ((1L << bitsPerElement) - 1));
     }
 
+    @Impure
     @Override
     public long getElementValue(long index, int bitsPerElement, long mask) {
 
@@ -106,12 +114,14 @@ public class EncodedLongBuffer implements FixedLengthData {
         return l & mask;
     }
 
+    @Impure
     @Override
     public long getLargeElementValue(long index, int bitsPerElement) {
         long mask = bitsPerElement == 64 ? -1 : ((1L << bitsPerElement) - 1);
         return getLargeElementValue(index, bitsPerElement, mask);
     }
 
+    @Impure
     @Override
     public long getLargeElementValue(long index, int bitsPerElement, long mask) {
 
@@ -130,21 +140,25 @@ public class EncodedLongBuffer implements FixedLengthData {
         return l & mask;
     }
 
+    @SideEffectFree
     @Override
     public void setElementValue(long index, int bitsPerElement, long value) {
         throw new UnsupportedOperationException("Not supported in shared-memory mode");
     }
 
+    @SideEffectFree
     @Override
     public void copyBits(FixedLengthData copyFrom, long sourceStartBit, long destStartBit, long numBits){
         throw new UnsupportedOperationException("Not supported in shared-memory mode");
     }
 
+    @SideEffectFree
     @Override
     public void incrementMany(long startBit, long increment, long bitsBetweenIncrements, int numIncrements){
         throw new UnsupportedOperationException("Not supported in shared-memory mode");
     }
 
+    @SideEffectFree
     @Override
     public void clearElementValue(long index, int bitsPerElement) {
         throw new UnsupportedOperationException("Not supported in shared-memory mode");

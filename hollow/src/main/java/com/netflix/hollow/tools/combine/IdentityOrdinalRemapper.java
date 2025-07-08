@@ -15,6 +15,8 @@
  *
  */
 package com.netflix.hollow.tools.combine;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * An implementation of the OrdinalRemapper for when ordinals are not actually remapped.  Not intended for external consumption.
@@ -26,18 +28,22 @@ public class IdentityOrdinalRemapper implements OrdinalRemapper {
 
     public static IdentityOrdinalRemapper INSTANCE = new IdentityOrdinalRemapper();
     
+    @SideEffectFree
     private IdentityOrdinalRemapper() { }
     
+    @Pure
     @Override
     public int getMappedOrdinal(String type, int originalOrdinal) {
         return originalOrdinal;
     }
 
+    @SideEffectFree
     @Override
     public void remapOrdinal(String type, int originalOrdinal, int mappedOrdinal) {
         throw new UnsupportedOperationException("Cannot remap ordinals in an IdentityOrdinalRemapper");
     }
     
+    @Pure
     @Override
     public boolean ordinalIsMapped(String type, int originalOrdinal) {
         return true;

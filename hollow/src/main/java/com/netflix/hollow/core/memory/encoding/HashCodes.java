@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory.encoding;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.HollowConstants.HASH_TABLE_MAX_SIZE;
 
 import com.netflix.hollow.core.memory.ArrayByteData;
@@ -25,10 +27,12 @@ import com.netflix.hollow.core.memory.ByteDataArray;
 public class HashCodes {
     private static final int MURMURHASH_SEED = 0xeab524b9;
 
+    @Impure
     public static int hashCode(ByteDataArray data) {
         return hashCode(data.getUnderlyingArray(), 0, (int) data.length());
     }
 
+    @Impure
     public static int hashCode(final String data) {
         if(data == null)
             return -1;
@@ -37,6 +41,7 @@ public class HashCodes {
         
         if(arrayLen == data.length()) {
             return hashCode(new ByteData() {
+                @Pure
                 @Override
                 public byte get(long position) {
                     return (byte)(data.charAt((int)position) & 0x7F);
@@ -49,10 +54,13 @@ public class HashCodes {
         }
     }
     
+    @Impure
     public static int hashCode(byte[] data) {
         return hashCode(new ArrayByteData(data), 0, data.length);
     }
 
+    @Pure
+    @Impure
     private static int calculateByteArrayLength(String data) {
         int length = data.length();
         for(int i=0;i<data.length();i++) {
@@ -62,6 +70,7 @@ public class HashCodes {
         return length;
     }
 
+    @Impure
     private static byte[] createByteArrayFromString(String data, int arrayLen) {
         byte array[] = new byte[arrayLen];
 
@@ -99,6 +108,7 @@ public class HashCodes {
      * @param len the length
      * @return the hash code
      */
+    @Impure
     public static int hashCode(ByteData data, long offset, int len) {
 
         final int c1 = 0xcc9e2d51;
@@ -151,6 +161,7 @@ public class HashCodes {
         return h1;
     }
 
+    @Pure
     public static int hashLong(long key) {
         key = (~key) + (key << 18);
         key ^= (key >>> 31);
@@ -161,6 +172,7 @@ public class HashCodes {
         return (int) key;
     }
 
+    @Pure
     public static int hashInt(int key) {
         key = ~key + (key << 15);
         key = key ^ (key >>> 12);
@@ -180,6 +192,7 @@ public class HashCodes {
      * @throws IllegalArgumentException when numElements is negative or exceeds
      *                                  {@link com.netflix.hollow.core.HollowConstants#HASH_TABLE_MAX_SIZE}
      */
+    @Pure
     public static int hashTableSize(int numElements) throws IllegalArgumentException {
         if (numElements < 0) {
             throw new IllegalArgumentException("cannot be negative; numElements="+numElements);

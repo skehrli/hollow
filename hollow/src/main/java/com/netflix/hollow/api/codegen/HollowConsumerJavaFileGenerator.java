@@ -15,6 +15,9 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.HollowGenerated;
 import com.netflix.hollow.api.codegen.objects.HollowCollectionsGenerator;
 import com.netflix.hollow.core.HollowDataset;
@@ -43,6 +46,7 @@ public abstract class HollowConsumerJavaFileGenerator implements HollowJavaFileG
     protected String className;
     protected boolean useCollectionsImport=false;
 
+    @SideEffectFree
     public HollowConsumerJavaFileGenerator(String packageName, String subPackageName, HollowDataset dataset,
             CodeGeneratorConfig config) {
         this.dataset = dataset;
@@ -51,33 +55,40 @@ public abstract class HollowConsumerJavaFileGenerator implements HollowJavaFileG
         this.config = config;
     }
 
+    @Impure
     protected String hollowImplClassname(String typeName) {
         return HollowCodeGenerationUtils.hollowImplClassname(typeName, config.getClassPostfix(),
                 config.isUseAggressiveSubstitutions(), config.isUseHollowPrimitiveTypes());
     }
 
+    @Pure
     public String getSubPackageName() {
         return subPackageName;
     }
 
+    @Pure
     @Override
     public final String getClassName() {
         return className;
     }
 
+    @Impure
     public void useCollectionsImport() {
         this.useCollectionsImport=true;
     }
 
+    @Impure
     protected void appendPackageAndCommonImports(StringBuilder builder) {
         appendPackageAndCommonImports(builder, null, new ArrayList<>());
     }
 
+    @Impure
     protected void appendPackageAndCommonImports(StringBuilder builder,
             String apiClassname) {
         appendPackageAndCommonImports(builder, apiClassname, new ArrayList<>());
     }
 
+    @Impure
     protected void appendPackageAndCommonImports(StringBuilder builder,
             String apiClassname, List<HollowSchema> schemasToImport) {
         String fullPackageName =
@@ -133,6 +144,7 @@ public abstract class HollowConsumerJavaFileGenerator implements HollowJavaFileG
     /**
      * Add @com.netflix.hollow.Generated annotation to the generated class
      */
+    @Impure
     protected void appendGeneratedAnnotation(StringBuilder builder) {
         if(config.isUseGeneratedAnnotation()) {
             builder.append("import ").append(HollowGenerated.class.getName()).append(";\n");
@@ -140,6 +152,8 @@ public abstract class HollowConsumerJavaFileGenerator implements HollowJavaFileG
         }
     }
 
+    @SideEffectFree
+    @Impure
     private String createFullPackageName(String packageName, String subPackageName, boolean usePackageGrouping) {
         if (usePackageGrouping && !isEmpty(packageName) && !isEmpty(subPackageName)) {
             return packageName + "."  + subPackageName;
@@ -149,10 +163,12 @@ public abstract class HollowConsumerJavaFileGenerator implements HollowJavaFileG
 
     }
 
+    @SideEffectFree
     private boolean isEmpty(String value) {
         return value == null || value.trim().isEmpty();
     }
 
+    @Impure
     private void appendImportFromBasePackage(StringBuilder builder, String leaf) {
         builder.append("import ").append(packageName).append(".").append(leaf).append(";\n");
     }
@@ -162,6 +178,7 @@ public abstract class HollowConsumerJavaFileGenerator implements HollowJavaFileG
      * primitive type. Factored out to prevent bloat in the switch statement it is called
      * from.
      */
+    @Impure
     private void addToSetIfNotPrimitiveOrCollection(Set<String> schemaNameSet, String... schemaNames) {
         for (String schemaName : schemaNames) {
             // collections schemas get brought in by a star import

@@ -15,25 +15,31 @@
  *
  */
 package com.netflix.hollow.api.producer.enforcer;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 
 public class BasicSingleProducerEnforcer extends AbstractSingleProducerEnforcer {
     private boolean isPrimary = true;
 
+    @Impure
     @Override
     protected void _enable() {
         isPrimary = true;
     }
 
+    @Impure
     @Override
     protected void _disable() {
         isPrimary = false;
     }
 
+    @Pure
     @Override
     protected boolean _isPrimary() {
         return isPrimary;
     }
 
+    @Impure
     @Override
     protected void _force() {
         isPrimary = true;

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects.generic;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.api.objects.HollowSet;
 import com.netflix.hollow.api.objects.delegate.HollowSetDelegate;
@@ -32,44 +34,58 @@ import com.netflix.hollow.tools.stringifier.HollowRecordStringifier;
  */
 public class GenericHollowSet extends HollowSet<HollowRecord> {
 
+    @Impure
     public GenericHollowSet(HollowDataAccess dataAccess, String type, int ordinal) {
         this((HollowSetTypeDataAccess)dataAccess.getTypeDataAccess(type, ordinal), ordinal);
     }
     
+    @Impure
     public GenericHollowSet(HollowSetTypeDataAccess dataAccess, int ordinal) {
         this(new HollowSetLookupDelegate<HollowRecord>(dataAccess), ordinal);
     }
 
+    @Impure
     public GenericHollowSet(HollowSetDelegate<HollowRecord> delegate, int ordinal) {
         super(delegate, ordinal);
     }
     
+    @SideEffectFree
+    @Impure
     public Iterable<GenericHollowObject> objects() {
         return new GenericHollowIterable<GenericHollowObject>(this);
     }
     
+    @SideEffectFree
+    @Impure
     public Iterable<GenericHollowList> lists() {
         return new GenericHollowIterable<GenericHollowList>(this);
     }
     
+    @SideEffectFree
+    @Impure
     public Iterable<GenericHollowSet> sets() {
         return new GenericHollowIterable<GenericHollowSet>(this);
     }
     
+    @SideEffectFree
+    @Impure
     public Iterable<GenericHollowMap> maps() {
         return new GenericHollowIterable<GenericHollowMap>(this);
     }
     
+    @Impure
     @Override
     public HollowRecord instantiateElement(int elementOrdinal) {
         return GenericHollowRecordHelper.instantiate(getTypeDataAccess().getDataAccess(), getSchema().getElementType(), elementOrdinal);
     }
 
+    @Impure
     @Override
     public boolean equalsElement(int elementOrdinal, Object testObject) {
         return GenericHollowRecordHelper.equalObject(getSchema().getElementType(), elementOrdinal, testObject);
     }
 
+    @Impure
     @Override
     public String toString() {
         return new HollowRecordStringifier().stringify(this);

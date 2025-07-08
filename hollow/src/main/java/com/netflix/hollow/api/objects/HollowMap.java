@@ -16,6 +16,12 @@
  */
 package com.netflix.hollow.api.objects;
 
+import org.checkerframework.framework.qual.EnsuresQualifier;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
 import com.netflix.hollow.api.objects.delegate.HollowMapDelegate;
 import com.netflix.hollow.api.objects.delegate.HollowRecordDelegate;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
@@ -38,74 +44,96 @@ public abstract class HollowMap<K, V> extends AbstractMap<K, V> implements Hollo
     protected final int ordinal;
     protected final HollowMapDelegate<K, V> delegate;
 
+    @SideEffectFree
     public HollowMap(HollowMapDelegate<K, V> delegate, int ordinal) {
         this.ordinal = ordinal;
         this.delegate = delegate;
     }
 
+    @Pure
     @Override
     public final int getOrdinal() {
         return ordinal;
     }
 
+    @EnsuresQualifier(expression="this", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionBottom.class)
+    @Impure
     @Override
     public final int size() {
         return delegate.size(ordinal);
     }
 
+    @Impure
     @Override
     public final Set<Map.Entry<K, V>> entrySet() {
         return new EntrySet();
     }
 
+    @Impure
     @Override
     public final V get(Object key) {
         return delegate.get(this, ordinal, key);
     }
 
+    @Impure
     @Override
     public final boolean containsKey(Object key) {
         return delegate.containsKey(this, ordinal, key);
     }
 
+    @Impure
     @Override
     public final boolean containsValue(Object value) {
         return delegate.containsValue(this, ordinal, value);
     }
     
+    @Impure
     public final K findKey(Object... hashKey) {
         return delegate.findKey(this, ordinal, hashKey);
     }
     
+    @Impure
     public final V findValue(Object... hashKey) {
         return delegate.findValue(this, ordinal, hashKey);
     }
     
+    @Impure
     public final Map.Entry<K, V> findEntry(Object... hashKey) {
         return delegate.findEntry(this, ordinal, hashKey);
     }
     
 
+    @Impure
     public abstract K instantiateKey(int keyOrdinal);
+    @Impure
     public abstract V instantiateValue(int valueOrdinal);
+    @Impure
     public abstract boolean equalsKey(int keyOrdinal, Object testObject);
+    @Impure
     public abstract boolean equalsValue(int valueOrdinal, Object testObject);
 
+    @Impure
     @Override
     public HollowMapSchema getSchema() {
         return delegate.getSchema();
     }
 
+    @Pure
+    @Impure
     @Override
     public HollowMapTypeDataAccess getTypeDataAccess() {
         return delegate.getTypeDataAccess();
     }
 
+    @Pure
     @Override
     public HollowRecordDelegate getDelegate() {
         return delegate;
     }
 
+    @Pure
+    @EnsuresQualifier(expression="this", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionBottom.class)
+    @Impure
     @Override
     public boolean equals(Object o) {
         // Note: hashCode is computed from the map's contents, see AbstractMap.hashCode
@@ -128,13 +156,15 @@ public abstract class HollowMap<K, V> extends AbstractMap<K, V> implements Hollo
 
     private final class EntrySet extends AbstractSet<Map.Entry<K, V>> {
 
+        @Impure
         @Override
-        public Iterator<Map.Entry<K, V>> iterator() {
+        public Iterator<Map.Entry<K, V>> iterator(@PolyOwningCollection HollowMap<K, V>.EntrySet this) {
             return new EntryItr();
         }
 
+        @Impure
         @Override
-        public int size() {
+        public int size(@NotOwningCollection HollowMap<K, V>.EntrySet this) {
             return delegate.size(ordinal);
         }
     }
@@ -144,18 +174,21 @@ public abstract class HollowMap<K, V> extends AbstractMap<K, V> implements Hollo
         private final HollowMapEntryOrdinalIterator ordinalIterator;
         private Map.Entry<K, V> next;
 
+        @Impure
         EntryItr() {
             this.ordinalIterator = delegate.iterator(ordinal);
             positionNext();
         }
 
+        @Pure
         @Override
-        public boolean hasNext() {
+        public boolean hasNext(@NotOwningCollection HollowMap<K, V>.EntryItr this) {
             return next != null;
         }
 
+        @Impure
         @Override
-        public Map.Entry<K, V> next() {
+        public Map.Entry<K, V> next(@NotOwningCollection HollowMap<K, V>.EntryItr this) {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -165,6 +198,7 @@ public abstract class HollowMap<K, V> extends AbstractMap<K, V> implements Hollo
             return current;
         }
 
+        @Impure
         private void positionNext() {
             if(ordinalIterator.next()) {
                 next = new OrdinalEntry<>(HollowMap.this, ordinalIterator.getKey(), ordinalIterator.getValue());
@@ -179,32 +213,39 @@ public abstract class HollowMap<K, V> extends AbstractMap<K, V> implements Hollo
         private final int keyOrdinal;
         private final int valueOrdinal;
 
+        @SideEffectFree
         OrdinalEntry(HollowMap<K, V> map, int keyOrdinal, int valueOrdinal) {
             this.map = map;
             this.keyOrdinal = keyOrdinal;
             this.valueOrdinal = valueOrdinal;
         }
 
+        @Impure
         @Override
         public K getKey() {
             return map.instantiateKey(keyOrdinal);
         }
 
+        @Impure
         @Override
         public V getValue() {
             return map.instantiateValue(valueOrdinal);
         }
 
+        @Pure
         @Override
         public V setValue(V value) {
             throw new UnsupportedOperationException();
         }
 
+        @Pure
         @Override
         public int hashCode() {
             return Objects.hashCode(getKey()) ^ Objects.hashCode(getValue());
         }
 
+        @Pure
+        @Impure
         @Override
         public boolean equals(Object o) {
             if (this == o) {

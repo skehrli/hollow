@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.dataaccess.disabled;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -29,73 +31,88 @@ public class HollowSetDisabledDataAccess implements HollowSetTypeDataAccess {
 
     public static final HollowSetDisabledDataAccess INSTANCE = new HollowSetDisabledDataAccess();
 
+    @SideEffectFree
     private HollowSetDisabledDataAccess() { }
 
+    @Pure
     @Override
     public int size(int ordinal) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowOrdinalIterator ordinalIterator(int ordinal) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @SideEffectFree
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         throw new IllegalStateException("Data Access is Disabled");
     }
     
+    @SideEffectFree
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         throw new IllegalStateException("Data Access is Disabled");
     }
     
+    @SideEffectFree
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         throw new IllegalStateException("DataAccess is Disabled");
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowSetSchema getSchema() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public boolean contains(int ordinal, int value) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public boolean contains(int ordinal, int value, int hashCode) {
         throw new IllegalStateException("Data Access is Disabled");
     }
     
+    @Pure
     @Override
     public int findElement(int ordinal, Object... hashKey) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int relativeBucketValue(int ordinal, int bucketIndex) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowOrdinalIterator potentialMatchOrdinalIterator(int ordinal, int hashCode) {
         throw new IllegalStateException("Data Access is Disabled");

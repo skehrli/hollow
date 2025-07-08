@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.listener;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.Status;
 import com.netflix.hollow.api.producer.validation.ValidationStatusListener;
@@ -50,6 +52,7 @@ public interface CycleListener extends HollowProducerEventListener {
      */
     // See HollowProducerListenerV2
     // Can this be merged in to onCycleComplete with status?
+    @Impure
     void onCycleSkip(CycleSkipReason reason);
 
 
@@ -64,6 +67,7 @@ public interface CycleListener extends HollowProducerEventListener {
      * @param version the version of the state that will become the first of a new delta chain
      */
     // This is called just before onCycleStart, can the two be merged with additional arguments?
+    @SideEffectFree
     void onNewDeltaChain(long version);
 
     /**
@@ -71,6 +75,7 @@ public interface CycleListener extends HollowProducerEventListener {
      *
      * @param version the version produced by the {@code HollowProducer} for new cycle about to start.
      */
+    @Impure
     void onCycleStart(long version);
 
     /**
@@ -96,5 +101,6 @@ public interface CycleListener extends HollowProducerEventListener {
      * @param version the version
      * @param elapsed duration of the cycle
      */
+    @Impure
     void onCycleComplete(Status status, HollowProducer.ReadState readState, long version, Duration elapsed);
 }

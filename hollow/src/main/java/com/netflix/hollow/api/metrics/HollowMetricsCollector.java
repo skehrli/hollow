@@ -15,18 +15,24 @@
  *
  */
 package com.netflix.hollow.api.metrics;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 
 public abstract class HollowMetricsCollector<T extends HollowMetrics> {
 
     private T metrics;
 
+    @Pure
     public T getMetrics() {
         return metrics;
     }
 
+    @Impure
     public void setMetrics(T metrics) {
         this.metrics = metrics;
     }
 
+    @SideEffectFree
     public abstract void collect(T metrics);
 }

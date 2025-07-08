@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.api.producer.IncrementalCycleListener.Status.FAIL;
 import static com.netflix.hollow.api.producer.IncrementalCycleListener.Status.SUCCESS;
 
@@ -43,6 +46,7 @@ public interface IncrementalCycleListener extends EventListener {
      * @param elapsed duration of the cycle in {@code unit} units
      * @param unit units of the {@code elapsed} duration
      */
+    @SideEffectFree
     public void onCycleComplete(IncrementalCycleStatus status, long elapsed, TimeUnit unit);
 
     /**
@@ -53,6 +57,7 @@ public interface IncrementalCycleListener extends EventListener {
      * @param elapsed duration of the cycle in {@code unit} units
      * @param unit units of the {@code elapsed} duration
      */
+    @SideEffectFree
     public void onCycleFail(IncrementalCycleStatus status, long elapsed, TimeUnit unit);
 
     public class IncrementalCycleStatus {
@@ -63,6 +68,7 @@ public interface IncrementalCycleListener extends EventListener {
         private final Map<String, Object> cycleMetadata;
         private final Throwable throwable;
 
+        @SideEffectFree
         public IncrementalCycleStatus(Status status, long version, Throwable throwable, long recordsAddedOrModified, long recordsRemoved, Map<String, Object> cycleMetadata) {
             this.status = status;
             this.version = version;
@@ -77,6 +83,7 @@ public interface IncrementalCycleListener extends EventListener {
          *
          * @return Current version of the {@code HollowIncrementalProducer}.
          */
+        @Pure
         public long getVersion() {
             return version;
         }
@@ -86,6 +93,7 @@ public interface IncrementalCycleListener extends EventListener {
          *
          * @return SUCCESS or FAIL.
          */
+        @Pure
         public Status getStatus() {
             return status;
         }
@@ -93,6 +101,7 @@ public interface IncrementalCycleListener extends EventListener {
          *
          * @return the number of records that potentially were added/modified from the dataset.
          */
+        @Pure
         public long getRecordsAddedOrModified() {
             return recordsAddedOrModified;
         }
@@ -100,6 +109,7 @@ public interface IncrementalCycleListener extends EventListener {
         /**
          * @return the number of records that potentially were removed from the dataset.
          */
+        @Pure
         public long getRecordsRemoved() {
             return recordsRemoved;
         }
@@ -107,6 +117,7 @@ public interface IncrementalCycleListener extends EventListener {
         /**
          * @return cycle metadata attached before runCycle in {@code HollowIncrementalProducer}
          */
+        @Pure
         public Map<String, Object> getCycleMetadata() {
             return cycleMetadata;
         }
@@ -116,6 +127,7 @@ public interface IncrementalCycleListener extends EventListener {
          *
          * @return Throwable if {@code Status.equals(FAIL)} else null.
          */
+        @Pure
         public Throwable getCause() {
             return throwable;
         }
@@ -131,10 +143,12 @@ public interface IncrementalCycleListener extends EventListener {
             private long recordsRemoved;
             private Map<String, Object> cycleMetadata;
 
+            @Impure
             Builder() {
                 start = System.currentTimeMillis();
             }
 
+            @Impure
             Builder success(long version, long recordsAddedOrModified, long recordsRemoved, Map<String, Object> cycleMetadata) {
                 this.status = SUCCESS;
                 this.version = version;
@@ -144,6 +158,7 @@ public interface IncrementalCycleListener extends EventListener {
                 return this;
             }
 
+            @Impure
             Builder fail(Throwable cause, long recordsAddedOrModified, long recordsRemoved, Map<String, Object> cycleMetadata) {
                 this.status = FAIL;
                 this.cause = cause;
@@ -153,11 +168,13 @@ public interface IncrementalCycleListener extends EventListener {
                 return this;
             }
 
+            @Impure
             IncrementalCycleStatus build() {
                 end = System.currentTimeMillis();
                 return new IncrementalCycleStatus(status, version, cause, recordsAddedOrModified, recordsRemoved, cycleMetadata);
             }
 
+            @Pure
             long elapsed() {
                 return end - start;
             }

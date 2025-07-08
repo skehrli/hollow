@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.api;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.delegateLookupClassname;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.typeAPIClassname;
 
@@ -39,12 +40,14 @@ import com.netflix.hollow.core.schema.HollowListSchema;
 public class TypeAPIListJavaGenerator extends HollowTypeAPIGenerator {
     private final HollowListSchema schema;
 
+    @Impure
     public TypeAPIListJavaGenerator(String apiClassname, String packageName, HollowListSchema schema,
             HollowDataset dataset, CodeGeneratorConfig config) {
         super(apiClassname, packageName, schema, dataset, config);
         this.schema = schema;
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder builder = new StringBuilder();

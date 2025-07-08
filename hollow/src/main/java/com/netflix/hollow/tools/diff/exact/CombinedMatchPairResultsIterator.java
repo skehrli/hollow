@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.diff.exact;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.util.IntList;
 import com.netflix.hollow.core.util.LongList;
 
@@ -32,11 +34,13 @@ public class CombinedMatchPairResultsIterator {
     private int currentFromOrdinal;
     private final IntList list;
 
+    @Impure
     public CombinedMatchPairResultsIterator(LongList[] shardedResults) {
         this.shardedResults = shardedResults;
         this.list = new IntList();
     }
 
+    @Impure
     public boolean next() {
         list.clear();
         
@@ -59,10 +63,12 @@ public class CombinedMatchPairResultsIterator {
         return false;
      }
 
+    @Pure
     public int fromOrdinal() {
         return currentFromOrdinal;
     }
 
+    @Pure
     public IntList toOrdinals() {
         return list;
     }

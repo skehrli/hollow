@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.getJavaScalarType;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.lowercase;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.substituteInvalidChars;
@@ -55,11 +57,13 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
     private final boolean memoizeOrdinal;
     private final Set<Class<?>> importClasses;
 
+    @Impure
     public HollowPOJOClassGenerator(HollowDataset dataset, HollowObjectSchema schema,
             String packageName, String classNameSuffix) {
         this(dataset, schema, packageName, classNameSuffix, false);
     }
     
+    @Impure
     public HollowPOJOClassGenerator(HollowDataset dataset, HollowObjectSchema schema,
             String packageName, String classNameSuffix, boolean memoizeOrdinal) {
         this.dataset = dataset;
@@ -71,16 +75,19 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         this.memoizeOrdinal = memoizeOrdinal;
     }
     
+    @Pure
     private static String buildClassName(String name, String suffix) {
         if (suffix == null) return name;
         return name + suffix;
     }
 
+    @Pure
     @Override
     public String getClassName() {
         return className;
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder classBodyBuilder = new StringBuilder();
@@ -128,6 +135,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private void generateHollowPrimaryKeyAnnotation(StringBuilder classBodyBuilder) {
         PrimaryKey primaryKey = schema.getPrimaryKey();
         if (primaryKey == null) {
@@ -144,6 +152,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         classBodyBuilder.append("})\n");
     }
 
+    @Impure
     private void generateInstanceVariables(StringBuilder classBodyBuilder) {
         for (int i = 0;i < schema.numFields();i++) {
             if (fieldNeedsTypeNameAnnotation(i)) {
@@ -159,6 +168,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         }
     }
 
+    @Impure
     private void generateConstructorForPrimaryKey(StringBuilder classBodyBuilder) {
         PrimaryKey primaryKey = schema.getPrimaryKey();
         if (primaryKey == null) {
@@ -184,6 +194,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         classBodyBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void generateChainableSetters(StringBuilder classBodyBuilder) {
         for (int i = 0; i < schema.numFields(); i++) {
             classBodyBuilder.append("    public ").append(getClassName()).append(" set")
@@ -196,6 +207,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         }
     }
 
+    @Impure
     private void generateChainableAddForSetAndList(StringBuilder classBodyBuilder) {
         for (int i = 0; i < schema.numFields(); i++) {
             if (schema.getFieldType(i) != FieldType.REFERENCE) {
@@ -225,6 +237,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         }
     }
 
+    @Impure
     private void generateEqualsMethod(StringBuilder classBodyBuilder) {
         classBodyBuilder.append("    public boolean equals(Object other) {\n");
         classBodyBuilder.append("        if (other == this)  return true;\n");
@@ -257,6 +270,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         classBodyBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void generateHashCodeMethod(StringBuilder classBodyBuilder) {
         classBodyBuilder.append("    public int hashCode() {\n");
         classBodyBuilder.append("        int hashCode = 1;\n");
@@ -297,6 +311,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         classBodyBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void generateToStringMethod(StringBuilder classBodyBuilder) {
         classBodyBuilder.append("    public String toString() {\n");
         classBodyBuilder.append("        StringBuilder builder = new StringBuilder(\"").append(getClassName()).append("{\");\n");
@@ -311,6 +326,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         classBodyBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void generateCloneMethod(StringBuilder classBodyBuilder) {
         classBodyBuilder.append("    public ").append(getClassName()).append(" clone() {\n");
         classBodyBuilder.append("        try {\n");
@@ -324,6 +340,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
                 .append("        } catch (CloneNotSupportedException cnse) { throw new RuntimeException(cnse); }\n");
     }
 
+    @Impure
     private boolean fieldNeedsTypeNameAnnotation(int i) {
         if (schema.getFieldType(i) == FieldType.REFERENCE) {
             HollowSchema referencedSchema = dataset.getSchema(schema.getReferencedType(i));
@@ -332,10 +349,12 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         return false;
     }
 
+    @Impure
     private boolean fieldNeedsInlineAnnotation(int i) {
         return schema.getFieldType(i) == FieldType.STRING;
     }
 
+    @Impure
     private String fieldType(int i) {
         switch (schema.getFieldType(i)) {
             case BOOLEAN:
@@ -354,6 +373,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
 
     }
 
+    @Impure
     private String defaultValue(int i) {
         switch (schema.getFieldType(i)) {
             case BOOLEAN:
@@ -375,6 +395,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         throw new IllegalArgumentException("Field type is unrecognized: " + schema.getFieldType(i));
     }
 
+    @Impure
     private String buildFieldType(HollowSchema referencedSchema) {
         if (referencedSchema instanceof HollowObjectSchema) {
             return buildClassName(referencedSchema.getName(), classNameSuffix);
@@ -396,6 +417,7 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
         throw new IllegalArgumentException("Schema is unrecognized type " + referencedSchema.getClass().getSimpleName());
     }
 
+    @Impure
     private String expectedCollectionClassName(HollowSchema referencedSchema) {
         if (referencedSchema instanceof HollowObjectSchema) {
             return referencedSchema.getName();
@@ -419,10 +441,12 @@ public class HollowPOJOClassGenerator implements HollowJavaFileGenerator {
     /**
      * Returns a field name that is same for use as a java variable.
      */
+    @Impure
     private String getFieldName(int index) {
         return substituteInvalidChars(schema.getFieldName(index));
     }
 
+    @Impure
     private int getIndexFromFieldName(String fieldName) {
         for (int i = 0; i < schema.numFields(); i++) {
             if (getFieldName(i).equals(fieldName)) {

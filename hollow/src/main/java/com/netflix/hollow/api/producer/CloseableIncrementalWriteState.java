@@ -1,5 +1,7 @@
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.api.producer.HollowIncrementalCyclePopulator.AddIfAbsent;
 import static com.netflix.hollow.api.producer.HollowIncrementalCyclePopulator.DELETE_RECORD;
 
@@ -15,6 +17,7 @@ final class CloseableIncrementalWriteState implements HollowProducer.Incremental
     private final HollowObjectMapper objectMapper;
     private volatile boolean closed;
 
+    @SideEffectFree
     public CloseableIncrementalWriteState(
             ConcurrentHashMap<RecordPrimaryKey, Object> events,
             HollowObjectMapper objectMapper) {
@@ -22,6 +25,7 @@ final class CloseableIncrementalWriteState implements HollowProducer.Incremental
         this.objectMapper = objectMapper;
     }
 
+    @Impure
     @Override
     public void addOrModify(Object o) {
         ensureNotClosed();
@@ -29,6 +33,7 @@ final class CloseableIncrementalWriteState implements HollowProducer.Incremental
         events.put(getKey(o), o);
     }
 
+    @Impure
     @Override
     public void addIfAbsent(Object o) {
         ensureNotClosed();
@@ -36,11 +41,13 @@ final class CloseableIncrementalWriteState implements HollowProducer.Incremental
         events.putIfAbsent(getKey(o), new AddIfAbsent(o));
     }
 
+    @Impure
     @Override
     public void delete(Object o) {
         delete(getKey(o));
     }
 
+    @Impure
     @Override
     public void delete(RecordPrimaryKey key) {
         ensureNotClosed();
@@ -49,6 +56,7 @@ final class CloseableIncrementalWriteState implements HollowProducer.Incremental
         events.put(key, DELETE_RECORD);
     }
 
+    @Impure
     private RecordPrimaryKey getKey(Object o) {
         if (o instanceof FlatRecord) {
             FlatRecord fr = (FlatRecord) o;
@@ -58,6 +66,7 @@ final class CloseableIncrementalWriteState implements HollowProducer.Incremental
         }
     }
 
+    @SideEffectFree
     private void ensureNotClosed() {
         if (closed) {
             throw new IllegalStateException(
@@ -65,6 +74,7 @@ final class CloseableIncrementalWriteState implements HollowProducer.Incremental
         }
     }
 
+    @Impure
     @Override public void close() {
         closed = true;
     }

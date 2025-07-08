@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.testdata;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.schema.HollowListSchema;
 import com.netflix.hollow.core.schema.HollowMapSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -34,14 +37,18 @@ public abstract class HollowTestRecord<T> {
     private final T parent;
     private int assignedOrdinal = -1;
     
+    @SideEffectFree
     protected HollowTestRecord(T parent) {
         this.parent = parent;
     }
     
+    @Pure
     public T up() {
         return parent;
     }
     
+    @Pure
+    @Impure
     @SuppressWarnings({ "hiding", "unchecked" })
     public <T> T upTop() {
         HollowTestRecord<?> root = this;
@@ -51,6 +58,7 @@ public abstract class HollowTestRecord<T> {
         return (T)root;
     }
     
+    @Impure
     int addTo(HollowWriteStateEngine writeEngine) {
         HollowSchema schema = getSchema();
         HollowTypeWriteState typeState = writeEngine.getTypeState(schema.getName());
@@ -76,12 +84,15 @@ public abstract class HollowTestRecord<T> {
         return assignedOrdinal;
     }
     
+    @Pure
     public int getOrdinal() {
         return assignedOrdinal;
     }
     
+    @Pure
     protected abstract HollowSchema getSchema();
 
+    @Impure
     protected abstract HollowWriteRecord toWriteRecord(HollowWriteStateEngine writeEngine);
     
 }

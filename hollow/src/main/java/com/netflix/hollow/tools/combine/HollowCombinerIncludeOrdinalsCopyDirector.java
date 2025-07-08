@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.combine;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import java.util.BitSet;
 import java.util.Map;
@@ -31,10 +33,12 @@ public class HollowCombinerIncludeOrdinalsCopyDirector implements HollowCombiner
 
     private final Map<String, BitSet> includedOrdinals;
 
+    @SideEffectFree
     public HollowCombinerIncludeOrdinalsCopyDirector(Map<String, BitSet> includedOrdinals) {
         this.includedOrdinals = includedOrdinals;
     }
 
+    @Impure
     @Override
     public boolean shouldCopy(HollowTypeReadState typeState, int ordinal) {
         BitSet typeIncludedOrdinals = includedOrdinals.get(typeState.getSchema().getName());

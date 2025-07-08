@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +38,7 @@ public final class ValidationStatus {
      * @param results the validation results
      * @throws NullPointerException if {@code results} is {@code null}
      */
+    @Impure
     public ValidationStatus(List<ValidationResult> results) {
         this.results = Collections.unmodifiableList(new ArrayList<>(results));
         this.passed = this.results.stream().allMatch(ValidationResult::isPassed);
@@ -47,6 +50,7 @@ public final class ValidationStatus {
      *
      * @return true if all validation results have passed, otherwise false
      */
+    @Pure
     public boolean passed() {
         return passed;
     }
@@ -57,6 +61,7 @@ public final class ValidationStatus {
      *
      * @return true if one or more validation results failed or was erroneous, otherwise false
      */
+    @Pure
     public boolean failed() {
         return !passed;
     }
@@ -66,6 +71,7 @@ public final class ValidationStatus {
      *
      * @return the validation results. The results are unmodifiable.
      */
+    @Pure
     public List<ValidationResult> getResults() {
         return results;
     }

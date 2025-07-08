@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.patch.delta;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.util.IntMap;
 import com.netflix.hollow.tools.combine.OrdinalRemapper;
 import com.netflix.hollow.tools.compact.HollowCompactor;
@@ -31,18 +34,22 @@ public class PartialOrdinalRemapper implements OrdinalRemapper {
     
     private final Map<String, IntMap> ordinalMappings;
     
+    @Impure
     public PartialOrdinalRemapper() {
         this.ordinalMappings = new HashMap<String, IntMap>();
     }
     
+    @Impure
     public void addOrdinalRemapping(String typeName, IntMap mapping) {
         ordinalMappings.put(typeName, mapping);
     }
     
+    @Pure
     public IntMap getOrdinalRemapping(String typeName) {
         return ordinalMappings.get(typeName);
     }
     
+    @Impure
     @Override
     public int getMappedOrdinal(String type, int originalOrdinal) {
         IntMap mapping = ordinalMappings.get(type);
@@ -54,11 +61,13 @@ public class PartialOrdinalRemapper implements OrdinalRemapper {
         return originalOrdinal;
     }
 
+    @Pure
     @Override
     public boolean ordinalIsMapped(String type, int originalOrdinal) {
         return true;
     }
     
+    @SideEffectFree
     @Override
     public void remapOrdinal(String type, int originalOrdinal, int mappedOrdinal) {
         throw new UnsupportedOperationException("Cannot explicitly remap an ordinal in an IntMapOrdinalRemapper");

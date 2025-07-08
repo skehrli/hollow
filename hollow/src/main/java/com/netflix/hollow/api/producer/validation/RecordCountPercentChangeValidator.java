@@ -1,5 +1,8 @@
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.consumer.data.AbstractHollowDataAccessor;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -22,17 +25,20 @@ public class RecordCountPercentChangeValidator implements ValidatorListener {
     private final Threshold threshold;
     private AbstractHollowDataAccessor accessor;
 
+    @SideEffectFree
     public RecordCountPercentChangeValidator(String typeName,
                                              Threshold threshold) {
         this.typeName = typeName;
         this.threshold = threshold;
     }
 
+    @Pure
     @Override
     public String getName() {
         return NAME + "_" + typeName;
     }
 
+    @Impure
     @Override
     public ValidationResult onValidate(HollowProducer.ReadState readState) {
         HollowReadStateEngine readStateEngine = requireNonNull(readState.getStateEngine(), "read state is null");
@@ -40,6 +46,7 @@ public class RecordCountPercentChangeValidator implements ValidatorListener {
                 "type not loaded or does not exist in dataset; type=" + typeName);
         accessor =
             new AbstractHollowDataAccessor<Object>(readStateEngine, typeName) {
+                @Pure
                 @Override public Object getRecord(int ordinal) { return null; }
         };
         ValidationResult validationResult = validateChanges(typeState);
@@ -47,6 +54,7 @@ public class RecordCountPercentChangeValidator implements ValidatorListener {
         return validationResult;
     }
 
+    @Impure
     private ValidationResult validateChanges(HollowTypeReadState typeState) {
         if(typeState.getPreviousOrdinals().isEmpty()) {
             return ValidationResult.from(this).passed("Ignore the check if previous records are empty.");
@@ -98,6 +106,7 @@ public class RecordCountPercentChangeValidator implements ValidatorListener {
         private final Supplier<Float> addedPercentageThreshold;
         private final Supplier<Float> updatedPercentageThreshold;
 
+        @SideEffectFree
         public Threshold(Supplier<Float> removedPercentageThreshold,
                          Supplier<Float> addedPercentageThreshold,
                          Supplier<Float> updatedPercentageThreshold) {
@@ -107,6 +116,7 @@ public class RecordCountPercentChangeValidator implements ValidatorListener {
         }
 
 
+        @Impure
         public static ThresholdBuilder builder() {
             return new ThresholdBuilder();
         }
@@ -116,21 +126,25 @@ public class RecordCountPercentChangeValidator implements ValidatorListener {
             private Supplier<Float> addedPercentageThreshold;
             private Supplier<Float> updatedPercentageThreshold;
 
+            @Impure
             public ThresholdBuilder withRemovedPercentageThreshold(Supplier<Float> removedPercentageThreshold) {
                 this.removedPercentageThreshold = removedPercentageThreshold;
                 return this;
             }
 
+            @Impure
             public ThresholdBuilder withAddedPercentageThreshold(Supplier<Float> addedPercentageThreshold) {
                 this.addedPercentageThreshold = addedPercentageThreshold;
                 return this;
             }
 
+            @Impure
             public ThresholdBuilder withUpdatedPercentageThreshold(Supplier<Float> updatedPercentageThreshold) {
                 this.updatedPercentageThreshold = updatedPercentageThreshold;
                 return this;
             }
 
+            @Impure
             public Threshold build() {
                 if (removedPercentageThreshold != null && (removedPercentageThreshold.get() < 0 || removedPercentageThreshold.get() > 1)) {
                     throw new RuntimeException("removed percentage threshold must be between 0 and 1, value "

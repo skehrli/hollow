@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toList;
 
@@ -63,16 +65,19 @@ final class ProducerListenerSupport extends ListenerSupport {
                     ValidationStatusListener.class)
                     .distinct().collect(toList());
 
+    @Impure
     static boolean isValidListener(HollowProducerEventListener l) {
         return LISTENERS.stream().anyMatch(c -> c.isInstance(l));
     }
 
+    @Impure
     ProducerListenerSupport() {
         // @@@ This is used only by HollowIncrementalProducer, and should be
         // separated out
         incrementalCycleListeners = new CopyOnWriteArraySet<>();
     }
 
+    @Impure
     ProducerListenerSupport(List<? extends HollowProducerEventListener> listeners) {
         super(listeners);
 
@@ -81,6 +86,7 @@ final class ProducerListenerSupport extends ListenerSupport {
         incrementalCycleListeners = new CopyOnWriteArraySet<>();
     }
 
+    @Impure
     ProducerListenerSupport(ProducerListenerSupport that) {
         super(that);
 
@@ -96,22 +102,27 @@ final class ProducerListenerSupport extends ListenerSupport {
      * From the returned copy events may be fired.
      * Any addition or removal of listeners will take effect on the next cycle.
      */
+    @Impure
     ProducerListeners listeners() {
         return new ProducerListeners(eventListeners.toArray(new HollowProducerEventListener[0]));
     }
 
     static final class ProducerListeners extends Listeners {
 
+        @SideEffectFree
+        @Impure
         ProducerListeners(HollowProducerEventListener[] listeners) {
             super(listeners);
         }
 
+        @Impure
         void fireProducerInit(long elapsedMillis) {
             fire(DataModelInitializationListener.class,
                     l -> l.onProducerInit(Duration.ofMillis(elapsedMillis)));
         }
 
 
+        @Impure
         Status.RestoreStageBuilder fireProducerRestoreStart(long version) {
             fire(RestoreListener.class,
                     l -> l.onProducerRestoreStart(version));
@@ -119,6 +130,7 @@ final class ProducerListenerSupport extends ListenerSupport {
             return new Status.RestoreStageBuilder();
         }
 
+        @Impure
         void fireProducerRestoreComplete(Status.RestoreStageBuilder b) {
             Status s = b.build();
             long versionDesired = b.versionDesired;
@@ -130,16 +142,19 @@ final class ProducerListenerSupport extends ListenerSupport {
         }
 
 
+        @Impure
         void fireNewDeltaChain(long version) {
             fire(CycleListener.class,
                     l -> l.onNewDeltaChain(version));
         }
 
+        @Impure
         void fireCycleSkipped(CycleListener.CycleSkipReason reason) {
             fire(CycleListener.class,
                     l -> l.onCycleSkip(reason));
         }
 
+        @Impure
         Status.StageWithStateBuilder fireCycleStart(long version) {
             fire(CycleListener.class,
                     l -> l.onCycleStart(version));
@@ -147,6 +162,7 @@ final class ProducerListenerSupport extends ListenerSupport {
             return new Status.StageWithStateBuilder().version(version);
         }
 
+        @Impure
         void fireCycleComplete(Status.StageWithStateBuilder b) {
             Status s = b.build();
             HollowProducer.ReadState readState = b.readState;
@@ -157,6 +173,7 @@ final class ProducerListenerSupport extends ListenerSupport {
                     l -> l.onCycleComplete(s, readState, version, elapsed));
         }
 
+        @Impure
         Status.IncrementalPopulateBuilder fireIncrementalPopulateStart(long version) {
             fire(IncrementalPopulateListener.class,
                     l -> l.onIncrementalPopulateStart(version));
@@ -164,6 +181,7 @@ final class ProducerListenerSupport extends ListenerSupport {
             return new Status.IncrementalPopulateBuilder().version(version);
         }
 
+        @Impure
         void fireIncrementalPopulateComplete(Status.IncrementalPopulateBuilder b) {
             Status s = b.build();
             long version = b.version;
@@ -175,6 +193,7 @@ final class ProducerListenerSupport extends ListenerSupport {
                     l -> l.onIncrementalPopulateComplete(s, removed, addedOrModified, version, elapsed));
         }
 
+        @Impure
         Status.StageBuilder firePopulateStart(long version) {
             fire(PopulateListener.class,
                     l -> l.onPopulateStart(version));
@@ -182,6 +201,7 @@ final class ProducerListenerSupport extends ListenerSupport {
             return new Status.StageBuilder().version(version);
         }
 
+        @Impure
         void firePopulateComplete(Status.StageBuilder b) {
             Status s = b.build();
             long version = b.version;
@@ -192,11 +212,13 @@ final class ProducerListenerSupport extends ListenerSupport {
         }
 
 
+        @Impure
         void fireNoDelta(long version) {
             fire(PublishListener.class,
                     l -> l.onNoDeltaAvailable(version));
         }
 
+        @Impure
         Status.StageBuilder firePublishStart(long version) {
             fire(PublishListener.class,
                     l -> l.onPublishStart(version));
@@ -204,6 +226,7 @@ final class ProducerListenerSupport extends ListenerSupport {
             return new Status.StageBuilder().version(version);
         }
 
+        @Impure
         void fireBlobStage(Status.PublishBuilder b) {
             Status s = b.build();
             HollowProducer.Blob blob = b.blob;
@@ -214,11 +237,13 @@ final class ProducerListenerSupport extends ListenerSupport {
         }
 
 
+        @Impure
         void fireBlobPublishAsync(CompletableFuture<HollowProducer.Blob> f) {
             fire(PublishListener.class,
                     l -> l.onBlobPublishAsync(f));
         }
 
+        @Impure
         void fireBlobPublish(Status.PublishBuilder b) {
             Status s = b.build();
             HollowProducer.Blob blob = b.blob;
@@ -228,6 +253,7 @@ final class ProducerListenerSupport extends ListenerSupport {
                     l -> l.onBlobPublish(s, blob, elapsed));
         }
 
+        @Impure
         void firePublishComplete(Status.StageBuilder b) {
             Status s = b.build();
             long version = b.version;
@@ -237,6 +263,7 @@ final class ProducerListenerSupport extends ListenerSupport {
                     l -> l.onPublishComplete(s, version, elapsed));
         }
 
+        @Impure
         Status.StageWithStateBuilder fireIntegrityCheckStart(HollowProducer.ReadState readState) {
             long version = readState.getVersion();
             fire(IntegrityCheckListener.class,
@@ -245,6 +272,7 @@ final class ProducerListenerSupport extends ListenerSupport {
             return new Status.StageWithStateBuilder().readState(readState);
         }
 
+        @Impure
         void fireIntegrityCheckComplete(Status.StageWithStateBuilder b) {
             Status s = b.build();
             HollowProducer.ReadState readState = b.readState;
@@ -256,6 +284,7 @@ final class ProducerListenerSupport extends ListenerSupport {
         }
 
 
+        @Impure
         Status.StageWithStateBuilder fireValidationStart(HollowProducer.ReadState readState) {
             long version = readState.getVersion();
             fire(HollowProducerListener.class,
@@ -267,6 +296,7 @@ final class ProducerListenerSupport extends ListenerSupport {
             return new Status.StageWithStateBuilder().readState(readState);
         }
 
+        @Impure
         void fireValidationComplete(Status.StageWithStateBuilder b, ValidationStatus vs) {
             Status s = b.build();
             HollowProducer.ReadState readState = b.readState;
@@ -282,6 +312,7 @@ final class ProducerListenerSupport extends ListenerSupport {
         }
 
 
+        @Impure
         Status.StageWithStateBuilder fireAnnouncementStart(HollowProducer.ReadState readState) {
             long version = readState.getVersion();
             fire(AnnouncementListener.class,
@@ -292,6 +323,7 @@ final class ProducerListenerSupport extends ListenerSupport {
             return new Status.StageWithStateBuilder().readState(readState);
         }
 
+        @Impure
         void fireAnnouncementComplete(Status.StageWithStateBuilder b) {
             Status s = b.build();
             HollowProducer.ReadState readState = b.readState;
@@ -310,18 +342,22 @@ final class ProducerListenerSupport extends ListenerSupport {
 
     private final Set<IncrementalCycleListener> incrementalCycleListeners;
 
+    @Impure
     void add(IncrementalCycleListener listener) {
         incrementalCycleListeners.add(listener);
     }
 
+    @Impure
     void remove(IncrementalCycleListener listener) {
         incrementalCycleListeners.remove(listener);
     }
 
+    @Impure
     private <T> void fire(Collection<T> ls, Consumer<? super T> r) {
         fire(ls.stream(), r);
     }
 
+    @Impure
     private <T> void fire(Stream<T> ls, Consumer<? super T> r) {
         ls.forEach(l -> {
             try {
@@ -332,6 +368,7 @@ final class ProducerListenerSupport extends ListenerSupport {
         });
     }
 
+    @Impure
     void fireIncrementalCycleComplete(
             long version, long recordsAddedOrModified, long recordsRemoved,
             Map<String, Object> cycleMetadata) {
@@ -344,6 +381,7 @@ final class ProducerListenerSupport extends ListenerSupport {
                 l -> l.onCycleComplete(icsb.build(), icsb.elapsed(), MILLISECONDS));
     }
 
+    @Impure
     void fireIncrementalCycleFail(
             Throwable cause, long recordsAddedOrModified, long recordsRemoved,
             Map<String, Object> cycleMetadata) {

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.engine.map;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.memory.encoding.FixedLengthElementArray;
@@ -45,6 +47,7 @@ public class HollowMapDeltaHistoricalStateCreator {
     private int nextOrdinal;
     private long nextStartBucket;
 
+    @Impure
     public HollowMapDeltaHistoricalStateCreator(HollowMapTypeReadState typeState, boolean reverse) {
         this.typeState = typeState;
         this.stateEngineDataElements = typeState.currentDataElements();
@@ -54,6 +57,7 @@ public class HollowMapDeltaHistoricalStateCreator {
         this.shardOrdinalShift = 31 - Integer.numberOfLeadingZeros(stateEngineDataElements.length);
     }
 
+    @Impure
     public void populateHistory() {
         populateStats();
 
@@ -71,21 +75,25 @@ public class HollowMapDeltaHistoricalStateCreator {
         }
     }
 
+    @Impure
     public void dereferenceTypeState() {
         this.typeState = null;
         this.stateEngineDataElements = null;
         this.iter = null;
     }
 
+    @Pure
     public IntMap getOrdinalMapping() {
         return ordinalMapping;
     }
 
+    @Impure
     public HollowMapTypeReadState createHistoricalTypeReadState() {
         HollowMapTypeReadState historicalTypeState = new HollowMapTypeReadState(typeState.getSchema(), historicalDataElements);
         return historicalTypeState;
     }
 
+    @Impure
     private void populateStats() {
         iter.reset();
         int removedEntryCount = 0;
@@ -123,6 +131,7 @@ public class HollowMapDeltaHistoricalStateCreator {
         ordinalMapping = new IntMap(removedEntryCount);
     }
 
+    @Impure
     private void copyRecord(int ordinal) {
         int shard = ordinal & shardNumberMask;
         int shardOrdinal = ordinal >> shardOrdinalShift; 

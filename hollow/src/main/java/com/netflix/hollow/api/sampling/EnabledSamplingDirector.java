@@ -15,11 +15,14 @@
  *
  */
 package com.netflix.hollow.api.sampling;
+import org.checkerframework.dataflow.qual.Impure;
 
 public class EnabledSamplingDirector extends HollowSamplingDirector {
 
+    @Impure
     public EnabledSamplingDirector() { }
 
+    @Impure
     @Override
     public boolean shouldRecord() {
         return !isUpdateThread();

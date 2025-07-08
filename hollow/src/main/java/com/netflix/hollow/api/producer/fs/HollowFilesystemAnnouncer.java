@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.fs;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import com.netflix.hollow.api.producer.HollowProducer;
@@ -34,10 +36,12 @@ public class HollowFilesystemAnnouncer implements HollowProducer.Announcer {
      * @param publishPath the path to publish to
      * @since 2.12.0
      */
+    @SideEffectFree
     public HollowFilesystemAnnouncer(Path publishPath) {
         this.publishPath = publishPath;
     }
 
+    @Impure
     @Override
     public void announce(long stateVersion) {
         Path announcePath = publishPath.resolve(ANNOUNCEMENT_FILENAME);

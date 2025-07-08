@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.error.SchemaNotFoundException;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.schema.HollowSchema;
@@ -32,12 +33,14 @@ public interface HollowDataset {
     /**
      * @return the schemas for all types in this dataset.
      */
+    @Impure
     List<HollowSchema> getSchemas();
 
     /**
      * @param typeName the type name
      * @return the schema for the specified type in this dataset.
      */
+    @Impure
     HollowSchema getSchema(String typeName);
 
     /**
@@ -45,12 +48,14 @@ public interface HollowDataset {
      * @return the schema for the specified type in this dataset.
      * @throws SchemaNotFoundException if the schema is not found
      */
+    @Impure
     HollowSchema getNonNullSchema(String typeName) throws SchemaNotFoundException;
     
     /**
      * @param other another HollowDataset
      * @return true iff the other HollowDataset has an identical set of schemas.
      */
+    @Impure
     default boolean hasIdenticalSchemas(HollowDataset other) {
         List<HollowSchema> thisSchemas = getSchemas();
         List<HollowSchema> otherSchemas = other.getSchemas();

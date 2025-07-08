@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.schema.HollowSchema;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,46 +52,58 @@ public class HollowBlobHeader {
     private long destinationRandomizedTag;
     private int blobFormatVersion = HOLLOW_BLOB_VERSION_HEADER;
 
+    @Pure
     public Map<String, String> getHeaderTags() {
         return headerTags;
     }
     
+    @Impure
     public void setSchemas(List<HollowSchema> schemas) {
         this.schemas = schemas;
     }
     
+    @Pure
     public List<HollowSchema> getSchemas() {
         return schemas;
     }
 
+    @Impure
     public void setHeaderTags(Map<String, String> headerTags) {
         this.headerTags = headerTags;
     }
 
+    @Pure
     public long getOriginRandomizedTag() {
         return originRandomizedTag;
     }
 
+    @Impure
     public void setOriginRandomizedTag(long originRandomizedTag) {
         this.originRandomizedTag = originRandomizedTag;
     }
 
+    @Pure
     public long getDestinationRandomizedTag() {
         return destinationRandomizedTag;
     }
 
+    @Impure
     public void setDestinationRandomizedTag(long destinationRandomizedTag) {
         this.destinationRandomizedTag = destinationRandomizedTag;
     }
 
+    @Impure
     public void setBlobFormatVersion(int blobFormatVersion) {
         this.blobFormatVersion = blobFormatVersion;
     }
 
+    @Pure
     public int getBlobFormatVersion() {
         return blobFormatVersion;
     }
 
+    @Pure
+    @Impure
     @Override
     public boolean equals(Object other) {
         if(other instanceof HollowBlobHeader) {
@@ -102,6 +116,7 @@ public class HollowBlobHeader {
         return false;
     }
 
+    @Pure
     @Override
     public int hashCode() {
         int result = blobFormatVersion;

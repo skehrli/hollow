@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.missing;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.iterator.EmptyMapOrdinalIterator;
 import com.netflix.hollow.core.read.iterator.EmptyOrdinalIterator;
 import com.netflix.hollow.core.read.iterator.HollowMapEntryOrdinalIterator;
@@ -24,131 +25,157 @@ import com.netflix.hollow.core.schema.HollowSchema;
 
 public class DefaultMissingDataHandler implements MissingDataHandler {
 
+    @Pure
     @Override
     public boolean handleIsNull(String type, int ordinal, String field) {
         return true;
     }
 
+    @Pure
     @Override
     public Boolean handleBoolean(String type, int ordinal, String field) {
         return null;
     }
 
+    @Pure
     @Override
     public int handleReferencedOrdinal(String type, int ordinal, String field) {
         return -1;
     }
 
+    @Pure
     @Override
     public int handleInt(String type, int ordinal, String field) {
         return Integer.MIN_VALUE;
     }
 
+    @Pure
     @Override
     public long handleLong(String type, int ordinal, String field) {
         return Long.MIN_VALUE;
     }
 
+    @Pure
     @Override
     public float handleFloat(String type, int ordinal, String field) {
         return Float.NaN;
     }
 
+    @Pure
     @Override
     public double handleDouble(String type, int ordinal, String field) {
         return Double.NaN;
     }
 
+    @Pure
     @Override
     public String handleString(String type, int ordinal, String field) {
         return null;
     }
 
+    @Pure
     @Override
     public boolean handleStringEquals(String type, int ordinal, String field, String testValue) {
         return testValue == null;
     }
 
+    @Pure
     @Override
     public byte[] handleBytes(String type, int ordinal, String field) {
         return null;
     }
 
+    @Pure
     @Override
     public int handleListSize(String type, int ordinal) {
         return 0;
     }
 
+    @Pure
     @Override
     public int handleListElementOrdinal(String type, int ordinal, int idx) {
         return -1;
     }
 
+    @Pure
     @Override
     public HollowOrdinalIterator handleListIterator(String type, int ordinal) {
         return EmptyOrdinalIterator.INSTANCE;
     }
 
+    @Pure
     @Override
     public int handleSetSize(String type, int ordinal) {
         return 0;
     }
 
+    @Pure
     @Override
     public boolean handleSetContainsElement(String type, int ordinal, int elementOrdinal, int elementOrdinalHashCode) {
         return false;
     }
     
+    @Pure
     @Override
     public int handleSetFindElement(String type, int ordinal, Object... keys) {
         return -1;
     }
 
+    @Pure
     @Override
     public HollowOrdinalIterator handleSetIterator(String type, int ordinal) {
         return EmptyOrdinalIterator.INSTANCE;
     }
 
+    @Pure
     @Override
     public HollowOrdinalIterator handleSetPotentialMatchIterator(String type, int ordinal, int hashCode) {
         return EmptyOrdinalIterator.INSTANCE;
     }
 
+    @Pure
     @Override
     public int handleMapSize(String type, int ordinal) {
         return 0;
     }
 
+    @Pure
     @Override
     public HollowMapEntryOrdinalIterator handleMapOrdinalIterator(String type, int ordinal) {
         return EmptyMapOrdinalIterator.INSTANCE;
     }
 
+    @Pure
     @Override
     public HollowMapEntryOrdinalIterator handleMapPotentialMatchOrdinalIterator(String type, int ordinal, int keyHashCode) {
         return EmptyMapOrdinalIterator.INSTANCE;
     }
 
+    @Pure
     @Override
     public int handleMapGet(String type, int ordinal, int keyOrdinal, int keyOrdinalHashCode) {
         return -1;
     }
 
+    @Pure
     @Override
     public int handleMapFindKey(String type, int ordinal, Object... keys) {
         return -1;
     }
 
+    @Pure
     @Override
     public int handleMapFindValue(String type, int ordinal, Object... keys) {
         return -1;
     }
 
+    @Pure
     @Override
     public long handleMapFindEntry(String type, int ordinal, Object... keys) {
         return -1L;
     }
     
+    @Pure
     @Override
     public HollowSchema handleSchema(String type) {
         throw new UnsupportedOperationException("By default, missing types are not handled.");

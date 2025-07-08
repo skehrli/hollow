@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,15 +28,18 @@ public class StackTraceRecorder {
 
     private final ConcurrentHashMap<String, StackTraceNode> rootNodes;
 
+    @Impure
     public StackTraceRecorder(int maxStackTraceElementsToRecord) {
         this.maxStackTraceElementsToRecord = maxStackTraceElementsToRecord;
         this.rootNodes = new ConcurrentHashMap<String, StackTraceRecorder.StackTraceNode>();
     }
 
+    @Impure
     public void recordStackTrace() {
         recordStackTrace(1);
     }
 
+    @Impure
     public void recordStackTrace(int omitFirstNFrames) {
         ++omitFirstNFrames;
 
@@ -53,6 +58,7 @@ public class StackTraceRecorder {
         }
     }
 
+    @Pure
     public Map<String, StackTraceNode> getRootNodes() {
         return rootNodes;
     }
@@ -62,34 +68,41 @@ public class StackTraceRecorder {
         private final AtomicInteger count;
         private final ConcurrentHashMap<String, StackTraceNode> children;
 
+        @Impure
         public StackTraceNode(String traceLine) {
             this.traceLine = traceLine;
             this.count = new AtomicInteger(0);
             this.children = new ConcurrentHashMap<String, StackTraceNode>(2);
         }
 
+        @Pure
         public String getTraceLine() {
             return traceLine;
         }
 
+        @Impure
         public int getCount() {
             return count.get();
         }
 
+        @Pure
         public Map<String, StackTraceNode> getChildren() {
             return children;
         }
 
+        @Impure
         public void increment() {
             count.incrementAndGet();
         }
 
+        @Impure
         public StackTraceNode getChild(StackTraceElement element) {
             return getNode(element, children);
         }
 
     }
 
+    @Impure
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
@@ -100,6 +113,7 @@ public class StackTraceRecorder {
         return builder.toString();
     }
 
+    @Impure
     private void append(StringBuilder builder, StackTraceNode node, int level) {
         for(int i=0;i<level;i++)
             builder.append("  ");
@@ -110,6 +124,7 @@ public class StackTraceRecorder {
         }
     }
 
+    @Impure
     private StackTraceNode getNode(StackTraceElement element, ConcurrentHashMap<String, StackTraceNode> nodes) {
         String line = element.toString();
         StackTraceNode node = nodes.get(line);

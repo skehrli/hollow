@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.metrics;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.HollowProducerListener;
 import com.netflix.hollow.api.producer.Status;
@@ -40,6 +42,7 @@ public class HollowProducerMetrics extends HollowMetrics {
      * cycles completed, version and type's footprint and ordinals.
      * @param producerStatus the producer status
      */
+    @Impure
     public void updateCycleMetrics(HollowProducerListener.ProducerStatus producerStatus) {
         Status.StatusType st = producerStatus.getStatus() == HollowProducerListener.Status.SUCCESS
                 ? Status.StatusType.SUCCESS
@@ -55,6 +58,7 @@ public class HollowProducerMetrics extends HollowMetrics {
      * @param readState the read state
      * @param version the version
      */
+    @Impure
     public void updateCycleMetrics(Status status, HollowProducer.ReadState readState, long version) {
         cyclesCompleted++;
         if(status.getType() == Status.StatusType.FAIL) {
@@ -71,6 +75,7 @@ public class HollowProducerMetrics extends HollowMetrics {
         }
     }
 
+    @Impure
     public void updateBlobTypeMetrics(HollowProducerListener.PublishStatus publishStatus) {
         Status.StatusType st = publishStatus.getStatus() == HollowProducerListener.Status.SUCCESS
                 ? Status.StatusType.SUCCESS
@@ -79,6 +84,7 @@ public class HollowProducerMetrics extends HollowMetrics {
         updateBlobTypeMetrics(new Status(st, publishStatus.getCause()), publishStatus.getBlob());
     }
 
+    @Impure
     public void updateBlobTypeMetrics(Status status, HollowProducer.Blob blob) {
         HollowProducer.Blob.Type blobType = blob.getType();
         switch (blobType) {
@@ -103,38 +109,47 @@ public class HollowProducerMetrics extends HollowMetrics {
         }
     }
 
+    @Pure
     public int getCyclesCompleted() {
         return this.cyclesCompleted;
     }
 
+    @Pure
     public int getCyclesSucceeded() {
         return this.cyclesSucceeded;
     }
 
+    @Pure
     public int getCycleFailed() {
         return this.cycleFailed;
     }
 
+    @Impure
     public int getSnapshotsCompleted() {
         return snapshotsCompleted.get();
     }
 
+    @Impure
     public int getSnapshotsFailed() {
         return snapshotsFailed.get();
     }
 
+    @Pure
     public int getDeltasCompleted() {
         return deltasCompleted;
     }
 
+    @Pure
     public int getDeltasFailed() {
         return deltasFailed;
     }
 
+    @Pure
     public int getReverseDeltasCompleted() {
         return reverseDeltasCompleted;
     }
 
+    @Pure
     public int getReverseDeltasFailed() {
         return reverseDeltasFailed;
     }

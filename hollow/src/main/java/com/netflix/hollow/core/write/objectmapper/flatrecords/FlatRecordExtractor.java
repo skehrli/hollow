@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write.objectmapper.flatrecords;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowConstants;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -44,6 +47,7 @@ public class FlatRecordExtractor {
     
     private final Map<String, HollowRecordCopier> recordCopiersByType;
     
+    @Impure
     public FlatRecordExtractor(HollowReadStateEngine extractFrom, HollowSchemaIdentifierMapper schemaIdMapper) {
         this.extractFrom = extractFrom;
         this.writer = new FlatRecordWriter(extractFrom, schemaIdMapper);
@@ -51,6 +55,7 @@ public class FlatRecordExtractor {
         this.recordCopiersByType = new HashMap<>();
     }
 
+    @Impure
     public synchronized FlatRecord extract(String type, int ordinal) {
         ordinalRemapper.clear();
         writer.reset();
@@ -62,6 +67,7 @@ public class FlatRecordExtractor {
         return writer.generateFlatRecord();
     }
     
+    @Impure
     private void extractHollowRecord(HollowTypeReadState typeState, int ordinal) {
         if(ordinal == -1)
             return;
@@ -77,6 +83,7 @@ public class FlatRecordExtractor {
         ordinalRemapper.remapOrdinal(type, ordinal, flatOrdinal);
     }
     
+    @Impure
     private void traverse(HollowTypeReadState typeState, int ordinal) {
         
         switch(typeState.getSchema().getSchemaType()) {
@@ -95,6 +102,7 @@ public class FlatRecordExtractor {
         }
     }
     
+    @Impure
     private void traverseObject(HollowObjectTypeReadState typeState, int ordinal) {
         HollowObjectSchema schema = typeState.getSchema();
         
@@ -107,6 +115,7 @@ public class FlatRecordExtractor {
         }
     }
     
+    @Impure
     private void traverseList(HollowListTypeReadState typeState, int ordinal) {
         HollowListSchema schema = typeState.getSchema();
 
@@ -119,6 +128,7 @@ public class FlatRecordExtractor {
         }
     }
     
+    @Impure
     private void traverseSet(HollowSetTypeReadState typeState, int ordinal) {
         HollowSetSchema schema = typeState.getSchema();
         
@@ -132,6 +142,7 @@ public class FlatRecordExtractor {
         }
     }
     
+    @Impure
     private void traverseMap(HollowMapTypeReadState typeState, int ordinal) {
         HollowMapSchema schema = typeState.getSchema();
         
@@ -145,6 +156,7 @@ public class FlatRecordExtractor {
         }
     }
     
+    @Impure
     private HollowRecordCopier recordCopier(String type) {
         HollowRecordCopier recordCopier = recordCopiersByType.get(type);
         if(recordCopier == null) {
@@ -159,21 +171,26 @@ public class FlatRecordExtractor {
 
         private final Map<TypedOrdinal, Integer> mappedFlatOrdinals = new HashMap<>();
         
+        @SideEffectFree
+        @Impure
         @Override
         public int getMappedOrdinal(String type, int originalOrdinal) {
             return mappedFlatOrdinals.get(new TypedOrdinal(type, originalOrdinal));
         }
 
+        @Impure
         @Override
         public void remapOrdinal(String type, int originalOrdinal, int mappedOrdinal) {
             mappedFlatOrdinals.put(new TypedOrdinal(type, originalOrdinal), mappedOrdinal);
         }
 
+        @Pure
         @Override
         public boolean ordinalIsMapped(String type, int originalOrdinal) {
             throw new UnsupportedOperationException();
         }
         
+        @Impure
         public void clear() {
             mappedFlatOrdinals.clear();
         }
@@ -182,11 +199,13 @@ public class FlatRecordExtractor {
             private final String type;
             private final int ordinal;
             
+            @SideEffectFree
             public TypedOrdinal(String type, int ordinal) {
                 this.type = type;
                 this.ordinal = ordinal;
             }
 
+            @Pure
             @Override
             public int hashCode() {
                 final int prime = 31;
@@ -196,6 +215,7 @@ public class FlatRecordExtractor {
                 return result;
             }
 
+            @Pure
             @Override
             public boolean equals(Object obj) {
                 if (this == obj)

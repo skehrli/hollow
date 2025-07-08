@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowObjectTypeAPI;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -27,30 +29,44 @@ import com.netflix.hollow.core.schema.HollowObjectSchema;
  */
 public interface HollowObjectDelegate extends HollowRecordDelegate {
 
+    @Impure
     public boolean isNull(int ordinal, String fieldName);
 
+    @Impure
     public boolean getBoolean(int ordinal, String fieldName);
 
+    @Impure
     public int getOrdinal(int ordinal, String fieldName);
 
+    @Impure
     public int getInt(int ordinal, String fieldName);
 
+    @Impure
     public long getLong(int ordinal, String fieldName);
 
+    @Impure
     public float getFloat(int ordinal, String fieldName);
 
+    @Impure
     public double getDouble(int ordinal, String fieldName);
 
+    @Impure
     public String getString(int ordinal, String fieldName);
 
+    @Impure
     public boolean isStringFieldEqual(int ordinal, String fieldName, String testValue);
 
+    @Impure
     public byte[] getBytes(int ordinal, String fieldName);
 
+    @Impure
     public HollowObjectSchema getSchema();
 
+    @Pure
+    @Impure
     public HollowObjectTypeDataAccess getTypeDataAccess();
 
+    @Pure
     public HollowObjectTypeAPI getTypeAPI();
 
 }

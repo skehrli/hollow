@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowBlobHeader;
 import com.netflix.hollow.core.HollowBlobOptionalPartHeader;
 import com.netflix.hollow.core.memory.encoding.VarInt;
@@ -37,10 +38,12 @@ import java.util.Map;
  */
 public class HollowBlobHeaderReader {
 
+    @Impure
     public HollowBlobHeader readHeader(InputStream is) throws IOException {
         return readHeader(HollowBlobInput.serial(is));
     }
 
+    @Impure
     public HollowBlobHeader readHeader(HollowBlobInput in) throws IOException {
         HollowBlobHeader header = new HollowBlobHeader();
         int headerVersion = in.readInt();
@@ -70,10 +73,12 @@ public class HollowBlobHeaderReader {
         return header;
     }
 
+    @Impure
     public HollowBlobOptionalPartHeader readPartHeader(InputStream is) throws IOException {
         return readPartHeader(HollowBlobInput.serial(is));
     }
 
+    @Impure
     public HollowBlobOptionalPartHeader readPartHeader(HollowBlobInput in) throws IOException {
         int headerVersion = in.readInt();
         if(headerVersion != HollowBlobOptionalPartHeader.HOLLOW_BLOB_PART_VERSION_HEADER) {
@@ -95,6 +100,7 @@ public class HollowBlobHeaderReader {
         return header;
     }
     
+    @Impure
     private List<HollowSchema> readSchemas(HollowBlobInput in) throws IOException {
         int numSchemas = VarInt.readVInt(in);
 
@@ -105,6 +111,7 @@ public class HollowBlobHeaderReader {
         return schemas;
     }
     
+    @Impure
     private void skipForwardCompatibilityBytes(HollowBlobInput in) throws IOException, EOFException {
         int bytesToSkip = VarInt.readVInt(in);
         while(bytesToSkip > 0) {
@@ -121,6 +128,7 @@ public class HollowBlobHeaderReader {
      * @param in the Hollow blob input
      * @throws IOException
      */
+    @Impure
     private Map<String, String> readHeaderTags(HollowBlobInput in) throws IOException {
         int numHeaderTags = in.readShort();
         Map<String, String> headerTags = new HashMap<String, String>();

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.testdata;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.schema.HollowListSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -31,6 +32,7 @@ class HollowListTypeTestDataAPIClassGenerator {
     private final String className;
     private final String elementClassName;
     
+    @Impure
     public HollowListTypeTestDataAPIClassGenerator(HollowDataset dataset, HollowListSchema schema, String packageName) {
         this.dataset = dataset;
         this.schema = schema;
@@ -39,6 +41,7 @@ class HollowListTypeTestDataAPIClassGenerator {
         this.elementClassName = schema.getElementType() + "TestData";
     }
     
+    @Impure
     public String generate() {
         StringBuilder builder = new StringBuilder();
         

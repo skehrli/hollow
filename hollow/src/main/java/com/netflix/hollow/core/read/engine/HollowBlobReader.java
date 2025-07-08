@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowBlobHeader;
 import com.netflix.hollow.core.HollowBlobOptionalPartHeader;
 import com.netflix.hollow.core.memory.MemoryMode;
@@ -56,18 +59,23 @@ public class HollowBlobReader {
     private final MemoryMode memoryMode;
     private final HollowBlobHeaderReader headerReader;
 
+    @Impure
     public HollowBlobReader(HollowReadStateEngine stateEngine) {
         this(stateEngine, new HollowBlobHeaderReader());
     }
 
+    @SideEffectFree
+    @Impure
     public HollowBlobReader(HollowReadStateEngine stateEngine, HollowBlobHeaderReader headerReader) {
         this(stateEngine, headerReader, MemoryMode.ON_HEAP);
     }
 
+    @Impure
     public HollowBlobReader(HollowReadStateEngine stateEngine, MemoryMode memoryMode) {
         this(stateEngine, new HollowBlobHeaderReader(), memoryMode);
     }
 
+    @SideEffectFree
     public HollowBlobReader(HollowReadStateEngine stateEngine, HollowBlobHeaderReader headerReader, MemoryMode memoryMode) {
         this.stateEngine = stateEngine;
         this.headerReader = headerReader;
@@ -80,6 +88,7 @@ public class HollowBlobReader {
      * @param is the input stream to read the snapshot from
      * @throws IOException if the snapshot could not be read
      */
+    @Impure
     public void readSnapshot(InputStream is) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
         readSnapshot(hbi);
@@ -91,6 +100,7 @@ public class HollowBlobReader {
      * @param in the Hollow blob input to read the snapshot from
      * @throws IOException if the snapshot could not be read
      */
+    @Impure
     public void readSnapshot(HollowBlobInput in) throws IOException {
         readSnapshot(in, new HollowFilterConfig(true));
     }
@@ -106,6 +116,7 @@ public class HollowBlobReader {
      *
      * @deprecated use {@link #readSnapshot(InputStream, TypeFilter)}
      */
+    @Impure
     @Deprecated
     public void readSnapshot(InputStream is, HollowFilterConfig filter) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
@@ -121,6 +132,7 @@ public class HollowBlobReader {
      * @param filter the filtering configuration to filter the snapshot
      * @throws IOException if the snapshot could not be read
      */
+    @Impure
     public void readSnapshot(InputStream is, TypeFilter filter) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
         readSnapshot(hbi, filter);
@@ -135,14 +147,17 @@ public class HollowBlobReader {
      * @param filter the filtering configuration to filter the snapshot
      * @throws IOException if the snapshot could not be read
      */
+    @Impure
     public void readSnapshot(HollowBlobInput in, TypeFilter filter) throws IOException {
         readSnapshot(in, null, filter);
     }
 
+    @Impure
     public void readSnapshot(HollowBlobInput in, OptionalBlobPartInput optionalParts) throws IOException {
         readSnapshot(in, optionalParts, new HollowFilterConfig(true));
     }
 
+    @Impure
     public void readSnapshot(HollowBlobInput in, OptionalBlobPartInput optionalParts, TypeFilter filter) throws IOException {
         validateMemoryMode(in.getMemoryMode());
         Map<String, HollowBlobInput> optionalPartInputs = null;
@@ -199,6 +214,7 @@ public class HollowBlobReader {
      * @param in the input stream to read the delta from
      * @throws IOException if the delta could not be applied
      */
+    @Impure
     public void applyDelta(InputStream in) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(in);
         applyDelta(hbi);
@@ -213,10 +229,12 @@ public class HollowBlobReader {
      * @param in the Hollow blob input to read the delta from
      * @throws IOException if the delta could not be applied
      */
+    @Impure
     public void applyDelta(HollowBlobInput in) throws IOException {
         applyDelta(in, null);
     }
 
+    @Impure
     public void applyDelta(HollowBlobInput in, OptionalBlobPartInput optionalParts) throws IOException {
         validateMemoryMode(in.getMemoryMode());
         Map<String, HollowBlobInput> optionalPartInputs = null;
@@ -258,6 +276,7 @@ public class HollowBlobReader {
         notifyEndUpdate();
     }
 
+    @Impure
     private HollowBlobHeader readHeader(HollowBlobInput in, boolean isDelta) throws IOException {
         HollowBlobHeader header = headerReader.readHeader(in);
 
@@ -270,6 +289,7 @@ public class HollowBlobReader {
         return header;
     }
 
+    @Impure
     private List<HollowBlobOptionalPartHeader> readPartHeaders(HollowBlobHeader header, Map<String, HollowBlobInput> inputsByPartName, MemoryMode mode) throws IOException {
         if(inputsByPartName == null)
             return Collections.emptyList();
@@ -289,6 +309,7 @@ public class HollowBlobReader {
         return list;
     }
 
+    @Impure
     private List<HollowSchema> combineSchemas(HollowBlobHeader header, List<HollowBlobOptionalPartHeader> partHeaders) throws IOException {
         if(partHeaders.isEmpty())
             return header.getSchemas();
@@ -302,6 +323,7 @@ public class HollowBlobReader {
         return schemas;
     }
 
+    @Impure
     private void notifyBeginUpdate() {
         for(HollowTypeReadState typeFile: stateEngine.getTypeStates()) {
             for(HollowTypeStateListener listener : typeFile.getListeners()) {
@@ -310,6 +332,7 @@ public class HollowBlobReader {
         }
     }
 
+    @Impure
     private void notifyEndUpdate() {
         for(HollowTypeReadState typeFile : stateEngine.getTypeStates()) {
             for(HollowTypeStateListener listener : typeFile.getListeners()) {
@@ -318,6 +341,7 @@ public class HollowBlobReader {
         }
     }
 
+    @Impure
     private String readTypeStateSnapshot(HollowBlobInput in, TypeFilter filter) throws IOException {
         HollowSchema schema = HollowSchema.readFrom(in);
         int numShards = readNumShards(in);
@@ -356,6 +380,7 @@ public class HollowBlobReader {
         return typeName;
     }
 
+    @Impure
     private void populateTypeStateSnapshotWithNumShards(HollowBlobInput in, HollowTypeReadState typeState, int numShards) throws IOException {
         if (numShards<=0 || ((numShards&(numShards-1))!=0)) {
             throw new IllegalArgumentException("Number of shards must be a power of 2!");
@@ -365,6 +390,7 @@ public class HollowBlobReader {
         typeState.readSnapshot(in, stateEngine.getMemoryRecycler(), numShards);
     }
 
+    @Impure
     private String readTypeStateDelta(HollowBlobInput in) throws IOException {
         HollowSchema schema = HollowSchema.readFrom(in);
 
@@ -383,10 +409,12 @@ public class HollowBlobReader {
         return schema.getName();
     }
 
+    @Pure
     private boolean shouldReshard(int currNumShards, int deltaNumShards) {
         return currNumShards != 0 && deltaNumShards != 0 && currNumShards != deltaNumShards;
     }
 
+    @Impure
     private int readNumShards(HollowBlobInput in) throws IOException {
         int backwardsCompatibilityBytes = VarInt.readVInt(in);
 
@@ -398,6 +426,7 @@ public class HollowBlobReader {
         return VarInt.readVInt(in);
     }
         
+    @Impure
     private void skipForwardsCompatibilityBytes(HollowBlobInput in) throws IOException {
         int bytesToSkip = VarInt.readVInt(in);
         while(bytesToSkip > 0) {
@@ -409,6 +438,7 @@ public class HollowBlobReader {
     }
 
 
+    @Impure
     private void discardDelta(HollowBlobInput in, HollowSchema schema, int numShards) throws IOException {
         if(schema instanceof HollowObjectSchema)
             HollowObjectTypeReadState.discardDelta(in, (HollowObjectSchema)schema, numShards);
@@ -420,6 +450,7 @@ public class HollowBlobReader {
             HollowMapTypeReadState.discardDelta(in, numShards);
     }
 
+    @SideEffectFree
     private void validateMemoryMode(MemoryMode inputMode) {
         if (!memoryMode.equals(inputMode)) {
             throw new IllegalStateException(String.format("HollowBlobReader is configured for memory mode %s but " +

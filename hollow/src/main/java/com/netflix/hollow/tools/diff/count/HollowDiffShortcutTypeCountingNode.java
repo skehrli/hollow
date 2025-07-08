@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.diff.count;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.util.IntList;
 import com.netflix.hollow.tools.diff.HollowDiff;
 import com.netflix.hollow.tools.diff.HollowDiffNodeIdentifier;
@@ -30,28 +31,33 @@ public class HollowDiffShortcutTypeCountingNode extends HollowDiffCountingNode {
     private int currentTopLevelFromOrdinal;
     private int currentTopLevelToOrdinal;
 
+    @Impure
     public HollowDiffShortcutTypeCountingNode(HollowDiff diff, HollowTypeDiff topLevelTypeDiff, HollowDiffNodeIdentifier nodeId) {
         super(diff, topLevelTypeDiff, nodeId);
         
         this.fieldDiff = new HollowFieldDiff(nodeId);
     }
 
+    @Impure
     @Override
     public void prepare(int topLevelFromOrdinal, int topLevelToOrdinal) {
         this.currentTopLevelFromOrdinal = topLevelFromOrdinal;
         this.currentTopLevelToOrdinal = topLevelToOrdinal;
     }
 
+    @Impure
     @Override
     public int traverseDiffs(IntList fromOrdinals, IntList toOrdinals) {
         return addResultToFieldDiff(fromOrdinals, toOrdinals);
     }
 
+    @Impure
     @Override
     public int traverseMissingFields(IntList fromOrdinals, IntList toOrdinals) {
         return addResultToFieldDiff(fromOrdinals, toOrdinals);
     }
     
+    @Impure
     private int addResultToFieldDiff(IntList fromOrdinals, IntList toOrdinals) {
         int score = fromOrdinals.size() + toOrdinals.size();
         
@@ -61,6 +67,7 @@ public class HollowDiffShortcutTypeCountingNode extends HollowDiffCountingNode {
         return score;
     }
 
+    @Impure
     @Override
     public List<HollowFieldDiff> getFieldDiffs() {
         if(fieldDiff.getTotalDiffScore() > 0)

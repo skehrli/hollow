@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.consumer.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.util.stream.Collectors.joining;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -59,6 +61,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
     final String[] matchFieldPaths;
     HollowHashIndex hhi;
 
+    @Impure
     HashIndexSelect(
             HollowConsumer consumer,
             Class<T> rootType,
@@ -85,6 +88,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
         this.hhi = new HollowHashIndex(consumer.getStateEngine(), rootTypeName, selectFieldPath, matchFieldPaths);
     }
 
+    @Impure
     HashIndexSelect(
             HollowConsumer consumer,
             Class<T> rootType,
@@ -100,6 +104,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
                                 FieldPaths::createFieldPathForHashIndex));
     }
 
+    @Impure
     HashIndexSelect(
             HollowConsumer consumer,
             Class<T> rootType,
@@ -122,6 +127,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
      * @param query the query
      * @return a stream of matching records (may be empty if there are no matches)
      */
+    @Impure
     @Override
     public Stream<S> apply(Q query) {
         return findMatches(query);
@@ -133,6 +139,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
      * @param query the query
      * @return a stream of matching records (may be empty if there are no matches)
      */
+    @Impure
     public Stream<S> findMatches(Q query) {
         Object[] queryArray = matchFields.stream().map(mf -> mf.extract(query)).toArray();
 
@@ -146,9 +153,11 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
 
     // HollowConsumer.RefreshListener
 
+    @SideEffectFree
     @Override public void refreshStarted(long currentVersion, long requestedVersion) {
     }
 
+    @Impure
     @Override public void snapshotUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) {
         HollowHashIndex hhi = this.hhi;
         hhi.detachFromDeltaUpdates();
@@ -158,22 +167,27 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
         this.api = api;
     }
 
+    @Impure
     @Override public void deltaUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) {
         this.api = api;
     }
 
+    @SideEffectFree
     @Override public void blobLoaded(HollowConsumer.Blob transition) {
     }
 
+    @SideEffectFree
     @Override public void refreshSuccessful(long beforeVersion, long afterVersion, long requestedVersion) {
     }
 
+    @SideEffectFree
     @Override public void refreshFailed(
             long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause) {
     }
 
     // HollowConsumer.RefreshRegistrationListener
 
+    @Impure
     @Override public void onBeforeAddition(HollowConsumer c) {
         if (c != consumer) {
             throw new IllegalStateException("The index's consumer and the listener's consumer are not the same");
@@ -181,6 +195,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
         hhi.listenForDeltaUpdates();
     }
 
+    @Impure
     @Override public void onAfterRemoval(HollowConsumer c) {
         hhi.detachFromDeltaUpdates();
     }
@@ -197,6 +212,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
         final String selectFieldPath;
         final Class<S> selectFieldType;
 
+        @SideEffectFree
         BuilderWithSelect(
                 HollowConsumer consumer, Class<T> rootType,
                 String selectFieldPath, Class<S> selectFieldType) {
@@ -218,6 +234,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
          * @throws IllegalArgumentException if the select field path is invalid, or the select field type
          * is invalid given resolution of the select field path.
          */
+        @Impure
         public <Q> HashIndexSelect<T, S, Q> usingBean(Class<Q> queryType) {
             Objects.requireNonNull(queryType);
             return new HashIndexSelect<>(consumer, rootType, selectFieldType, selectFieldPath,
@@ -237,6 +254,7 @@ public class HashIndexSelect<T extends HollowRecord, S extends HollowRecord, Q>
          * @throws IllegalArgumentException if the select field path is invalid, or the select field type
          * is invalid given resolution of the select field path.
          */
+        @Impure
         public <Q> HashIndexSelect<T, S, Q> usingPath(String queryFieldPath, Class<Q> queryFieldType) {
             Objects.requireNonNull(queryFieldPath);
             if (queryFieldPath.isEmpty()) {

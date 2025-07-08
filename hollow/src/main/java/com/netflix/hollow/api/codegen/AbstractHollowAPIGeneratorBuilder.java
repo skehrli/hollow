@@ -15,6 +15,8 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.write.HollowWriteStateEngine;
 import com.netflix.hollow.core.write.objectmapper.HollowObjectMapper;
@@ -38,25 +40,31 @@ public abstract class AbstractHollowAPIGeneratorBuilder<B extends AbstractHollow
     protected Path destinationPath;
     protected CodeGeneratorConfig config = new CodeGeneratorConfig();
 
+    @Impure
     protected abstract G instantiateGenerator();
 
+    @Pure
     protected abstract B getBuilder();
 
+    @Impure
     public B withAPIClassname(String apiClassname) {
         this.apiClassname = apiClassname;
         return getBuilder();
     }
 
+    @Impure
     public B withPackageName(String packageName) {
         this.packageName = packageName;
         return getBuilder();
     }
 
+    @Impure
     public B withDataModel(HollowDataset dataset) {
         this.dataset = dataset;
         return getBuilder();
     }
 
+    @Impure
     public B withDataModel(Class<?> ... classes) {
         HollowWriteStateEngine writeEngine = new HollowWriteStateEngine();
         HollowObjectMapper mapper = new HollowObjectMapper(writeEngine);
@@ -67,46 +75,55 @@ public abstract class AbstractHollowAPIGeneratorBuilder<B extends AbstractHollow
         return withDataModel(writeEngine);
     }
 
+    @Impure
     public B withParameterizedTypes(Set<String> parameterizedTypes) {
         this.parameterizedTypes = parameterizedTypes;
         return getBuilder();
     }
 
+    @Impure
     public B withParameterizeAllClassNames(boolean parameterizeAllClassNames) {
         this.parameterizeAllClassNames = parameterizeAllClassNames;
         return getBuilder();
     }
 
+    @Impure
     public B withClassPostfix(String classPostfix) {
         config.setClassPostfix(classPostfix);
         return getBuilder();
     }
 
+    @Impure
     public B withGetterPrefix(String getterPrefix) {
         config.setGetterPrefix(getterPrefix);
         return getBuilder();
     }
 
+    @Impure
     public B withAggressiveSubstitutions(boolean useAggressiveSubstitutions) {
         config.setUseAggressiveSubstitutions(useAggressiveSubstitutions);
         return getBuilder();
     }
 
+    @Impure
     public B withErgonomicShortcuts() {
         this.useErgonomicShortcuts = true;
         return getBuilder();
     }
 
+    @Impure
     public B withPackageGrouping() {
         config.setUsePackageGrouping(true);
         return getBuilder();
     }
 
+    @Impure
     public B withBooleanFieldErgonomics(boolean useBooleanFieldErgonomics) {
         config.setUseBooleanFieldErgonomics(useBooleanFieldErgonomics);
         return getBuilder();
     }
 
+    @Impure
     public B reservePrimaryKeyIndexForTypeWithPrimaryKey(boolean reservePrimaryKeyIndexForTypeWithPrimaryKey) {
         config.setReservePrimaryKeyIndexForTypeWithPrimaryKey(reservePrimaryKeyIndexForTypeWithPrimaryKey);
         return getBuilder();
@@ -116,25 +133,30 @@ public abstract class AbstractHollowAPIGeneratorBuilder<B extends AbstractHollow
      * NOTE: Have to be enabled with withErgonomicShortcuts
      * @return this builder
      */
+    @Impure
     public B withRestrictApiToFieldType() {
         config.setRestrictApiToFieldType(true);
         return getBuilder();
     }
 
+    @Impure
     public B withHollowPrimitiveTypes(boolean useHollowPrimitiveTypes) {
         config.setUseHollowPrimitiveTypes(useHollowPrimitiveTypes);
         return getBuilder();
     }
 
+    @Impure
     public B withVerboseToString(boolean useVerboseToString) {
         config.setUseVerboseToString(useVerboseToString);
         return getBuilder();
     }
 
+    @Impure
     public B withDestination(String destinationPath) {
         return withDestination(Paths.get(destinationPath));
     }
 
+    @Impure
     public B withDestination(Path destinationPath) {
         this.destinationPath = destinationPath;
         return getBuilder();
@@ -145,10 +167,12 @@ public abstract class AbstractHollowAPIGeneratorBuilder<B extends AbstractHollow
      * @param metaInfoPath location for meta info
      * @return this builder
      */
+    @Impure
     public B withMetaInfo(String metaInfoPath) {
         return withMetaInfo(Paths.get(metaInfoPath));
     }
 
+    @Impure
     public B withMetaInfo(Path metaInfoPath) {
         config.setMetaInfoPath(metaInfoPath);
         return getBuilder();
@@ -158,11 +182,13 @@ public abstract class AbstractHollowAPIGeneratorBuilder<B extends AbstractHollow
      * Enable @Generated annotation in the generated API
      * @return
      */
+    @Impure
     public B withGeneratedAnnotation() {
         config.setUseGeneratedAnnotation(true);
         return getBuilder();
     }
 
+    @Impure
     public G build() {
         if (apiClassname == null)
             throw new IllegalStateException("Please specify an API classname (.withAPIClassname()) before calling .build()");

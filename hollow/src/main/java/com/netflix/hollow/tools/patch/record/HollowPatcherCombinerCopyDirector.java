@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.patch.record;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.tools.combine.HollowCombinerCopyDirector;
@@ -30,6 +32,7 @@ public class HollowPatcherCombinerCopyDirector implements HollowCombinerCopyDire
     private final Map<String, BitSet> baseMatchesClosure;
     private final Map<String, BitSet> patchFromMatchesClosure;
 
+    @SideEffectFree
     public HollowPatcherCombinerCopyDirector(HollowReadStateEngine base, Map<String, BitSet> baseMatchesClosure, HollowReadStateEngine patchFrom, Map<String, BitSet> patchFromMatchesClosure) {
         this.base = base;
         this.patchFrom = patchFrom;
@@ -37,6 +40,7 @@ public class HollowPatcherCombinerCopyDirector implements HollowCombinerCopyDire
         this.patchFromMatchesClosure = patchFromMatchesClosure;
     }
 
+    @Impure
     @Override
     public boolean shouldCopy(HollowTypeReadState typeState, int ordinal) {
         if(typeState.getStateEngine() == base) {

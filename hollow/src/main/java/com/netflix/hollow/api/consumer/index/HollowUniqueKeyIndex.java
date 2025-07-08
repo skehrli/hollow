@@ -14,7 +14,9 @@
  *     limitations under the License.
  */
 package com.netflix.hollow.api.consumer.index;
+import org.checkerframework.dataflow.qual.Pure;
 
 public interface HollowUniqueKeyIndex<T> {
+    @Pure
     T findMatch(Object... keys);
 }

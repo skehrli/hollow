@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.sampling;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.filter.HollowFilterConfig;
 import com.netflix.hollow.core.read.filter.HollowFilterConfig.ObjectFilterConfig;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -35,6 +37,7 @@ public class HollowObjectSampler implements HollowSampler {
     private final HollowSamplingDirector samplingDirectors[];
     private boolean isSamplingDisabled;
 
+    @Impure
     public HollowObjectSampler(HollowObjectSchema schema, HollowSamplingDirector director) {
         this.typeName = schema.getName();
         this.sampleCounts = new long[schema.numFields()];
@@ -50,6 +53,7 @@ public class HollowObjectSampler implements HollowSampler {
         this.samplingDirectors = samplingDirectors;
     }
 
+    @Impure
     public void setSamplingDirector(HollowSamplingDirector director) {
         if(!"".equals(typeName)) {
             this.isSamplingDisabled = director == DisabledSamplingDirector.INSTANCE;
@@ -57,6 +61,7 @@ public class HollowObjectSampler implements HollowSampler {
         }
     }
 
+    @Impure
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         ObjectFilterConfig typeConfig = fieldSpec.getObjectTypeConfig(typeName);
@@ -69,17 +74,20 @@ public class HollowObjectSampler implements HollowSampler {
         }
     }
 
+    @Impure
     public void setUpdateThread(Thread t) {
         for(int i=0;i<samplingDirectors.length;i++)
             samplingDirectors[i].setUpdateThread(t);
     }
 
+    @Impure
     public void recordFieldAccess(int fieldPosition) {
         if (this.isSamplingDisabled) return;
         if(samplingDirectors[fieldPosition].shouldRecord())
             sampleCounts[fieldPosition]++;
     }
 
+    @Pure
     public boolean hasSampleResults() {
         for(int i=0;i<sampleCounts.length;i++)
             if(sampleCounts[i] > 0)
@@ -87,6 +95,7 @@ public class HollowObjectSampler implements HollowSampler {
         return false;
     }
 
+    @Impure
     @Override
     public Collection<SampleResult> getSampleResults() {
         List<SampleResult> sampleResults = new ArrayList<SampleResult>(sampleCounts.length);
@@ -98,6 +107,7 @@ public class HollowObjectSampler implements HollowSampler {
         return sampleResults;
     }
 
+    @Impure
     @Override
     public void reset() {
         Arrays.fill(sampleCounts, 0L);

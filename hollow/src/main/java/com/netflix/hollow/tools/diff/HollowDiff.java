@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.diff;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -62,6 +65,7 @@ public class HollowDiff {
      * @param from the "from" state
      * @param to the "to" state
      */
+    @Impure
     public HollowDiff(HollowReadStateEngine from, HollowReadStateEngine to) {
         this(from, to, true, false);
     }
@@ -75,6 +79,7 @@ public class HollowDiff {
      * @param to the "to" state
      * @param isAutoDiscoverTypeDiff If true, all OBJECT types with a defined PrimaryKey will be configured to be diffed.
      */
+    @Impure
     public HollowDiff(HollowReadStateEngine from, HollowReadStateEngine to, boolean isAutoDiscoverTypeDiff) {
         this(from, to, isAutoDiscoverTypeDiff, false);
     }
@@ -89,6 +94,7 @@ public class HollowDiff {
      * @param isAutoDiscoverTypeDiff If true, all OBJECT types with a defined PrimaryKey will be configured to be diffed.
      * @param isIncludeNonPrimaryKeyTypes If true, all OBJECT types without PrimaryKey will also be configured to be diffed.
      */
+    @Impure
     public HollowDiff(HollowReadStateEngine from, HollowReadStateEngine to, boolean isAutoDiscoverTypeDiff, boolean isIncludeNonPrimaryKeyTypes) {
         this.fromStateEngine = from;
         this.toStateEngine = to;
@@ -122,6 +128,7 @@ public class HollowDiff {
      * @param primaryKeyPaths the path(s) to the field(s) which comprise the type's primary key
      * @return the diff type
      */
+    @Impure
     public HollowTypeDiff addTypeDiff(String type, String... primaryKeyPaths) {
         HollowTypeDiff typeDiff = new HollowTypeDiff(this, type, primaryKeyPaths);
         if(typeDiff.hasAnyData())
@@ -129,6 +136,7 @@ public class HollowDiff {
         return typeDiff;
     }
 
+    @SideEffectFree
     public List<HollowTypeDiff> getTypeDiffs() {
         return new ArrayList<>(typeDiffs.values());
     }
@@ -138,14 +146,17 @@ public class HollowDiff {
      * @param type the type name
      * @return the diff type
      */
+    @Pure
     public HollowTypeDiff getTypeDiff(String type) {
         return typeDiffs.get(type);
     }
 
+    @Pure
     public HollowReadStateEngine getFromStateEngine() {
         return fromStateEngine;
     }
 
+    @Pure
     public HollowReadStateEngine getToStateEngine() {
         return toStateEngine;
     }
@@ -153,6 +164,7 @@ public class HollowDiff {
     /**
      * Run the diff
      */
+    @Impure
     public void calculateDiffs() {
         long startTime = System.currentTimeMillis();
 
@@ -167,10 +179,12 @@ public class HollowDiff {
         }
     }
 
+    @Pure
     public DiffEqualityMapping getEqualityMapping() {
         return equalityMapping;
     }
 
+    @Impure
     private void prepareForDiffCalculation() {
         SimultaneousExecutor executor = new SimultaneousExecutor(1 + typeDiffs.size(), getClass(), "prepare");
 

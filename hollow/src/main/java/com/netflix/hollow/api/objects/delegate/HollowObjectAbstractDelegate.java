@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
 import com.netflix.hollow.core.read.missing.MissingDataHandler;
 
@@ -26,6 +27,7 @@ import com.netflix.hollow.core.read.missing.MissingDataHandler;
  */
 public abstract class HollowObjectAbstractDelegate implements HollowObjectDelegate {
 
+    @Impure
     @Override
     public boolean isNull(int ordinal, String fieldName) {
         try {
@@ -41,6 +43,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         }
     }
 
+    @Impure
     @Override
     public boolean getBoolean(int ordinal, String fieldName) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -53,6 +56,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return bool == null ? false : bool.booleanValue();
     }
 
+    @Impure
     @Override
     public int getOrdinal(int ordinal, String fieldName) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -64,6 +68,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return dataAccess.readOrdinal(ordinal, fieldIndex);
     }
 
+    @Impure
     @Override
     public int getInt(int ordinal, String fieldName) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -75,6 +80,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return dataAccess.readInt(ordinal, fieldIndex);
     }
 
+    @Impure
     @Override
     public long getLong(int ordinal, String fieldName) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -86,6 +92,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return dataAccess.readLong(ordinal, fieldIndex);
     }
 
+    @Impure
     @Override
     public float getFloat(int ordinal, String fieldName) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -97,6 +104,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return dataAccess.readFloat(ordinal, fieldIndex);
     }
 
+    @Impure
     @Override
     public double getDouble(int ordinal, String fieldName) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -108,6 +116,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return dataAccess.readDouble(ordinal, fieldIndex);
     }
 
+    @Impure
     @Override
     public String getString(int ordinal, String fieldName) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -119,6 +128,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return dataAccess.readString(ordinal, fieldIndex);
     }
 
+    @Impure
     @Override
     public boolean isStringFieldEqual(int ordinal, String fieldName, String testValue) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -131,6 +141,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return dataAccess.isStringFieldEqual(ordinal, fieldIndex, testValue);
     }
 
+    @Impure
     @Override
     public byte[] getBytes(int ordinal, String fieldName) {
         HollowObjectTypeDataAccess dataAccess = getTypeDataAccess();
@@ -143,6 +154,7 @@ public abstract class HollowObjectAbstractDelegate implements HollowObjectDelega
         return dataAccess.readBytes(ordinal, fieldIndex);
     }
 
+    @Impure
     private MissingDataHandler missingDataHandler() {
         return getTypeDataAccess().getDataAccess().getMissingDataHandler();
     }

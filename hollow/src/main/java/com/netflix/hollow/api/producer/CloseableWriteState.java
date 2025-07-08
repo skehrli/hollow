@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.write.HollowWriteStateEngine;
 import com.netflix.hollow.core.write.objectmapper.HollowObjectMapper;
 
@@ -25,12 +27,14 @@ final class CloseableWriteState implements HollowProducer.WriteState, AutoClosea
     private final HollowProducer.ReadState priorReadState;
     private volatile boolean closed;
 
+    @SideEffectFree
     CloseableWriteState(long version, HollowObjectMapper objectMapper, HollowProducer.ReadState priorReadState) {
         this.version = version;
         this.objectMapper = objectMapper;
         this.priorReadState = priorReadState;
     }
 
+    @Impure
     @Override
     public int add(Object o) throws IllegalStateException {
         ensureNotClosed();
@@ -38,6 +42,8 @@ final class CloseableWriteState implements HollowProducer.WriteState, AutoClosea
         return objectMapper.add(o);
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public HollowObjectMapper getObjectMapper() throws IllegalStateException {
         ensureNotClosed();
@@ -45,6 +51,7 @@ final class CloseableWriteState implements HollowProducer.WriteState, AutoClosea
         return objectMapper;
     }
 
+    @Impure
     @Override
     public HollowWriteStateEngine getStateEngine() throws IllegalStateException {
         ensureNotClosed();
@@ -52,6 +59,8 @@ final class CloseableWriteState implements HollowProducer.WriteState, AutoClosea
         return objectMapper.getStateEngine();
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public long getVersion() throws IllegalStateException {
         ensureNotClosed();
@@ -59,12 +68,15 @@ final class CloseableWriteState implements HollowProducer.WriteState, AutoClosea
         return version;
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public HollowProducer.ReadState getPriorState() throws IllegalStateException {
         ensureNotClosed();
         return priorReadState;
     }
 
+    @SideEffectFree
     private void ensureNotClosed() {
         if (closed) {
             throw new IllegalStateException(
@@ -73,6 +85,7 @@ final class CloseableWriteState implements HollowProducer.WriteState, AutoClosea
         }
     }
 
+    @Impure
     @Override
     public void close() {
         closed = true;

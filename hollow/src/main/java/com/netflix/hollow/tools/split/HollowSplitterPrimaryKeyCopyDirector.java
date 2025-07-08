@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.split;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.index.key.HollowPrimaryKeyValueDeriver;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -32,6 +35,7 @@ public class HollowSplitterPrimaryKeyCopyDirector implements HollowSplitterCopyD
     private final List<String> topLevelTypes;
     private final Map<String, HollowPrimaryKeyValueDeriver> primaryKeyDeriverByType;
     
+    @Impure
     public HollowSplitterPrimaryKeyCopyDirector(HollowReadStateEngine stateEngine, int numShards, PrimaryKey... keys) {
         this.numShards = numShards;
         this.topLevelTypes = new ArrayList<String>(keys.length);
@@ -44,20 +48,24 @@ public class HollowSplitterPrimaryKeyCopyDirector implements HollowSplitterCopyD
         }
     }
     
+    @Impure
     public void addReplicatedTypes(String... replicatedTypes) {
         topLevelTypes.addAll(Arrays.asList(replicatedTypes));
     }
 
+    @SideEffectFree
     @Override
     public String[] getTopLevelTypes() {
         return topLevelTypes.toArray(new String[topLevelTypes.size()]);
     }
 
+    @Pure
     @Override
     public int getNumShards() {
         return numShards;
     }
 
+    @Impure
     @Override
     public int getShard(HollowTypeReadState topLevelType, int ordinal) {
         HollowPrimaryKeyValueDeriver deriver = primaryKeyDeriverByType.get(topLevelType.getSchema().getName());
@@ -70,6 +78,7 @@ public class HollowSplitterPrimaryKeyCopyDirector implements HollowSplitterCopyD
         return hashKey(topLevelType.getSchema().getName(), key) % numShards;
     }
     
+    @Pure
     public int hashKey(String type, Object[] key) {
         return Arrays.hashCode(key);
     }

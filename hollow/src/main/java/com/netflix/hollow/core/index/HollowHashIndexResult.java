@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 import java.util.Spliterator;
@@ -35,6 +38,8 @@ public class HollowHashIndexResult {
     private final int selectTableBuckets;
     private final int selectBucketMask;
 
+    @SideEffectFree
+    @Impure
     HollowHashIndexResult(HollowHashIndex.HollowHashIndexState hashIndexState, long selectTableStartPointer, int selectTableSize) {
         this.hashIndexState = hashIndexState;
         this.selectTableStartPointer = selectTableStartPointer;
@@ -46,6 +51,7 @@ public class HollowHashIndexResult {
     /**
      * @return the number of matched records
      */
+    @Pure
     public int numResults() {
         return selectTableSize;
     }
@@ -54,6 +60,7 @@ public class HollowHashIndexResult {
      * @param value the ordinal
      * @return {@code true} if the ordinal is matched, otherwise {@code false}
      */
+    @Impure
     public boolean contains(int value) {
         int hash = HashCodes.hashInt(value);
         int bucket = hash & selectBucketMask;
@@ -74,11 +81,13 @@ public class HollowHashIndexResult {
      * @return A {@link HollowOrdinalIterator} over the matched ordinals.  The ordinals may be used with a generated API or the Generic Object API to inspect
      * the matched records.
      */
+    @Impure
     public HollowOrdinalIterator iterator() {
         return new HollowOrdinalIterator() {
             final long endBucket = selectTableStartPointer + selectTableBuckets;
             long currentBucket = selectTableStartPointer;
 
+            @Impure
             @Override
             public int next() {
                 while(currentBucket < endBucket) {
@@ -100,17 +109,20 @@ public class HollowHashIndexResult {
      *
      * @return an {@code IntStream} of matching ordinals
      */
+    @Impure
     public IntStream stream() {
         Spliterator.OfInt si = new Spliterator.OfInt() {
             final long endBucket = selectTableStartPointer + selectTableBuckets;
             long currentBucket = selectTableStartPointer;
 
+            @Pure
             @Override
             public OfInt trySplit() {
                 // @@@ Supporting splitting and therefore enable parallelism
                 return null;
             }
 
+            @Impure
             @Override
             public boolean tryAdvance(IntConsumer action) {
                 while (currentBucket < endBucket) {
@@ -125,12 +137,14 @@ public class HollowHashIndexResult {
                 return false;
             }
 
+            @Pure
             @Override
             public long estimateSize() {
                 // @@@
                 return 0;
             }
 
+            @Pure
             @Override
             public int characteristics() {
                 // @@@ ordinals are distinct?

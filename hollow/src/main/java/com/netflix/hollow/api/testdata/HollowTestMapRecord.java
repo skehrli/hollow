@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.api.testdata;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.mustcall.qual.Owning;
 import com.netflix.hollow.core.schema.HollowSchema;
 import com.netflix.hollow.core.write.HollowMapWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteRecord;
@@ -27,19 +31,24 @@ public abstract class HollowTestMapRecord<T> extends HollowTestRecord<T> {
 
     private final List<Entry<?>> entries = new ArrayList<>();
 
-    protected HollowTestMapRecord(T parent) {
+    @SideEffectFree
+    @Impure
+    protected HollowTestMapRecord(@Owning T parent) {
         super(parent);
     }
     
+    @Impure
     protected void addEntry(Entry<? extends HollowTestRecord<?>> entry) {
         entries.add(entry);
     }
 
+    @Pure
     @SuppressWarnings({ "unchecked", "hiding" })
     public <T> Entry<T> getEntry(int idx) {
         return (Entry<T>) entries.get(idx);
     }
     
+    @Impure
     public HollowWriteRecord toWriteRecord(HollowWriteStateEngine writeEngine) {
         HollowMapWriteRecord rec = new HollowMapWriteRecord();
         for(Entry<?> entry : entries) {
@@ -55,33 +64,41 @@ public abstract class HollowTestMapRecord<T> extends HollowTestRecord<T> {
         private HollowTestRecord<?> key;
         private HollowTestRecord<?> value;
         
-        public Entry(T parent) {
+        @SideEffectFree
+        @Impure
+        public Entry(@Owning T parent) {
             super(parent);
         }
         
+        @Impure
         protected void setKey(HollowTestRecord<?> key) {
             this.key = key;
         }
         
+        @Impure
         protected void setValue(HollowTestRecord<?> value) {
             this.value = value;
         }
         
+        @Pure
         @SuppressWarnings({ "hiding", "unchecked" })
         public <T extends HollowTestRecord<?>> T getKey() {
             return (T)key;
         }
 
+        @Pure
         @SuppressWarnings({ "hiding", "unchecked" })
         public <T extends HollowTestRecord<?>> T getValue() {
             return (T)value;
         }
 
+        @Pure
         @Override
         protected HollowSchema getSchema() {
             throw new UnsupportedOperationException();
         }
 
+        @Pure
         @Override
         protected HollowWriteRecord toWriteRecord(HollowWriteStateEngine writeEngine) {
             throw new UnsupportedOperationException();

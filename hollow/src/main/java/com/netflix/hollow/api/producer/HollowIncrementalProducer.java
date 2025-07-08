@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.api.producer.HollowIncrementalCyclePopulator.AddIfAbsent;
 import static com.netflix.hollow.api.producer.HollowIncrementalCyclePopulator.DELETE_RECORD;
 
@@ -53,15 +56,18 @@ public class HollowIncrementalProducer {
     private final double threadsPerCpu;
     private long lastSucessfulCycle;
 
+    @Impure
     public HollowIncrementalProducer(HollowProducer producer) {
         this(producer, 1.0d, null, null, new ArrayList<IncrementalCycleListener>());
     }
 
     //For backwards compatible. TODO: @Deprecated ??
+    @Impure
     public HollowIncrementalProducer(HollowProducer producer, double threadsPerCpu) {
         this(producer, threadsPerCpu, null, null, new ArrayList<IncrementalCycleListener>());
     }
 
+    @Impure
     protected HollowIncrementalProducer(HollowProducer producer, double threadsPerCpu, HollowConsumer.AnnouncementWatcher announcementWatcher, HollowConsumer.BlobRetriever blobRetriever, List<IncrementalCycleListener> listeners, Class<?>... classes) {
         this.producer = producer;
         this.mutations = new ConcurrentHashMap<RecordPrimaryKey, Object>();
@@ -80,6 +86,7 @@ public class HollowIncrementalProducer {
     /**
      * Initializes the data model and restores from existing state.
      */
+    @Impure
     public void restoreFromLastState() {
         producer.initializeDataModel(dataModel);
         long latestAnnouncedVersion = announcementWatcher.getLatestVersion();
@@ -90,110 +97,134 @@ public class HollowIncrementalProducer {
         restore(latestAnnouncedVersion, blobRetriever);
     }
 
+    @Impure
     public void restore(long versionDesired, BlobRetriever blobRetriever) {
         producer.hardRestore(versionDesired, blobRetriever);
     }
 
+    @Impure
     public void addOrModify(Object obj) {
         RecordPrimaryKey pk = extractRecordPrimaryKey(obj);
         mutations.put(pk, obj);
     }
     
+    @Impure
     public void addIfAbsent(Object obj) {
         RecordPrimaryKey pk = extractRecordPrimaryKey(obj);
         mutations.putIfAbsent(pk, new AddIfAbsent(obj));
     }
 
+    @Impure
     public void addOrModify(Collection<Object> objList) {
         for(Object obj : objList) {
             addOrModify(obj);
         }
     }
     
+    @Impure
     public void addOrModify(FlatRecord flatRecord) {
         RecordPrimaryKey pk = flatRecord.getRecordPrimaryKey();
         mutations.put(pk, flatRecord);
     }
     
+    @Impure
     public void addIfAbsent(FlatRecord flatRecord) {
         RecordPrimaryKey pk = flatRecord.getRecordPrimaryKey();
         mutations.putIfAbsent(pk, new AddIfAbsent(flatRecord));
     }
 
+    @Impure
     public void addOrModifyInParallel(Collection<Object> objList) {
         executeInParallel(objList, "add-or-modify", this::addOrModify);
     }
 
+    @Impure
     public void delete(Object obj) {
         RecordPrimaryKey pk = extractRecordPrimaryKey(obj);
         delete(pk);
     }
 
+    @Impure
     public void delete(Collection<Object> objList) {
         for(Object obj : objList) {
             delete(obj);
         }
     }
 
+    @Impure
     public void deleteInParallel(Collection<Object> objList) {
         executeInParallel(objList, "delete", this::delete);
     }
 
+    @Impure
     public void discard(Object obj) {
         RecordPrimaryKey pk = extractRecordPrimaryKey(obj);
         discard(pk);
     }
 
+    @Impure
     public void discard(Collection<Object> objList) {
         for(Object obj : objList) {
             discard(obj);
         }
     }
 
+    @Impure
     public void discardInParallel(Collection<Object> objList) {
         executeInParallel(objList, "discard", this::discard);
     }
 
+    @Impure
     public void delete(RecordPrimaryKey key) {
         mutations.put(key, DELETE_RECORD);
     }
 
+    @Impure
     public void discard(RecordPrimaryKey key) {
         mutations.remove(key);
     }
 
+    @Impure
     public void clearChanges() {
         this.mutations.clear();
     }
 
+    @Pure
     public boolean hasChanges() {
         return this.mutations.size() > 0;
     }
 
+    @Impure
     public void addCycleMetadata(String key, Object value) {
         this.cycleMetadata.put(key, value);
     }
 
+    @Impure
     public void addAllCycleMetadata(Map<String, Object> metadata) {
         this.cycleMetadata.putAll(metadata);
     }
 
+    @Impure
     public void removeFromCycleMetadata(String key) {
         this.cycleMetadata.remove(key);
     }
 
+    @Impure
     public void clearCycleMetadata() {
         this.cycleMetadata.clear();
     }
 
+    @Pure
     public boolean hasMetadata() {
         return !this.cycleMetadata.isEmpty();
     }
 
+    @Impure
     public void addListener(IncrementalCycleListener listener) {
         this.listeners.add(listener);
     }
 
+    @Impure
     public void removeListener(IncrementalCycleListener listener) {
         this.listeners.remove(listener);
     }
@@ -204,6 +235,7 @@ public class HollowIncrementalProducer {
      * @return the version of the cycle if successful, otherwise the {@link #FAILED_VERSION}
      * @since 2.9.9
      */
+    @Impure
     public long runCycle() {
         long recordsRemoved = countRecordsToRemove();
         long recordsAddedOrModified = this.mutations.values().size() - recordsRemoved;
@@ -225,6 +257,7 @@ public class HollowIncrementalProducer {
         }
     }
 
+    @SideEffectFree
     private long countRecordsToRemove() {
         long recordsToRemove = 0L;
         Collection<Object> records = mutations.values();
@@ -234,11 +267,13 @@ public class HollowIncrementalProducer {
         return recordsToRemove;
     }
 
+    @Impure
     private RecordPrimaryKey extractRecordPrimaryKey(Object obj) {
         return producer.getObjectMapper().extractPrimaryKey(obj);
     }
 
 
+    @Impure
     public static HollowIncrementalProducer.Builder withProducer(HollowProducer hollowProducer) {
         Builder builder = new Builder();
         return builder.withProducer(hollowProducer);
@@ -253,47 +288,56 @@ public class HollowIncrementalProducer {
         protected Class<?>[] dataModel;
         protected List<IncrementalCycleListener> listeners = new ArrayList<IncrementalCycleListener>();
 
+        @Impure
         public B withProducer(HollowProducer producer) {
             this.producer = producer;
             return (B) this;
         }
 
+        @Impure
         public B withThreadsPerCpu(double threadsPerCpu) {
             this.threadsPerCpu = threadsPerCpu;
             return (B) this;
         }
 
+        @Impure
         public B withAnnouncementWatcher(HollowConsumer.AnnouncementWatcher announcementWatcher) {
             this.announcementWatcher = announcementWatcher;
             return (B) this;
         }
 
+        @Impure
         public B withBlobRetriever(HollowConsumer.BlobRetriever blobRetriever) {
             this.blobRetriever = blobRetriever;
             return (B) this;
         }
 
+        @Impure
         public B withDataModel(Class<?>... classes) {
             this.dataModel = classes;
             return (B) this;
         }
 
+        @Impure
         public B withListener(IncrementalCycleListener listener) {
             this.listeners.add(listener);
             return (B) this;
         }
 
+        @Impure
         public B withListeners(IncrementalCycleListener... listeners) {
             for (IncrementalCycleListener listener : listeners)
                 this.listeners.add(listener);
             return (B) this;
         }
 
+        @SideEffectFree
         protected void checkArguments() {
             if (producer == null)
                 throw new IllegalArgumentException("HollowProducer must be specified.");
         }
 
+        @Impure
         public HollowIncrementalProducer build() {
             checkArguments();
             return new HollowIncrementalProducer(producer, threadsPerCpu, announcementWatcher, blobRetriever, listeners, dataModel);
@@ -308,6 +352,7 @@ public class HollowIncrementalProducer {
      * @param objList
      * @param callback
      */
+    @Impure
     private void executeInParallel(Collection<Object> objList, String description, final Callback callback) {
         SimultaneousExecutor executor = new SimultaneousExecutor(threadsPerCpu, getClass(), description);
         for(final Object obj : objList) {
@@ -322,6 +367,7 @@ public class HollowIncrementalProducer {
     }
 
     private interface Callback {
+        @SideEffectFree
         void call(Object obj);
     }
 }

@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.mustcall.qual.MustCallAlias;
 import static com.netflix.hollow.api.consumer.HollowConsumer.AnnouncementWatcher.NO_ANNOUNCEMENT_AVAILABLE;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -118,6 +122,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * and directly defers to them (in effect explicit bridge methods).
      */
 
+    @Impure
     @Deprecated
     public HollowProducer(
             Publisher publisher,
@@ -128,6 +133,7 @@ public class HollowProducer extends AbstractHollowProducer {
     // The only constructor should be that which accepts a builder
     // This ensures that if the builder modified to include new state that
     // extended builders will not require modification to pass on that new state
+    @Impure
     protected HollowProducer(Builder<?> b) {
         super(b);
     }
@@ -136,6 +142,7 @@ public class HollowProducer extends AbstractHollowProducer {
     /**
      * @return the metrics for this producer
      */
+    @Impure
     @Override
     public HollowProducerMetrics getMetrics() {
         return super.getMetrics();
@@ -159,6 +166,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * @throws IllegalArgumentException if {@code classes} is empty
      * @see #restore(long, HollowConsumer.BlobRetriever)
      */
+    @Impure
     @Override
     public void initializeDataModel(Class<?>... classes) {
         super.initializeDataModel(classes);
@@ -182,6 +190,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * @throws IllegalArgumentException if {@code schemas} is empty
      * @see #restore(long, HollowConsumer.BlobRetriever)
      */
+    @Impure
     @Override
     public void initializeDataModel(HollowSchema... schemas) {
         super.initializeDataModel(schemas);
@@ -202,16 +211,19 @@ public class HollowProducer extends AbstractHollowProducer {
      * @throws IllegalStateException if the producer's data model has not been initialized
      * @see #initializeDataModel(Class[])
      */
+    @Impure
     @Override
     public HollowProducer.ReadState restore(long versionDesired, HollowConsumer.BlobRetriever blobRetriever) {
         return super.restore(versionDesired, blobRetriever);
     }
 
+    @Impure
     @Override
     public HollowWriteStateEngine getWriteEngine() {
         return super.getWriteEngine();
     }
 
+    @Impure
     @Override
     public HollowObjectMapper getObjectMapper() {
         return super.getObjectMapper();
@@ -224,6 +236,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * @param doEnable true if enable primary producer, if false
      * @return true if the intended action was successful
      */
+    @Impure
     @Override
     public boolean enablePrimaryProducer(boolean doEnable) {
         return super.enablePrimaryProducer(doEnable);
@@ -239,6 +252,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * @throws RuntimeException if the cycle failed
      */
     // @@@ Should this be marked as synchronized?
+    @Impure
     public long runCycle(HollowProducer.Populator task) {
         return runCycle(null, task);
     }
@@ -251,6 +265,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * @param config specifies what criteria to use to determine whether a compaction is necessary
      * @return the version identifier of the produced state, or AnnouncementWatcher.NO_ANNOUNCEMENT_AVAILABLE if compaction was unnecessary.
      */
+    @Impure
     public long runCompactionCycle(HollowCompactor.CompactionConfig config) {
         if (config != null && readStates.hasCurrent()) {
             final HollowCompactor compactor = new HollowCompactor(getWriteEngine(),
@@ -274,6 +289,7 @@ public class HollowProducer extends AbstractHollowProducer {
      *
      * @param listener the listener to add
      */
+    @Impure
     @Override
     public void addListener(HollowProducerListener listener) {
         super.addListener(listener);
@@ -290,6 +306,7 @@ public class HollowProducer extends AbstractHollowProducer {
      *
      * @param listener the listener to add
      */
+    @Impure
     @Override
     public void addListener(HollowProducerEventListener listener) {
         super.addListener(listener);
@@ -306,6 +323,7 @@ public class HollowProducer extends AbstractHollowProducer {
      *
      * @param listener the listener to remove
      */
+    @Impure
     @Override
     public void removeListener(HollowProducerListener listener) {
         super.removeListener(listener);
@@ -322,6 +340,7 @@ public class HollowProducer extends AbstractHollowProducer {
      *
      * @param listener the listener to remove
      */
+    @Impure
     @Override
     public void removeListener(HollowProducerEventListener listener) {
         super.removeListener(listener);
@@ -330,11 +349,13 @@ public class HollowProducer extends AbstractHollowProducer {
     public static final class ChecksumValidationException extends IllegalStateException {
         private static final long serialVersionUID = -4399719849669674206L;
 
+        @Impure
         ChecksumValidationException(Blob.Type blobType, HollowChecksum applied, HollowChecksum pending) {
             super(blobType.name() + " has invalid checksums: " + differences(applied, pending));
         }
 
         // symmetric difference between the 2 sets
+        @Impure
         static String differences(HollowChecksum applied, HollowChecksum pending) {
             List<HollowChecksum.TypeChecksum> uniqueToApplied = new ArrayList<>(applied.getSortedTypeChecksums());
             List<HollowChecksum.TypeChecksum> uniqueToPending = new ArrayList<>(pending.getSortedTypeChecksums());
@@ -348,6 +369,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * */
     public static final class NotPrimaryMidCycleException extends IllegalStateException {
 
+        @SideEffectFree
         NotPrimaryMidCycleException(String message) {
             super(message);
         }
@@ -361,6 +383,7 @@ public class HollowProducer extends AbstractHollowProducer {
          *
          * @return a new state version
          */
+        @Impure
         long mint();
     }
 
@@ -413,6 +436,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @param newState the new state to add objects to
          * @throws Exception if population fails.  If failure occurs the data from the previous cycle is retained.
          */
+        @Impure
         void populate(HollowProducer.WriteState newState) throws Exception;
     }
 
@@ -430,6 +454,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @throws IllegalStateException if called after the populate stage has completed (see
          * {@link Populator} for details on the contract)
          */
+        @Impure
         int add(Object o) throws IllegalStateException;
 
         /**
@@ -444,6 +469,8 @@ public class HollowProducer extends AbstractHollowProducer {
          * @throws IllegalStateException if called after the populate stage has completed (see
          * {@link Populator} for details on the contract)
          */
+        @SideEffectFree
+        @Impure
         HollowObjectMapper getObjectMapper() throws IllegalStateException;
 
         /**
@@ -458,6 +485,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @throws IllegalStateException if called after the populate stage has completed (see
          * {@link Populator} for details on the contract)
          */
+        @Impure
         HollowWriteStateEngine getStateEngine() throws IllegalStateException;
 
         /**
@@ -471,6 +499,8 @@ public class HollowProducer extends AbstractHollowProducer {
          * @throws IllegalStateException if called after the populate stage has completed (see
          * {@link Populator} for details on the contract)
          */
+        @SideEffectFree
+        @Impure
         ReadState getPriorState() throws IllegalStateException;
 
         /**
@@ -482,6 +512,8 @@ public class HollowProducer extends AbstractHollowProducer {
          * @throws IllegalStateException if called after the populate stage has completed (see
          * {@link Populator} for details on the contract)
          */
+        @SideEffectFree
+        @Impure
         long getVersion() throws IllegalStateException;
     }
 
@@ -494,6 +526,7 @@ public class HollowProducer extends AbstractHollowProducer {
          *
          * @return the version
          */
+        @Pure
         long getVersion();
 
         /**
@@ -501,6 +534,7 @@ public class HollowProducer extends AbstractHollowProducer {
          *
          * @return the read state engine
          */
+        @Pure
         HollowReadStateEngine getStateEngine();
     }
 
@@ -514,6 +548,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @param version the blob version
          * @return a {@link HollowProducer.Blob} representing a snapshot for the {@code version}
          */
+        @Impure
         HollowProducer.Blob openSnapshot(long version);
 
         /**
@@ -523,6 +558,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @param version the blob version
          * @return a {@link HollowProducer.HeaderBlob} representing a header for the {@code version}
          */
+        @Impure
         HollowProducer.HeaderBlob openHeader(long version);
 
         /**
@@ -537,6 +573,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @param toVersion the data state this delta will transition to
          * @return a {@link HollowProducer.Blob} representing a snapshot for the {@code version}
          */
+        @Impure
         HollowProducer.Blob openDelta(long fromVersion, long toVersion);
 
         /**
@@ -551,18 +588,23 @@ public class HollowProducer extends AbstractHollowProducer {
          * @param toVersion version in the delta chain immediately before {@code fromVersion}
          * @return a {@link HollowProducer.Blob} representing a snapshot for the {@code version}
          */
+        @Impure
         HollowProducer.Blob openReverseDelta(long fromVersion, long toVersion);
     }
 
     public interface BlobCompressor {
         BlobCompressor NO_COMPRESSION = new BlobCompressor() {
+            @MustCallAlias
+            @Pure
             @Override
-            public OutputStream compress(OutputStream os) {
+            public OutputStream compress(@MustCallAlias OutputStream os) {
                 return os;
             }
 
+            @MustCallAlias
+            @Pure
             @Override
-            public InputStream decompress(InputStream is) {
+            public InputStream decompress(@MustCallAlias InputStream is) {
                 return is;
             }
         };
@@ -573,6 +615,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @param is the uncompressed output stream
          * @return the compressed output stream
          */
+        @Pure
         OutputStream compress(OutputStream is);
 
         /**
@@ -581,6 +624,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @param is the compressed input stream
          * @return the uncompressed input stream
          */
+        @Pure
         InputStream decompress(InputStream is);
     }
 
@@ -597,6 +641,7 @@ public class HollowProducer extends AbstractHollowProducer {
          *
          * @param blob the blob to publish
          */
+        @Impure
         @Deprecated
         default void publish(HollowProducer.Blob blob) {
             publish((PublishArtifact)blob);
@@ -612,6 +657,7 @@ public class HollowProducer extends AbstractHollowProducer {
          *
          * @param publishArtifact the blob to publish
          */
+        @Impure
         default void publish(HollowProducer.PublishArtifact publishArtifact) {
             if (publishArtifact instanceof HollowProducer.Blob) {
                 publish((HollowProducer.Blob)publishArtifact);
@@ -620,15 +666,20 @@ public class HollowProducer extends AbstractHollowProducer {
     }
 
     public interface PublishArtifact {
+        @Impure
         void cleanup();
+        @Impure
         void write(HollowBlobWriter blobWriter) throws IOException;
+        @Impure
         InputStream newInputStream() throws IOException;
 
+        @SideEffectFree
         @Deprecated
         default File getFile() {
             throw new UnsupportedOperationException("File is not available");
         }
 
+        @Pure
         default Path getPath() {
             throw new UnsupportedOperationException("Path is not available");
         }
@@ -637,10 +688,12 @@ public class HollowProducer extends AbstractHollowProducer {
     public static abstract class HeaderBlob implements PublishArtifact{
         protected final long version;
 
+        @SideEffectFree
         protected HeaderBlob(long version) {
             this.version = version;
         }
 
+        @Pure
         public long getVersion() {
             return version;
         }
@@ -653,10 +706,13 @@ public class HollowProducer extends AbstractHollowProducer {
         protected final Blob.Type type;
         protected final ProducerOptionalBlobPartConfig optionalPartConfig;
 
+        @SideEffectFree
+        @Impure
         protected Blob(long fromVersion, long toVersion, Blob.Type type) {
             this(fromVersion, toVersion, type, null);
         }
 
+        @SideEffectFree
         protected Blob(long fromVersion, long toVersion, Blob.Type type, ProducerOptionalBlobPartConfig optionalPartConfig) {
             this.fromVersion = fromVersion;
             this.toVersion = toVersion;
@@ -664,26 +720,32 @@ public class HollowProducer extends AbstractHollowProducer {
             this.optionalPartConfig = optionalPartConfig;
         }
 
+        @Impure
         public InputStream newOptionalPartInputStream(String partName) throws IOException {
             throw new UnsupportedOperationException("The provided HollowProducer.Blob implementation does not support optional blob parts");
         }
 
+        @Pure
         public Path getOptionalPartPath(String partName) {
             throw new UnsupportedOperationException("The provided HollowProducer.Blob implementation does not support optional blob parts");
         }
 
+        @Pure
         public Type getType() {
             return this.type;
         }
 
+        @Pure
         public long getFromVersion() {
             return this.fromVersion;
         }
 
+        @Pure
         public long getToVersion() {
             return this.toVersion;
         }
 
+        @Pure
         public ProducerOptionalBlobPartConfig getOptionalPartConfig() {
             return optionalPartConfig;
         }
@@ -698,6 +760,7 @@ public class HollowProducer extends AbstractHollowProducer {
 
             public final String prefix;
 
+            @Impure
             Type(String prefix) {
                 this.prefix = prefix;
             }
@@ -706,13 +769,16 @@ public class HollowProducer extends AbstractHollowProducer {
 
     public interface Announcer {
 
+        @Impure
         void announce(long stateVersion);
 
+        @Impure
         default void announce(long stateVersion, Map<String, String> metadata) {
             announce(stateVersion);
         }
     }
 
+    @Impure
     public static HollowProducer.Builder<?> withPublisher(HollowProducer.Publisher publisher) {
         Builder<?> builder = new Builder<>();
         return builder.withPublisher(publisher);
@@ -740,31 +806,37 @@ public class HollowProducer extends AbstractHollowProducer {
         boolean doIntegrityCheck = true;
         ProducerOptionalBlobPartConfig optionalPartConfig = null;
 
+        @Impure
         public B withBlobStager(HollowProducer.BlobStager stager) {
             this.stager = stager;
             return (B) this;
         }
 
+        @Impure
         public B withBlobCompressor(HollowProducer.BlobCompressor compressor) {
             this.compressor = compressor;
             return (B) this;
         }
 
+        @Impure
         public B withOptionalPartConfig(ProducerOptionalBlobPartConfig optionalPartConfig) {
             this.optionalPartConfig = optionalPartConfig;
             return (B) this;
         }
 
+        @Impure
         public B withBlobStagingDir(File stagingDir) {
             this.stagingDir = stagingDir;
             return (B) this;
         }
 
+        @Impure
         public B withPublisher(HollowProducer.Publisher publisher) {
             this.publisher = publisher;
             return (B) this;
         }
 
+        @Impure
         public B withAnnouncer(HollowProducer.Announcer announcer) {
             this.announcer = announcer;
             return (B) this;
@@ -778,6 +850,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @return this builder
          * @throws IllegalArgumentException if the listener does not implement a recognized event listener type
          */
+        @Impure
         public B withListener(HollowProducerEventListener listener) {
             if (!ProducerListenerSupport.isValidListener(listener)) {
                 throw new IllegalArgumentException(
@@ -795,6 +868,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @return this builder
          * @throws IllegalArgumentException if the listener does not implement a recognized event listener type
          */
+        @Impure
         public B withListeners(HollowProducerEventListener... listeners) {
             for (HollowProducerEventListener listener : listeners) {
                 if (!ProducerListenerSupport.isValidListener(listener)) {
@@ -816,6 +890,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * {@link #withListener(HollowProducerEventListener)}.
          * @see #withListener(HollowProducerEventListener)
          */
+        @Impure
         public B withValidator(ValidatorListener validator) {
             return withListener(validator);
         }
@@ -830,33 +905,40 @@ public class HollowProducer extends AbstractHollowProducer {
          * {@link #withListeners(HollowProducerEventListener...)}.
          * @see #withListeners(HollowProducerEventListener...)
          */
+        @Impure
         public B withValidators(ValidatorListener... validators) {
             return withListeners(validators);
         }
 
+        @Impure
         public B withListener(HollowProducerListener listener) {
             return withListener((HollowProducerEventListener) listener);
         }
 
+        @Impure
         public B withListeners(HollowProducerListener... listeners) {
             return withListeners((HollowProducerEventListener[]) listeners);
         }
 
+        @Impure
         public B withVersionMinter(HollowProducer.VersionMinter versionMinter) {
             this.versionMinter = versionMinter;
             return (B) this;
         }
 
+        @Impure
         public B withSnapshotPublishExecutor(Executor executor) {
             this.snapshotPublishExecutor = executor;
             return (B) this;
         }
 
+        @Impure
         public B withNumStatesBetweenSnapshots(int numStatesBetweenSnapshots) {
             this.numStatesBetweenSnapshots = numStatesBetweenSnapshots;
             return (B) this;
         }
 
+        @Impure
         public B withTargetMaxTypeShardSize(long targetMaxTypeShardSize) {
             this.targetMaxTypeShardSize = targetMaxTypeShardSize;
             return (B) this;
@@ -867,6 +949,7 @@ public class HollowProducer extends AbstractHollowProducer {
          *
          * This can be used by the consumers to reduce the work necessary to apply a delta, by skipping recreation of shards where no records are added.
          */
+        @Impure
         public B withFocusHoleFillInFewestShards(boolean focusHoleFillInFewestShards) {
             this.focusHoleFillInFewestShards = focusHoleFillInFewestShards;
             return (B) this;
@@ -882,6 +965,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * Requires integrity check to be enabled, and honors numShards pinned using annotation in data model.
          * Also requires consumers of the delta chain to be on a recent Hollow library version that supports re-sharding at the time of delta application.
          */
+        @Impure
         public B withTypeResharding(boolean allowTypeResharding) {
             return (B) withTypeResharding(allowTypeResharding, false);
         }
@@ -894,42 +978,50 @@ public class HollowProducer extends AbstractHollowProducer {
          *                                    for exercising resharding coverage frequently in test environments, and is not expected
          *                                    to be set for production environments.
          */
+        @Impure
         public B withTypeResharding(boolean allowTypeResharding, boolean forceCoverage) {
             this.allowTypeResharding = allowTypeResharding;
             this.forceCoverageOfTypeResharding = forceCoverage;
             return (B) this;
         }
 
+        @Impure
         public B withMetricsCollector(HollowMetricsCollector<HollowProducerMetrics> metricsCollector) {
             this.metricsCollector = metricsCollector;
             return (B) this;
         }
 
+        @Impure
         public B withBlobStorageCleaner(BlobStorageCleaner blobStorageCleaner) {
             this.blobStorageCleaner = blobStorageCleaner;
             return (B) this;
         }
 
+        @Impure
         public B withSingleProducerEnforcer(SingleProducerEnforcer singleProducerEnforcer) {
             this.singleProducerEnforcer = singleProducerEnforcer;
             return (B) this;
         }
 
+        @Pure
         public B noSingleProducerEnforcer() {
             return (B) this;
         }
 
+        @Impure
         @Deprecated
         public B withHashCodeFinder(HollowObjectHashCodeFinder hashCodeFinder) {
             this.hashCodeFinder = hashCodeFinder;
             return (B) this;
         }
         
+        @Impure
         public B noIntegrityCheck() {
             this.doIntegrityCheck = false;
             return (B) this;
         }
 
+        @Impure
         protected void checkArguments() {
             if (allowTypeResharding == true && doIntegrityCheck == false) { // type resharding feature rollout
                 throw new IllegalArgumentException("Enabling type re-sharding requires integrity check to also be enabled");
@@ -964,6 +1056,7 @@ public class HollowProducer extends AbstractHollowProducer {
          *
          * @return a producer.
          */
+        @Impure
         public HollowProducer build() {
             checkArguments();
             return new HollowProducer(this);
@@ -975,6 +1068,7 @@ public class HollowProducer extends AbstractHollowProducer {
          *
          * @return an incremental producer
          */
+        @Impure
         public HollowProducer.Incremental buildIncremental() {
             checkArguments();
             return new HollowProducer.Incremental(this);
@@ -986,6 +1080,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * It allows users to implement logic base on Blob Type.
      */
     public static abstract class BlobStorageCleaner {
+        @Impure
         public void clean(Blob.Type blobType) {
             switch (blobType) {
                 case SNAPSHOT:
@@ -1003,16 +1098,19 @@ public class HollowProducer extends AbstractHollowProducer {
         /**
          * This method provides an opportunity to remove old snapshots.
          */
+        @Impure
         public abstract void cleanSnapshots();
 
         /**
          * This method provides an opportunity to remove old deltas.
          */
+        @SideEffectFree
         public abstract void cleanDeltas();
 
         /**
          * This method provides an opportunity to remove old reverse deltas.
          */
+        @SideEffectFree
         public abstract void cleanReverseDeltas();
     }
 
@@ -1025,6 +1123,7 @@ public class HollowProducer extends AbstractHollowProducer {
      * publishing and announcing data states.
      */
     public static class Incremental extends AbstractHollowProducer {
+        @Impure
         protected Incremental(Builder<?> b) {
             super(b);
         }
@@ -1044,6 +1143,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @throws IllegalStateException if the producer's data model has not been initialized
          * @see #initializeDataModel(Class[])
          */
+        @Impure
         @Override
         public HollowProducer.ReadState restore(long versionDesired, HollowConsumer.BlobRetriever blobRetriever) {
             return super.hardRestore(versionDesired, blobRetriever);
@@ -1059,6 +1159,7 @@ public class HollowProducer extends AbstractHollowProducer {
          * @throws RuntimeException if the cycle failed
          */
         // @@@ Should this be marked as synchronized?
+        @Impure
         public long runIncrementalCycle(Incremental.IncrementalPopulator task) {
             return runCycle(task, null);
         }
@@ -1116,6 +1217,7 @@ public class HollowProducer extends AbstractHollowProducer {
              * @param state the state to add, modify or delete objects
              * @throws Exception if population fails.  If failure occurs the data from the previous cycle is not changed.
              */
+            @SideEffectFree
             void populate(IncrementalWriteState state) throws Exception;
         }
 
@@ -1132,6 +1234,7 @@ public class HollowProducer extends AbstractHollowProducer {
              * @param o the object
              * @throws IllegalArgumentException if the object does not have primary key defined
              */
+            @Impure
             void addOrModify(Object o);
 
             /**
@@ -1143,6 +1246,7 @@ public class HollowProducer extends AbstractHollowProducer {
              * @param o the object
              * @throws IllegalArgumentException if the object does not have primary key defined
              */
+            @Impure
             void addIfAbsent(Object o);
 
             /**
@@ -1155,6 +1259,7 @@ public class HollowProducer extends AbstractHollowProducer {
              * @param o the object
              * @throws IllegalArgumentException if the object does not have primary key defined
              */
+            @Impure
             void delete(Object o);
 
             /**
@@ -1168,6 +1273,7 @@ public class HollowProducer extends AbstractHollowProducer {
              * @param key the primary key value
              * @throws IllegalArgumentException if the field path of the primary key is not resolvable
              */
+            @Impure
             void delete(RecordPrimaryKey key);
         }
 

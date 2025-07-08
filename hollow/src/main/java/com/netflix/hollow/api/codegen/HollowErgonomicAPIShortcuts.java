@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
@@ -32,23 +35,28 @@ public class HollowErgonomicAPIShortcuts {
     
     private final Map<String, Shortcut> shortcutFieldPaths;
     
+    @SideEffectFree
     private HollowErgonomicAPIShortcuts() {
         this.shortcutFieldPaths = Collections.emptyMap();
     }
     
+    @Impure
     HollowErgonomicAPIShortcuts(HollowDataset dataset) {
         this.shortcutFieldPaths = new HashMap<String, Shortcut>();
         populatePaths(dataset);
     }
     
+    @Pure
     public Shortcut getShortcut(String typeField) {
         return shortcutFieldPaths.get(typeField);
     }
     
+    @Pure
     int numShortcuts() {
         return shortcutFieldPaths.size();
     }
     
+    @Impure
     private void populatePaths(HollowDataset dataset) {
         for(HollowSchema schema : dataset.getSchemas()) {
             if(schema.getSchemaType() == SchemaType.OBJECT) {
@@ -70,6 +78,7 @@ public class HollowErgonomicAPIShortcuts {
         }
     }
     
+    @Impure
     private Shortcut getShortcutFieldPath(HollowDataset dataset, HollowSchema schema) {
         if(schema.getSchemaType() == SchemaType.OBJECT) {
             HollowObjectSchema objSchema = (HollowObjectSchema)schema;
@@ -97,6 +106,7 @@ public class HollowErgonomicAPIShortcuts {
         return null;
     }
     
+    @Impure
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for(Map.Entry<String, Shortcut> entry : shortcutFieldPaths.entrySet()) {
@@ -110,24 +120,29 @@ public class HollowErgonomicAPIShortcuts {
         public final String[] path;
         public final FieldType type;
         
+        @SideEffectFree
         public Shortcut(String[] pathTypes, String[] path, FieldType type) {
             this.pathTypes = pathTypes;
             this.path = path;
             this.type = type;
         }
         
+        @Pure
         public String[] getPath() {
             return path;
         }
         
+        @Pure
         public String[] getPathTypes() {
             return pathTypes;
         }
         
+        @Pure
         public FieldType getType() {
             return type;
         }
         
+        @SideEffectFree
         public String toString() {
             return Arrays.toString(path) + " (" + type.toString() + ")";
         }

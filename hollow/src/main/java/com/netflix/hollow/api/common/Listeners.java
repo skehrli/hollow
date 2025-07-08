@@ -1,5 +1,7 @@
 package com.netflix.hollow.api.common;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.listener.VetoableListener;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -13,19 +15,23 @@ public abstract class Listeners {
 
     protected final EventListener[] listeners;
 
+    @SideEffectFree
     protected Listeners(EventListener[] listeners) {
         this.listeners = listeners;
     }
 
+    @Impure
     public <T extends EventListener> Stream<T> getListeners(Class<T> c) {
         return Arrays.stream(listeners).filter(c::isInstance).map(c::cast);
     }
 
+    @Impure
     protected <T extends EventListener> void fire(
             Class<T> c, Consumer<? super T> r) {
         fireStream(getListeners(c), r);
     }
 
+    @Impure
     protected <T extends EventListener> void fireStream(
             Stream<T> s, Consumer<? super T> r) {
         s.forEach(l -> {

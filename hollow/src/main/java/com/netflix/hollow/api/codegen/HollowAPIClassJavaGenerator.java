@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowAPIGenerator.SCHEMA_DOC_SUFFIX;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.hollowFactoryClassname;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.hollowObjectProviderName;
@@ -62,12 +63,14 @@ public class HollowAPIClassJavaGenerator extends HollowConsumerJavaFileGenerator
 
     private final boolean parameterizeClassNames;
 
+    @Impure
     public HollowAPIClassJavaGenerator(String packageName, String apiClassname, HollowDataset dataset, boolean parameterizeClassNames, CodeGeneratorConfig config) {
         super(packageName, SUB_PACKAGE_NAME, dataset, config);
         this.className = apiClassname;
         this.parameterizeClassNames = parameterizeClassNames;
     }
 
+    @Impure
     @Override
     public String generate() {
         List<HollowSchema> schemaList = HollowSchemaSorter.dependencyOrderedSchemaList(dataset);
@@ -247,6 +250,7 @@ public class HollowAPIClassJavaGenerator extends HollowConsumerJavaFileGenerator
         return builder.toString();
     }
 
+    @Impure
     private String schemaType(HollowSchema schema) {
         switch(schema.getSchemaType()) {
         case OBJECT:

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.BitSet;
 
 /**
@@ -28,38 +31,46 @@ public class PopulatedOrdinalListener implements HollowTypeStateListener {
     private final BitSet previousOrdinals;
     private final BitSet populatedOrdinals;
 
+    @Impure
     public PopulatedOrdinalListener() {
         this.populatedOrdinals = new BitSet();
         this.previousOrdinals = new BitSet();
     }
 
+    @Impure
     @Override
     public void beginUpdate() {
         previousOrdinals.clear();
         previousOrdinals.or(populatedOrdinals);
     }
 
+    @Impure
     @Override
     public void addedOrdinal(int ordinal) {
         populatedOrdinals.set(ordinal);
     }
 
+    @Impure
     @Override
     public void removedOrdinal(int ordinal) {
         populatedOrdinals.clear(ordinal);
     }
 
+    @SideEffectFree
     @Override
     public void endUpdate() { }
 
+    @Pure
     public boolean updatedLastCycle() {
         return !populatedOrdinals.equals(previousOrdinals);
     }
 
+    @Pure
     public BitSet getPopulatedOrdinals() {
         return populatedOrdinals;
     }
 
+    @Pure
     public BitSet getPreviousOrdinals() {
         return previousOrdinals;
     }

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.sampling.DisabledSamplingDirector;
 import com.netflix.hollow.api.sampling.HollowSetSampler;
 import com.netflix.hollow.core.index.key.PrimaryKey;
@@ -31,15 +33,18 @@ public class HollowHistoricalSetDataAccess extends HollowHistoricalTypeDataAcces
 
     private HistoricalPrimaryKeyMatcher keyMatcher;
     
+    @Impure
     public HollowHistoricalSetDataAccess(HollowHistoricalStateDataAccess dataAccess, HollowTypeReadState typeState) {
         super(dataAccess, typeState, new HollowSetSampler(typeState.getSchema().getName(), DisabledSamplingDirector.INSTANCE));
     }
 
+    @Impure
     @Override
     public HollowSetSchema getSchema() {
         return removedRecords().getSchema();
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         sampler().recordSize();
@@ -50,6 +55,7 @@ public class HollowHistoricalSetDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().size(getMappedOrdinal(ordinal));
     }
     
+    @Impure
     @Override
     public boolean contains(int ordinal, int value) {
         sampler().recordGet();
@@ -60,6 +66,7 @@ public class HollowHistoricalSetDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().contains(getMappedOrdinal(ordinal), value);
     }
     
+    @Impure
     @Override
     public int findElement(int ordinal, Object... hashKey) {
         sampler().recordGet();
@@ -92,6 +99,7 @@ public class HollowHistoricalSetDataAccess extends HollowHistoricalTypeDataAcces
         return -1;
     }
 
+    @Impure
     @Override
     public boolean contains(int ordinal, int value, int hashCode) {
         sampler().recordGet();
@@ -102,6 +110,7 @@ public class HollowHistoricalSetDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().contains(getMappedOrdinal(ordinal), value, hashCode);
     }
 
+    @Impure
     @Override
     public int relativeBucketValue(int ordinal, int bucketIndex) {
         recordStackTrace();
@@ -111,6 +120,7 @@ public class HollowHistoricalSetDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().relativeBucketValue(getMappedOrdinal(ordinal), bucketIndex);
     }
 
+    @Impure
     @Override
     public HollowOrdinalIterator potentialMatchOrdinalIterator(int ordinal, int hashCode) {
         sampler().recordIterator();
@@ -121,6 +131,7 @@ public class HollowHistoricalSetDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().potentialMatchOrdinalIterator(getMappedOrdinal(ordinal), hashCode);
     }
 
+    @Impure
     @Override
     public HollowOrdinalIterator ordinalIterator(int ordinal) {
         sampler().recordIterator();
@@ -131,14 +142,17 @@ public class HollowHistoricalSetDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().ordinalIterator(getMappedOrdinal(ordinal));
     }
 
+    @Pure
     private HollowSetTypeReadState removedRecords() {
         return (HollowSetTypeReadState) removedRecords;
     }
 
+    @Pure
     private HollowSetSampler sampler() {
         return (HollowSetSampler) sampler;
     }
     
+    @Impure
     void buildKeyMatcher() {
         PrimaryKey hashKey = getSchema().getHashKey();
         if(hashKey != null)

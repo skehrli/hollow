@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.HollowProducer.ReadState;
 import com.netflix.hollow.core.index.HollowPrimaryKeyIndex;
@@ -76,6 +78,7 @@ public class DuplicateDataDetectionValidator implements ValidatorListener {
      * @param dataType the data type class
      * @throws IllegalArgumentException if the data type class is not annotated with {@link HollowPrimaryKey}
      */
+    @Impure
     public DuplicateDataDetectionValidator(Class<?> dataType) {
         Objects.requireNonNull(dataType);
 
@@ -97,6 +100,7 @@ public class DuplicateDataDetectionValidator implements ValidatorListener {
      *
      * @param dataTypeName the data type name
      */
+    @Impure
     public DuplicateDataDetectionValidator(String dataTypeName) {
         this.dataTypeName = Objects.requireNonNull(dataTypeName);
         this.fieldPathNames = null;
@@ -112,16 +116,19 @@ public class DuplicateDataDetectionValidator implements ValidatorListener {
      * @param dataTypeName the data type name
      * @param fieldPathNames the field paths defining the primary key
      */
+    @Impure
     public DuplicateDataDetectionValidator(String dataTypeName, String[] fieldPathNames) {
         this.dataTypeName = Objects.requireNonNull(dataTypeName);
         this.fieldPathNames = fieldPathNames.clone();
     }
 
+    @Pure
     @Override
     public String getName() {
         return NAME + "_" + dataTypeName;
     }
 
+    @Impure
     @Override
     public ValidationResult onValidate(ReadState readState) {
         ValidationResult.ValidationResultBuilder vrb = ValidationResult.from(this);
@@ -159,6 +166,7 @@ public class DuplicateDataDetectionValidator implements ValidatorListener {
         return vrb.passed();
     }
 
+    @Impure
     private Collection<Object[]> getDuplicateKeys(HollowReadStateEngine stateEngine, PrimaryKey primaryKey) {
         HollowTypeReadState typeState = stateEngine.getTypeState(dataTypeName);
         HollowPrimaryKeyIndex hollowPrimaryKeyIndex = typeState.getListener(HollowPrimaryKeyIndex.class);
@@ -168,6 +176,7 @@ public class DuplicateDataDetectionValidator implements ValidatorListener {
         return hollowPrimaryKeyIndex.getDuplicateKeys();
     }
 
+    @Pure
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -181,6 +190,7 @@ public class DuplicateDataDetectionValidator implements ValidatorListener {
                 Arrays.equals(fieldPathNames, that.fieldPathNames);
     }
 
+    @Pure
     @Override
     public int hashCode() {
         int result = Objects.hash(dataTypeName);
@@ -188,6 +198,7 @@ public class DuplicateDataDetectionValidator implements ValidatorListener {
         return result;
     }
 
+    @Impure
     private String duplicateKeysToString(Collection<Object[]> duplicateKeys) {
         return duplicateKeys.stream().map(Arrays::toString).collect(Collectors.joining(","));
     }
@@ -212,6 +223,7 @@ public class DuplicateDataDetectionValidator implements ValidatorListener {
      * building the producer.
      * @see HollowProducer#initializeDataModel(Class[])
      */
+    @Impure
     public static void addValidatorsForSchemaWithPrimaryKey(HollowProducer producer) {
         producer.getWriteEngine().getOrderedTypeStates().stream()
                 .filter(ts -> ts.getSchema().getSchemaType() == SchemaType.OBJECT)

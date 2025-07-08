@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.consumer.index;
 
+import org.checkerframework.dataflow.qual.Pure;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,10 +33,12 @@ import java.lang.annotation.Target;
     /**
      * @return the field path, if empty then the path is derived from the field or method name.
      */
+    @Pure
     String value() default "";
 
     /**
      * @return the field path order
      */
+    @Pure
     int order() default 0;
 }

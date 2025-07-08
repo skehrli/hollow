@@ -1,6 +1,7 @@
 package com.netflix.hollow.core.memory.pool;
 
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
 import java.util.Arrays;
@@ -17,10 +18,12 @@ public class GarbageCollectorAwareRecycler implements ArraySegmentRecycler {
 
     private final ArraySegmentRecycler delegate;
 
+    @Impure
     public GarbageCollectorAwareRecycler() {
         this(DEFAULT_LOG2_BYTE_ARRAY_SIZE, DEFAULT_LOG2_LONG_ARRAY_SIZE);
     }
 
+    @Impure
     public GarbageCollectorAwareRecycler(int log2OfByteSegmentSize, int log2OfLongSegmentSize) {
         boolean isLowPause = ManagementFactory.getGarbageCollectorMXBeans()
                 .stream()
@@ -31,36 +34,43 @@ public class GarbageCollectorAwareRecycler implements ArraySegmentRecycler {
                 : new RecyclingRecycler(log2OfByteSegmentSize, log2OfLongSegmentSize);
     }
 
+    @Impure
     @Override
     public int getLog2OfByteSegmentSize() {
         return delegate.getLog2OfByteSegmentSize();
     }
 
+    @Impure
     @Override
     public int getLog2OfLongSegmentSize() {
         return delegate.getLog2OfLongSegmentSize();
     }
 
+    @Impure
     @Override
     public long[] getLongArray() {
         return delegate.getLongArray();
     }
 
+    @Impure
     @Override
     public void recycleLongArray(long[] arr) {
         delegate.recycleLongArray(arr);
     }
 
+    @Impure
     @Override
     public byte[] getByteArray() {
         return delegate.getByteArray();
     }
 
+    @Impure
     @Override
     public void recycleByteArray(byte[] arr) {
         delegate.recycleByteArray(arr);
     }
 
+    @Impure
     @Override
     public void swap() {
         delegate.swap();

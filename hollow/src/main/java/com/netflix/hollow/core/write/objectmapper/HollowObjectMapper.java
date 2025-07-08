@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.core.write.HollowWriteStateEngine;
 import com.netflix.hollow.core.write.objectmapper.flatrecords.FlatRecord;
@@ -44,20 +46,24 @@ public class HollowObjectMapper {
     private boolean ignoreListOrdering = false;
     private boolean useDefaultHashKeys = true;
 
+    @Impure
     public HollowObjectMapper(HollowWriteStateEngine stateEngine) {
         this.stateEngine = stateEngine;
         this.typeNameMappers = new ConcurrentHashMap<>();
         this.typeMappers = new ConcurrentHashMap<>();
     }
 
+    @Impure
     public void ignoreListOrdering() {
         this.ignoreListOrdering = true;
     }
 
+    @Impure
     public void useDefaultHashKeys() {
         this.useDefaultHashKeys = true;
     }
 
+    @Impure
     public void doNotUseDefaultHashKeys() {
         this.useDefaultHashKeys = false;
     }
@@ -72,11 +78,13 @@ public class HollowObjectMapper {
      * @param o the POJO to add
      * @return the ordinal assigned to the newly added object
      */
+    @Impure
     public int add(Object o) {
         HollowTypeMapper typeMapper = getTypeMapper(o.getClass(), null, null);
         return typeMapper.write(o);
     }
 
+    @Impure
     public <T> T readHollowRecord(HollowRecord record) {
         HollowTypeMapper typeMapper = typeMappers.get(record.getSchema().getName());
         if (typeMapper == null) {
@@ -85,11 +93,13 @@ public class HollowObjectMapper {
         return (T) typeMapper.parseHollowRecord(record);
     }
     
+    @Impure
     public void writeFlat(Object o, FlatRecordWriter flatRecordWriter) {
     	HollowTypeMapper typeMapper = getTypeMapper(o.getClass(), null, null);
     	typeMapper.writeFlat(o, flatRecordWriter);
     }
 
+    @Impure
     public <T> T readFlat(FlatRecordTraversalNode node) {
         String schemaName = node.getSchema().getName();
         HollowTypeMapper typeMapper = typeMappers.get(schemaName);
@@ -100,6 +110,7 @@ public class HollowObjectMapper {
         return (T) obj;
     }
 
+    @Impure
     public <T> T readFlat(FlatRecord record) {
         FlatRecordTraversalNode node = new FlatRecordTraversalObjectNode(record);
         return readFlat(node);
@@ -112,6 +123,7 @@ public class HollowObjectMapper {
      * @return the primary key
      * @throws IllegalArgumentException if the POJO does not have primary key defined
      */
+    @Impure
     public RecordPrimaryKey extractPrimaryKey(Object o) {
         HollowObjectTypeMapper typeMapper = (HollowObjectTypeMapper) getTypeMapper(o.getClass(), null, null);
         return new RecordPrimaryKey(typeMapper.getTypeName(), typeMapper.extractPrimaryKey(o));
@@ -122,6 +134,7 @@ public class HollowObjectMapper {
      * @return the ordinal assigned to the newly added object
      * @deprecated use {@link #add(Object)} instead.
      */
+    @Impure
     @Deprecated
     public int addObject(Object o) {
         return add(o);
@@ -139,15 +152,18 @@ public class HollowObjectMapper {
      * @param clazz type whose schema to derive and add to the data model
      * @see #add(Object)
      */
+    @Impure
     public void initializeTypeState(Class<?> clazz) {
         Objects.requireNonNull(clazz);
         getTypeMapper(clazz, null, null);
     }
 
+    @Impure
     HollowTypeMapper getTypeMapper(Type type, String declaredName, String[] hashKeyFieldPaths) {
         return getTypeMapper(type, declaredName, hashKeyFieldPaths, -1, null);
     }
 
+    @Impure
     HollowTypeMapper getTypeMapper(
             Type type, String declaredName, String[] hashKeyFieldPaths, int numShards, Set<Type> visited) {
 
@@ -195,6 +211,7 @@ public class HollowObjectMapper {
         return typeMapper;
     }
 
+    @Impure
     private String findTypeName(Type type) {
         String typeName = typeNameMappers.get(type);
         if(typeName == null) {
@@ -204,10 +221,12 @@ public class HollowObjectMapper {
         return typeName;
     }
 
+    @Impure
     int nextUnassignedTypeId() {
         return unassignedTypeCounter.getAndIncrement();
     }
 
+    @Pure
     public HollowWriteStateEngine getStateEngine() {
         return stateEngine;
     }

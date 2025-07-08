@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.objects;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.delegate.HollowRecordDelegate;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
 import com.netflix.hollow.core.schema.HollowSchema;
@@ -26,12 +28,16 @@ import com.netflix.hollow.core.schema.HollowSchema;
  */
 public interface HollowRecord {
 
+    @Pure
     public int getOrdinal();
 
+    @Impure
     public HollowSchema getSchema();
 
+    @Impure
     public HollowTypeDataAccess getTypeDataAccess();
 
+    @Pure
     public HollowRecordDelegate getDelegate();
 
 }

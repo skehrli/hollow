@@ -15,6 +15,8 @@
  *
  */
 package com.netflix.hollow.core.memory;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * A ByteData backed by a simple array of bytes.
@@ -26,15 +28,18 @@ public class ArrayByteData implements ByteData {
 
     private final byte[] data;
 
+    @SideEffectFree
     public ArrayByteData(byte[] data) {
         this.data = data;
     }
 
+    @Pure
     @Override
     public byte get(long position) {
         return data[(int)position];
     }
 
+    @Pure
     @Override
     public long length() {
         return data.length;

@@ -1,5 +1,7 @@
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import java.util.function.Supplier;
@@ -19,16 +21,19 @@ public class MinimumRecordCountValidator implements ValidatorListener {
     private final String typeName;
     private final Supplier<Integer> minRecordCountSupplier;
 
+    @SideEffectFree
     public MinimumRecordCountValidator(String typeName, Supplier<Integer> minRecordCountSupplier) {
         this.typeName = typeName;
         this.minRecordCountSupplier = minRecordCountSupplier;
     }
 
+    @Impure
     @Override
     public String getName() {
         return MinimumRecordCountValidator.class.getSimpleName() + "_" + typeName;
     }
 
+    @Impure
     @Override
     public ValidationResult onValidate(HollowProducer.ReadState readState) {
         ValidationResult.ValidationResultBuilder vrb = ValidationResult.from(this);

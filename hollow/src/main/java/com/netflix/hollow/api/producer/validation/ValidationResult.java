@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -32,6 +34,7 @@ public final class ValidationResult {
     private final String message;
     private final Map<String, String> details;
 
+    @Impure
     ValidationResult(
             ValidationResultType type,
             String name,
@@ -61,6 +64,7 @@ public final class ValidationResult {
      *
      * @return the validation result type
      */
+    @Pure
     public ValidationResultType getResultType() {
         return type;
     }
@@ -70,6 +74,7 @@ public final class ValidationResult {
      *
      * @return the name of the validation performed
      */
+    @Pure
     public String getName() {
         return name;
     }
@@ -81,6 +86,7 @@ public final class ValidationResult {
      * @return the {@code Throwable} associated with an erroneous validator, otherwise
      * {@code null}
      */
+    @Pure
     public Throwable getThrowable() {
         return ex;
     }
@@ -90,6 +96,7 @@ public final class ValidationResult {
      *
      * @return a message associated with the validation. may be {@code null}
      */
+    @Pure
     public String getMessage() {
         return message;
     }
@@ -99,6 +106,7 @@ public final class ValidationResult {
      *
      * @return details associated with the validation. The details are unmodifiable and may be empty.
      */
+    @Pure
     public Map<String, String> getDetails() {
         return details;
     }
@@ -108,10 +116,12 @@ public final class ValidationResult {
      *
      * @return true if validation passed, otherwise {@code false}
      */
+    @Pure
     public boolean isPassed() {
         return type == ValidationResultType.PASSED;
     }
 
+    @Impure
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ValidationResult[")
@@ -140,6 +150,7 @@ public final class ValidationResult {
      * @return the validation builder
      * @throws NullPointerException if {@code v} is {@code null}
      */
+    @Impure
     public static ValidationResultBuilder from(ValidatorListener v) {
         return from(v.getName());
     }
@@ -151,6 +162,7 @@ public final class ValidationResult {
      * @return the validation builder
      * @throws NullPointerException if {@code name} is {@code null}
      */
+    @Impure
     public static ValidationResultBuilder from(String name) {
         return new ValidationResultBuilder(name);
     }
@@ -165,6 +177,7 @@ public final class ValidationResult {
         private final String name;
         private Map<String, String> details;
 
+        @Impure
         ValidationResultBuilder(String name) {
             this.name = Objects.requireNonNull(name);
             this.details = new LinkedHashMap<>();
@@ -179,6 +192,7 @@ public final class ValidationResult {
          * @return the validation builder
          * @throws NullPointerException if {@code name} or {@code value} are {@code null}
          */
+        @Impure
         public ValidationResultBuilder detail(String name, Object value) {
             Objects.requireNonNull(name);
             Objects.requireNonNull(value);
@@ -191,6 +205,7 @@ public final class ValidationResult {
          *
          * @return a validation result that has passed.
          */
+        @Impure
         public ValidationResult passed() {
             return new ValidationResult(
                     ValidationResultType.PASSED,
@@ -207,6 +222,7 @@ public final class ValidationResult {
          * @param message the message, may be {@code null}
          * @return a validation result that has passed.
          */
+        @Impure
         public ValidationResult passed(String message) {
             return build(
                     ValidationResultType.PASSED,
@@ -224,6 +240,7 @@ public final class ValidationResult {
          * @return a validation result that has failed.
          * @throws NullPointerException if {@code message} is {@code null}
          */
+        @Impure
         public ValidationResult failed(String message) {
             return build(
                     ValidationResultType.FAILED,
@@ -244,6 +261,7 @@ public final class ValidationResult {
          */
         // @@@ This could be made package private as it is questionable if validators should use this,
         // however for testing purposes of status listeners it's useful.
+        @Impure
         public ValidationResult error(Throwable t) {
             return build(
                     ValidationResultType.ERROR,
@@ -254,6 +272,7 @@ public final class ValidationResult {
             );
         }
 
+        @Impure
         private ValidationResult build(
                 ValidationResultType type,
                 String name,
@@ -264,6 +283,7 @@ public final class ValidationResult {
             return new ValidationResult(type, name, ex, message, details);
         }
 
+        @Impure
         private void reset() {
             this.details = new LinkedHashMap<>();
         }

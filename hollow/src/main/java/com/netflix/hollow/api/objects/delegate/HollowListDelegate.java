@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.objects.delegate;
 
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowListTypeAPI;
 import com.netflix.hollow.api.objects.HollowList;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
@@ -28,20 +31,28 @@ import com.netflix.hollow.core.schema.HollowListSchema;
  */
 public interface HollowListDelegate<T> extends HollowRecordDelegate {
 
+    @Impure
     public int size(int ordinal);
 
-    public T get(HollowList<T> list, int ordinal, int index);
+    @Impure
+    public T get(@NotOwningCollection HollowList<T> list, int ordinal, int index);
 
-    public boolean contains(HollowList<T> list, int ordinal, Object o);
+    @Impure
+    public boolean contains(@NotOwningCollection HollowList<T> list, int ordinal, Object o);
 
-    public int indexOf(HollowList<T> list, int ordinal, Object o);
+    @Impure
+    public int indexOf(@NotOwningCollection HollowList<T> list, int ordinal, Object o);
 
-    public int lastIndexOf(HollowList<T> list, int ordinal, Object o);
+    @Impure
+    public int lastIndexOf(@NotOwningCollection HollowList<T> list, int ordinal, Object o);
 
+    @Impure
     public HollowListSchema getSchema();
 
+    @Pure
     public HollowListTypeDataAccess getTypeDataAccess();
 
+    @Pure
     public HollowListTypeAPI getTypeAPI();
 
 }

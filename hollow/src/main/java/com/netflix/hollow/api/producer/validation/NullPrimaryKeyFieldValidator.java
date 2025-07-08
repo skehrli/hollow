@@ -1,5 +1,7 @@
 package com.netflix.hollow.api.producer.validation;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.read.HollowReadFieldUtils;
@@ -55,6 +57,7 @@ public class NullPrimaryKeyFieldValidator implements ValidatorListener {
      * @param dataType the data type class
      * @throws IllegalArgumentException if the data type class is not annotated with {@link HollowPrimaryKey}
      */
+    @Impure
     public NullPrimaryKeyFieldValidator(Class<?> dataType) {
         Objects.requireNonNull(dataType);
 
@@ -76,15 +79,18 @@ public class NullPrimaryKeyFieldValidator implements ValidatorListener {
      *
      * @param dataTypeName the data type name
      */
+    @Impure
     public NullPrimaryKeyFieldValidator(String dataTypeName) {
         this.dataTypeName = Objects.requireNonNull(dataTypeName);
     }
 
+    @Pure
     @Override
     public String getName() {
         return NAME + "_" + dataTypeName;
     }
 
+    @Impure
     @Override
     public ValidationResult onValidate(HollowProducer.ReadState readState) {
         ValidationResult.ValidationResultBuilder vrb = ValidationResult.from(this);
@@ -118,6 +124,7 @@ public class NullPrimaryKeyFieldValidator implements ValidatorListener {
         return vrb.passed(getName() + "no records with null primary key fields");
     }
 
+    @Impure
     private Map<Integer, Object[]> getNullPrimaryKeyValues(HollowProducer.ReadState readState, PrimaryKey primaryKey) {
         HollowReadStateEngine stateEngine = readState.getStateEngine();
         HollowObjectTypeReadState typeState = (HollowObjectTypeReadState) stateEngine.getTypeState(dataTypeName);
@@ -140,6 +147,7 @@ public class NullPrimaryKeyFieldValidator implements ValidatorListener {
         return ordinalToNullPkey;
     }
 
+    @Impure
     private Object[] getPrimaryKeyValue(HollowObjectTypeReadState typeState, int[][] fieldPathIndexes, int ordinal) {
         Object[] results = new Object[fieldPathIndexes.length];
         for (int i = 0; i < fieldPathIndexes.length; i++) {
@@ -149,6 +157,7 @@ public class NullPrimaryKeyFieldValidator implements ValidatorListener {
         return results;
     }
 
+    @Impure
     private Object getPrimaryKeyFieldValue(HollowObjectTypeReadState typeState, int[] fieldPathIndexes, int ordinal) {
         HollowObjectSchema schema = typeState.getSchema();
         int lastFieldPath = fieldPathIndexes.length - 1;
@@ -170,6 +179,7 @@ public class NullPrimaryKeyFieldValidator implements ValidatorListener {
         return HollowReadFieldUtils.fieldValueObject(typeState, ordinal, fieldPathIndexes[lastFieldPath]);
     }
 
+    @Impure
     private String nullKeysToString(Map<Integer, Object[]> nullPrimaryKeyValues) {
         return nullPrimaryKeyValues.entrySet().stream()
                 .map(entry -> {

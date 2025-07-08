@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.filter;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.util.IOUtils.copySegmentedLongArray;
 import static com.netflix.hollow.core.util.IOUtils.copyVInt;
 import static com.netflix.hollow.core.util.IOUtils.copyVLong;
@@ -77,6 +78,7 @@ public class FilteredHollowBlobWriter {
      * 
      * @param configs the filter configurations
      */
+    @Impure
     public FilteredHollowBlobWriter(HollowFilterConfig... configs) {
         this.configs = configs;
         this.headerReader = new HollowBlobHeaderReader();
@@ -96,6 +98,7 @@ public class FilteredHollowBlobWriter {
      * @param out the output streams to write the filtered snapshot
      * @throws IOException if the snapshot cannot be filtered
      */
+    @Impure
     public void filterSnapshot(InputStream in, OutputStream... out) throws IOException {
         filter(false, in, out);
     }
@@ -109,10 +112,12 @@ public class FilteredHollowBlobWriter {
      * @param out the output streams to write the filtered delta
      * @throws IOException if the delta cannot be filtered
      */
+    @Impure
     public void filterDelta(InputStream in, OutputStream... out) throws IOException {
         filter(true, in, out);
     }
 
+    @Impure
     public void filter(boolean delta, InputStream is, OutputStream... out) throws IOException {
         HollowBlobInput in = HollowBlobInput.serial(is);
 
@@ -175,6 +180,7 @@ public class FilteredHollowBlobWriter {
         }
     }
 
+    @Impure
     private int readNumShards(HollowBlobInput in) throws IOException {
         int backwardsCompatibilityBytes = VarInt.readVInt(in);
         
@@ -186,6 +192,7 @@ public class FilteredHollowBlobWriter {
         return VarInt.readVInt(in);
     }
     
+    @Impure
     private void skipForwardsCompatibilityBytes(HollowBlobInput in) throws IOException {
         int bytesToSkip = VarInt.readVInt(in);
         while(bytesToSkip > 0) {
@@ -196,6 +203,7 @@ public class FilteredHollowBlobWriter {
         }
     }
 
+    @Impure
     @SuppressWarnings("unchecked")
     private void copyFilteredObjectState(boolean delta, HollowBlobInput in, FilteredHollowBlobWriterStreamAndFilter[] streamAndFilters, HollowObjectSchema schema, int numShards) throws IOException {
         DataOutputStream[] os = streamsOnly(streamAndFilters);
@@ -307,6 +315,7 @@ public class FilteredHollowBlobWriter {
             copySnapshotPopulatedOrdinals(in, os);
     }
 
+    @Impure
     private long writeBitsPerField(HollowObjectSchema unfilteredSchema, int bitsPerField[], HollowObjectSchema filteredSchema, DataOutputStream os) throws IOException {
         long bitsPerRecord = 0;
 
@@ -320,6 +329,7 @@ public class FilteredHollowBlobWriter {
         return bitsPerRecord;
     }
     
+    @Impure
     private List<HollowSchema> getFilteredSchemaList(List<HollowSchema> schemaList, HollowFilterConfig filterConfig) {
         List<HollowSchema> filteredList = new ArrayList<HollowSchema>();
         
@@ -332,6 +342,7 @@ public class FilteredHollowBlobWriter {
         return filteredList;
     }
     
+    @Impure
     private HollowSchema getFilteredSchema(HollowSchema schema, HollowFilterConfig filterConfig) {
         if(filterConfig.doesIncludeType(schema.getName())) {
             if(schema.getSchemaType() == SchemaType.OBJECT)
@@ -342,6 +353,7 @@ public class FilteredHollowBlobWriter {
         return null;
     }
 
+    @Impure
     private HollowObjectSchema getFilteredObjectSchema(HollowObjectSchema schema, HollowFilterConfig filterConfig) {
         ObjectFilterConfig typeConfig = filterConfig.getObjectTypeConfig(schema.getName());
 
@@ -365,6 +377,7 @@ public class FilteredHollowBlobWriter {
         return filteredSchema;
     }
 
+    @Impure
     private void copyListState(boolean delta, HollowBlobInput in, DataOutputStream[] os, int numShards) throws IOException {
         if(numShards > 1)
             copyVInt(in, os);
@@ -389,6 +402,7 @@ public class FilteredHollowBlobWriter {
             copySnapshotPopulatedOrdinals(in, os);
     }
 
+    @Impure
     private void copySetState(boolean delta, HollowBlobInput in, DataOutputStream[] os, int numShards) throws IOException {
         if(numShards > 1)
             copyVInt(in, os);
@@ -414,6 +428,7 @@ public class FilteredHollowBlobWriter {
             copySnapshotPopulatedOrdinals(in, os);
     }
 
+    @Impure
     private void copyMapState(boolean delta, HollowBlobInput in, DataOutputStream[] os, int numShards) throws IOException {
         if(numShards > 1)
             copyVInt(in, os);
@@ -440,6 +455,7 @@ public class FilteredHollowBlobWriter {
             copySnapshotPopulatedOrdinals(in, os);
     }
 
+    @Impure
     private void copySnapshotPopulatedOrdinals(HollowBlobInput in, DataOutputStream[] os) throws IOException {
         int numLongs = in.readInt();
         for(int i=0;i<os.length;i++)

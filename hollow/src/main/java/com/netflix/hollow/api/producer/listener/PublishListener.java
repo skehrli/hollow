@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.listener;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.Status;
 import java.time.Duration;
@@ -40,6 +42,7 @@ public interface PublishListener extends HollowProducerEventListener {
      *
      * @param version Current version of the cycle.
      */
+    @SideEffectFree
     void onNoDeltaAvailable(long version);
 
     /**
@@ -47,6 +50,7 @@ public interface PublishListener extends HollowProducerEventListener {
      *
      * @param version version to be published.
      */
+    @SideEffectFree
     void onPublishStart(long version);
 
     /**
@@ -58,6 +62,7 @@ public interface PublishListener extends HollowProducerEventListener {
      * @param blob the blob
      * @param elapsed time taken to stage the blob
      */
+    @SideEffectFree
     default void onBlobStage(Status status, HollowProducer.Blob blob, Duration elapsed) {
     }
 
@@ -70,6 +75,7 @@ public interface PublishListener extends HollowProducerEventListener {
      * @param blob the blob
      * @param elapsed time taken to publish the blob
      */
+    @Impure
     void onBlobPublish(Status status, HollowProducer.Blob blob, Duration elapsed);
 
     /**
@@ -84,6 +90,7 @@ public interface PublishListener extends HollowProducerEventListener {
      * (i.e. use of asynchronous execution could result in a subsequent stage completing after the blob contents have
      * been cleaned up).
      */
+    @SideEffectFree
     default void onBlobPublishAsync(CompletableFuture<HollowProducer.Blob> blob) {
     }
 
@@ -96,5 +103,6 @@ public interface PublishListener extends HollowProducerEventListener {
      * @param version version that was published.
      * @param elapsed duration of the publish stage in {@code unit} units
      */
+    @Impure
     void onPublishComplete(Status status, long version, Duration elapsed);
 }

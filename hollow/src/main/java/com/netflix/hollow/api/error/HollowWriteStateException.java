@@ -15,19 +15,27 @@
  *
  */
 package com.netflix.hollow.api.error;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 
 /**
  * An exception thrown when the write state is unable to advance, revert, or otherwise fails.
  */
 public class HollowWriteStateException extends HollowException {
+    @SideEffectFree
+    @Impure
     public HollowWriteStateException(String message) {
         super(message);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowWriteStateException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowWriteStateException(Throwable cause) {
         super(cause);
     }

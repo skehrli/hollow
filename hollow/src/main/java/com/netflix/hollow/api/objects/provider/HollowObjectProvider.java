@@ -15,6 +15,7 @@
  *
  */
 package com.netflix.hollow.api.objects.provider;
+import org.checkerframework.dataflow.qual.Impure;
 
 /**
  * A HollowObjectProvider, either one of {@link HollowObjectFactoryProvider} or {@link HollowObjectCacheProvider},
@@ -22,6 +23,7 @@ package com.netflix.hollow.api.objects.provider;
  */
 public abstract class HollowObjectProvider<T> {
 
+    @Impure
     public abstract T getHollowObject(int ordinal);
 
 }

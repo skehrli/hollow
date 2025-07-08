@@ -15,6 +15,10 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -25,15 +29,19 @@ public class ArgumentParser<T extends Enum> {
         private final T key;
         private final String value;
 
+        @SideEffectFree
         public ParsedArgument(T key, String value) {
             this.key = key;
             this.value = value;
         }
 
+        @NotOwning
+        @Pure
         public T getKey() {
             return key;
         }
 
+        @Pure
         public String getValue() {
             return value;
         }
@@ -42,6 +50,7 @@ public class ArgumentParser<T extends Enum> {
 
     private final List<ParsedArgument> parsedArguments = new ArrayList<>();
 
+    @Impure
     public ArgumentParser(Class<T> validArguments, String[] args) {
         for (String arg : args) {
             Matcher matcher = COMMAND_LINE_ARG_PATTERN.matcher(arg);
@@ -59,6 +68,7 @@ public class ArgumentParser<T extends Enum> {
         }
     }
 
+    @Pure
     public List<ParsedArgument> getParsedArguments() {
         return this.parsedArguments;
     }

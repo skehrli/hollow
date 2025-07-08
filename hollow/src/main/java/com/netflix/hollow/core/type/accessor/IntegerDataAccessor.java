@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.type.accessor;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.api.consumer.HollowConsumerAPI;
 import com.netflix.hollow.api.consumer.data.AbstractHollowDataAccessor;
@@ -27,15 +28,18 @@ public class IntegerDataAccessor extends AbstractHollowDataAccessor<Integer> {
     public static final String TYPE = "Integer";
     private HollowConsumerAPI.IntegerRetriever api;
 
+    @Impure
     public IntegerDataAccessor(HollowConsumer consumer) {
         this(consumer.getStateEngine(), (HollowConsumerAPI.IntegerRetriever)consumer.getAPI());
     }
 
+    @Impure
     public IntegerDataAccessor(HollowReadStateEngine rStateEngine, HollowConsumerAPI.IntegerRetriever api) {
         super(rStateEngine, TYPE, "value");
         this.api = api;
     }
 
+    @Impure
     @Override public Integer getRecord(int ordinal){
         HInteger val = api.getHInteger(ordinal);
         return val == null ? null : val.getValueBoxed();

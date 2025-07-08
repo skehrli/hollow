@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowBlobHeader;
 import com.netflix.hollow.core.HollowBlobOptionalPartHeader;
 import com.netflix.hollow.core.memory.encoding.VarInt;
@@ -32,6 +33,7 @@ public class HollowBlobHeaderWriter {
      * @param dos the data output stream to write the blov header
      * @throws IOException if the blob header could not be written
      */
+    @Impure
     public void writeHeader(HollowBlobHeader header, DataOutputStream dos) throws IOException {
         /// save 4 bytes to indicate FastBlob version header.  This will be changed to indicate backwards incompatibility.
         dos.writeInt(HollowBlobHeader.HOLLOW_BLOB_VERSION_HEADER);
@@ -64,6 +66,7 @@ public class HollowBlobHeaderWriter {
         }
     }
     
+    @Impure
     public void writePartHeader(HollowBlobOptionalPartHeader header, DataOutputStream dos) throws IOException {
         dos.writeInt(HollowBlobOptionalPartHeader.HOLLOW_BLOB_PART_VERSION_HEADER);
 

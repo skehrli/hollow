@@ -15,6 +15,9 @@
  *
  */
 package com.netflix.hollow.api.error;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 
 /**
  * An exception thrown when trying to compare two versions of an object with incompatible schema.
@@ -25,6 +28,8 @@ public class IncompatibleSchemaException extends HollowException {
     private final String fieldType;
     private final String otherType;
 
+    @SideEffectFree
+    @Impure
     public IncompatibleSchemaException(String typeName, String fieldName, String fieldType,
             String otherType) {
         super("No common schema exists for " + typeName + ": field " + fieldName
@@ -35,18 +40,22 @@ public class IncompatibleSchemaException extends HollowException {
         this.otherType = otherType;
     }
 
+    @Pure
     public String getTypeName() {
         return this.typeName;
     }
 
+    @Pure
     public String getFieldName() {
         return this.fieldName;
     }
 
+    @Pure
     public String getFieldType() {
         return this.fieldType;
     }
 
+    @Pure
     public String getOtherType() {
         return this.otherType;
     }

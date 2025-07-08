@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.PopulatedOrdinalListener;
@@ -50,6 +51,7 @@ public class HollowWriteStateCreator {
      * @param schemas The schemas from the data model
      * @return a write state engine which is pre-populated with the specified data model. 
      */
+    @Impure
     public static HollowWriteStateEngine createWithSchemas(Collection<HollowSchema> schemas) {
         HollowWriteStateEngine stateEngine = new HollowWriteStateEngine();
 
@@ -65,6 +67,7 @@ public class HollowWriteStateCreator {
      * @param engine the write state engine
      * @throws IOException if the schema could not be read
      */
+    @Impure
     public static void readSchemaFileIntoWriteState(String schemaFilePath, HollowWriteStateEngine engine)
             throws IOException {
         InputStream input = null;
@@ -86,6 +89,7 @@ public class HollowWriteStateCreator {
      * @param stateEngine The state engine to pre-populate
      * @param schemas The schemas from the data model.
      */
+    @Impure
     public static void populateStateEngineWithTypeWriteStates(HollowWriteStateEngine stateEngine, Collection<HollowSchema> schemas) {
 
         for(HollowSchema schema : schemas) {
@@ -118,6 +122,7 @@ public class HollowWriteStateCreator {
      * @param readEngine the read state engine
      * @return the write state engine
      */
+    @Impure
     public static HollowWriteStateEngine recreateAndPopulateUsingReadEngine(final HollowReadStateEngine readEngine) {
         final HollowWriteStateEngine writeEngine = new HollowWriteStateEngine();
         
@@ -144,10 +149,12 @@ public class HollowWriteStateCreator {
      * @param writeEngine the write state engine
      * @param readEngine the read state engine
      */
+    @Impure
     public static void populateUsingReadEngine(HollowWriteStateEngine writeEngine, HollowReadStateEngine readEngine) {
         populateUsingReadEngine(writeEngine, readEngine, true);
     }
 
+    @Impure
     public static void populateUsingReadEngine(HollowWriteStateEngine writeEngine, HollowReadStateEngine readEngine, boolean preserveHashPositions) {
         SimultaneousExecutor executor = new SimultaneousExecutor(HollowWriteStateCreator.class, "populate");
         
@@ -158,6 +165,7 @@ public class HollowWriteStateCreator {
         
         for(final HollowTypeReadState readState : readEngine.getTypeStates()) {
             executor.execute(new Runnable() {
+                @Impure
                 public void run() {
                     HollowTypeWriteState writeState = writeEngine.getTypeState(readState.getSchema().getName());
                     

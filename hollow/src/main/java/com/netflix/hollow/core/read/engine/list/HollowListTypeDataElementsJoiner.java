@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine.list;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.FixedLengthDataFactory;
 import com.netflix.hollow.core.read.engine.HollowTypeDataElementsJoiner;
 
@@ -12,15 +14,19 @@ import com.netflix.hollow.core.read.engine.HollowTypeDataElementsJoiner;
  */
 class HollowListTypeDataElementsJoiner extends HollowTypeDataElementsJoiner<HollowListTypeDataElements> {
 
+    @SideEffectFree
+    @Impure
     public HollowListTypeDataElementsJoiner(HollowListTypeDataElements[] from) {
         super(from);
     }
 
+    @Impure
     @Override
     public void initToElements() {
         this.to = new HollowListTypeDataElements(from[0].memoryMode, from[0].memoryRecycler);
     }
 
+    @Impure
     @Override
     public void populateStats() {
         for(int fromIndex=0;fromIndex<from.length;fromIndex++) {
@@ -50,6 +56,7 @@ class HollowListTypeDataElementsJoiner extends HollowTypeDataElementsJoiner<Holl
         to.totalNumberOfElements = totalOfListSizes;
     }
 
+    @Impure
     @Override
     public void copyRecords() {
         long elementCounter = 0;

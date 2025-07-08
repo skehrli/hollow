@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write.copy;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.write.HollowObjectWriteRecord;
@@ -26,6 +28,7 @@ public class HollowObjectCopier extends HollowRecordCopier {
     
     private final int fieldIndexMapping[];
 
+    @Impure
     public HollowObjectCopier(HollowObjectTypeReadState readTypeState, HollowObjectSchema destinationSchema, OrdinalRemapper ordinalRemapper) {
         super(readTypeState, new HollowObjectWriteRecord(destinationSchema), ordinalRemapper, false);
         
@@ -37,6 +40,7 @@ public class HollowObjectCopier extends HollowRecordCopier {
         }
     }
 
+    @Impure
     @Override
     public HollowWriteRecord copy(int ordinal) {
         HollowObjectTypeReadState objectReadState = readState();
@@ -96,10 +100,12 @@ public class HollowObjectCopier extends HollowRecordCopier {
         return rec;
     }
     
+    @Pure
     private HollowObjectTypeReadState readState() {
         return (HollowObjectTypeReadState)readTypeState;
     }
     
+    @Pure
     private HollowObjectWriteRecord rec() {
         return (HollowObjectWriteRecord)writeRecord;
     }

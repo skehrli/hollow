@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.producer.metrics;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.AbstractHollowProducerListener;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.core.HollowStateEngine;
@@ -41,12 +42,14 @@ public abstract class AbstractProducerMetricsListener extends AbstractHollowProd
     OptionalLong lastAnnouncementSuccessTimeNanoOptional;
 
 
+    @Impure
     public AbstractProducerMetricsListener() {
         consecutiveFailures = 0l;
         lastCycleSuccessTimeNanoOptional = OptionalLong.empty();
         lastAnnouncementSuccessTimeNanoOptional = OptionalLong.empty();
     }
 
+    @Impure
     @Override
     public void onAnnouncementStart(long version) {
         announcementMetricsBuilder = new AnnouncementMetrics.Builder();
@@ -59,6 +62,7 @@ public abstract class AbstractProducerMetricsListener extends AbstractHollowProd
      * no. of consecutive failures and most recent cycle success time are retained, and no cycle status (success or fail) is reported.
      * @param reason Reason why the run was skipped
      */
+    @Impure
     @Override
     public void onCycleSkip(CycleSkipReason reason) {
         CycleMetrics.Builder cycleMetricsBuilder = new CycleMetrics.Builder();
@@ -77,6 +81,7 @@ public abstract class AbstractProducerMetricsListener extends AbstractHollowProd
      * @param version Version of data that was announced
      * @param elapsed Announcement start to end duration
      */
+    @Impure
     @Override
     public void onAnnouncementComplete(com.netflix.hollow.api.producer.Status status, HollowProducer.ReadState readState, long version, Duration elapsed) {
         boolean isAnnouncementSuccess = false;
@@ -119,6 +124,7 @@ public abstract class AbstractProducerMetricsListener extends AbstractHollowProd
      * @param version Version of data that was published in this cycle
      * @param elapsed Cycle start to end duration
      */
+    @Impure
     @Override
     public void onCycleComplete(com.netflix.hollow.api.producer.Status status, HollowProducer.ReadState readState, long version, Duration elapsed) {
         boolean isCycleSuccess;

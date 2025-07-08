@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.api.consumer.HollowConsumer.TransitionAwareRefreshListener;
 import com.netflix.hollow.api.custom.HollowAPI;
@@ -58,6 +60,7 @@ class HollowDataHolder {
 
     private long currentVersion = HollowConstants.VERSION_NONE;
 
+    @Impure
     HollowDataHolder(HollowReadStateEngine stateEngine,
                             HollowAPIFactory apiFactory,
                             MemoryMode memoryMode,
@@ -75,18 +78,22 @@ class HollowDataHolder {
         this.objLongevityConfig = objLongevityConfig;
     }
 
+    @Pure
     HollowReadStateEngine getStateEngine() {
         return stateEngine;
     }
 
+    @Pure
     HollowAPI getAPI() {
         return currentAPI;
     }
 
+    @Pure
     long getCurrentVersion() {
         return currentVersion;
     }
 
+    @Impure
     HollowDataHolder setFilter(HollowFilterConfig filter) {
         /*
          * This method is preserved for binary compat from before TypeFilter was introduced.
@@ -95,16 +102,19 @@ class HollowDataHolder {
         return setFilter((TypeFilter)filter);
     }
 
+    @Impure
     HollowDataHolder setFilter(TypeFilter filter) {
         this.filter = filter;
         return this;
     }
 
+    @Impure
     HollowDataHolder setSkipTypeShardUpdateWithNoAdditions(boolean skipTypeShardUpdateWithNoAdditions) {
         this.stateEngine.setSkipTypeShardUpdateWithNoAdditions(skipTypeShardUpdateWithNoAdditions);
         return this;
     }
 
+    @Impure
     void update(HollowUpdatePlan updatePlan, HollowConsumer.RefreshListener[] refreshListeners,
             Runnable apiInitCallback) throws Throwable {
         // Only fail if double snapshot is configured.
@@ -129,6 +139,7 @@ class HollowDataHolder {
         }
     }
 
+    @Impure
     private void applySnapshotPlan(HollowUpdatePlan updatePlan,
             HollowConsumer.RefreshListener[] refreshListeners,
             Runnable apiInitCallback) throws Throwable {
@@ -147,6 +158,7 @@ class HollowDataHolder {
         }
     }
 
+    @Impure
     private void applySnapshotTransition(HollowConsumer.Blob snapshotBlob,
             HollowConsumer.RefreshListener[] refreshListeners,
             Runnable apiInitCallback) throws Throwable {
@@ -165,6 +177,7 @@ class HollowDataHolder {
         }
     }
 
+    @Impure
     private void applyStateEngineTransition(HollowBlobInput in, OptionalBlobPartInput optionalPartIn, HollowConsumer.Blob transition, HollowConsumer.RefreshListener[] refreshListeners) throws IOException {
         if(transition.isSnapshot()) {
             if(filter == null) {
@@ -183,6 +196,7 @@ class HollowDataHolder {
             refreshListener.blobLoaded(transition);
     }
 
+    @Impure
     private void initializeAPI(Runnable r) {
         if (objLongevityConfig.enableLongLivedObjectSupport()) {
             HollowProxyDataAccess dataAccess = new HollowProxyDataAccess();
@@ -199,12 +213,14 @@ class HollowDataHolder {
         }
     }
 
+    @Impure
     private void applyDeltaOnlyPlan(HollowUpdatePlan updatePlan, HollowConsumer.RefreshListener[] refreshListeners) throws Throwable {
         for(HollowConsumer.Blob blob : updatePlan) {
             applyDeltaTransition(blob, false, refreshListeners);
         }
     }
 
+    @Impure
     private void applyDeltaTransition(HollowConsumer.Blob blob, boolean isSnapshotPlan, HollowConsumer.RefreshListener[] refreshListeners) throws Throwable {
         if (!memoryMode.equals(MemoryMode.ON_HEAP)) {
             LOG.warning("Skipping delta transition in shared-memory mode");
@@ -249,6 +265,7 @@ class HollowDataHolder {
         }
     }
 
+    @Impure
     private void wireHistoricalStateChain(HollowHistoricalStateDataAccess nextPriorState) {
         if(priorHistoricalDataAccess != null) {
             HollowHistoricalStateDataAccess dataAccess = priorHistoricalDataAccess.get();
@@ -260,6 +277,7 @@ class HollowDataHolder {
         priorHistoricalDataAccess = new WeakReference<HollowHistoricalStateDataAccess>(nextPriorState);
     }
 
+    @Impure
     private void setVersion(long version) {
         currentVersion = version;
     }

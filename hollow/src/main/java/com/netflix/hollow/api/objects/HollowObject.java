@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.objects;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.objects.delegate.HollowObjectDelegate;
 import com.netflix.hollow.api.objects.delegate.HollowRecordDelegate;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
@@ -30,71 +33,87 @@ public abstract class HollowObject implements HollowRecord {
     protected final int ordinal;
     protected final HollowObjectDelegate delegate;
 
+    @SideEffectFree
     public HollowObject(HollowObjectDelegate delegate, int ordinal) {
         this.ordinal = ordinal;
         this.delegate = delegate;
     }
 
+    @Pure
     @Override
     public final int getOrdinal() {
         return ordinal;
     }
 
+    @Impure
     public final boolean isNull(String fieldName) {
         return delegate.isNull(ordinal, fieldName);
     }
 
+    @Impure
     public final boolean getBoolean(String fieldName) {
         return delegate.getBoolean(ordinal, fieldName);
     }
 
+    @Impure
     public final int getOrdinal(String fieldName) {
         return delegate.getOrdinal(ordinal, fieldName);
     }
 
+    @Impure
     public final int getInt(String fieldName) {
         return delegate.getInt(ordinal, fieldName);
     }
 
+    @Impure
     public final long getLong(String fieldName) {
         return delegate.getLong(ordinal, fieldName);
     }
 
+    @Impure
     public final float getFloat(String fieldName) {
         return delegate.getFloat(ordinal, fieldName);
     }
 
+    @Impure
     public final double getDouble(String fieldName) {
         return delegate.getDouble(ordinal, fieldName);
     }
 
+    @Impure
     public final String getString(String fieldName) {
         return delegate.getString(ordinal, fieldName);
     }
 
+    @Impure
     public final boolean isStringFieldEqual(String fieldName, String testValue) {
         return delegate.isStringFieldEqual(ordinal, fieldName, testValue);
     }
 
+    @Impure
     public final byte[] getBytes(String fieldName) {
         return delegate.getBytes(ordinal, fieldName);
     }
 
+    @Impure
     @Override
     public HollowObjectSchema getSchema() {
         return delegate.getSchema();
     }
 
+    @Impure
     @Override
     public HollowObjectTypeDataAccess getTypeDataAccess() {
         return delegate.getTypeDataAccess();
     }
 
+    @Pure
     @Override
     public int hashCode() {
         return ordinal;
     }
 
+    @Impure
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof HollowObject) {
@@ -110,11 +129,13 @@ public abstract class HollowObject implements HollowRecord {
         return false;
     }
 
+    @Impure
     @Override
     public String toString() {
         return "Hollow Object: " + getSchema().getName() + " (" + ordinal + ")";
     }
 
+    @Pure
     @Override
     public HollowRecordDelegate getDelegate() {
         return delegate;

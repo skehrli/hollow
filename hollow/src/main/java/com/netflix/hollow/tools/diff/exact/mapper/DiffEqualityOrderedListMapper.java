@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.tools.diff.exact.mapper;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.read.engine.HollowCollectionTypeReadState;
 import com.netflix.hollow.core.read.engine.list.HollowListTypeReadState;
@@ -28,10 +29,12 @@ import com.netflix.hollow.tools.diff.exact.DiffEqualityMapping;
  */
 public class DiffEqualityOrderedListMapper extends DiffEqualityCollectionMapper {
 
+    @Impure
     public DiffEqualityOrderedListMapper(DiffEqualityMapping mapping, HollowListTypeReadState fromState, HollowListTypeReadState toState, boolean oneToOne) {
         super(mapping, fromState, toState, oneToOne, true);
     }
 
+    @Impure
     @Override
     protected int recordHashCode(HollowCollectionTypeReadState typeState, int ordinal, OrdinalIdentityTranslator identityTranslator) {
         HollowOrdinalIterator iter = typeState.ordinalIterator(ordinal);

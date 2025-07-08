@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.dataaccess.disabled;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -29,53 +31,64 @@ public class HollowListDisabledDataAccess implements HollowListTypeDataAccess {
 
     public static final HollowListDisabledDataAccess INSTANCE = new HollowListDisabledDataAccess();
 
+    @SideEffectFree
     private HollowListDisabledDataAccess() { }
 
+    @Pure
     @Override
     public int size(int ordinal) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowOrdinalIterator ordinalIterator(int ordinal) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @SideEffectFree
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @SideEffectFree
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         throw new IllegalStateException("DataAccess is Disabled");
     }
     
+    @SideEffectFree
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         throw new IllegalStateException("DataAccess is Disabled");
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowListSchema getSchema() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public int getElementOrdinal(int ordinal, int listIndex) {
         throw new IllegalStateException("Data Access is Disabled");

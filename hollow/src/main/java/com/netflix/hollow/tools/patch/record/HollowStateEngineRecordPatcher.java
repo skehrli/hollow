@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.patch.record;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.index.traversal.HollowIndexerValueTraverser;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -43,24 +45,30 @@ public class HollowStateEngineRecordPatcher {
 
     private String ignoredTypes[] = new String[0];
 
+    @SideEffectFree
+    @Impure
     public HollowStateEngineRecordPatcher(HollowReadStateEngine base, HollowReadStateEngine patchFrom) {
         this(base, patchFrom, true);
     }
 
+    @SideEffectFree
     public HollowStateEngineRecordPatcher(HollowReadStateEngine base, HollowReadStateEngine patchFrom, boolean removeDetachedTransitiveReferences) {
         this.base = base;
         this.patchFrom = patchFrom;
         this.matchKeyPaths = new ArrayList<TypeMatchSpec>();
     }
 
+    @Impure
     public void addTypeMatchSpec(TypeMatchSpec matchSpec) {
         this.matchKeyPaths.add(matchSpec);
     }
 
+    @Impure
     public void setIgnoredTypes(String... ignoredTypes) {
         this.ignoredTypes = ignoredTypes;
     }
 
+    @Impure
     public HollowWriteStateEngine patch() {
         Map<String, BitSet> baseMatches = findMatches(base);
 
@@ -76,6 +84,7 @@ public class HollowStateEngineRecordPatcher {
         return combiner.getCombinedStateEngine();
     }
 
+    @Impure
     private Map<String, BitSet> findMatches(HollowReadStateEngine stateEngine) {
         Map<String, BitSet> matches = new HashMap<String, BitSet>();
         for(TypeMatchSpec spec : matchKeyPaths) {
@@ -127,6 +136,7 @@ public class HollowStateEngineRecordPatcher {
         return matches;
     }
 
+    @Impure
     private BitSet getOrCreateBitSet(Map<String, BitSet> bitSets, String typeName, int numBitsRequired) {
         if(numBitsRequired < 0)
             return new BitSet(0);
@@ -139,6 +149,7 @@ public class HollowStateEngineRecordPatcher {
         return bs;
     }
 
+    @Impure
     private BitSet getPopulatedOrdinals(HollowTypeReadState typeState) {
         return typeState.getListener(PopulatedOrdinalListener.class).getPopulatedOrdinals();
     }

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index.key;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.HollowReadFieldUtils;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -39,6 +42,7 @@ public class HollowPrimaryKeyValueDeriver {
      * @param primaryKey The primary key spec
      * @param stateEngine The state engine to retrieve data from
      */
+    @Impure
     public HollowPrimaryKeyValueDeriver(PrimaryKey primaryKey, HollowReadStateEngine stateEngine) {
         this.fieldPathIndexes = new int[primaryKey.numFields()][];
         this.fieldTypes = new FieldType[primaryKey.numFields()];
@@ -51,6 +55,7 @@ public class HollowPrimaryKeyValueDeriver {
         this.typeState = (HollowObjectTypeReadState) stateEngine.getTypeState(primaryKey.getType());
     }
 
+    @SideEffectFree
     public HollowPrimaryKeyValueDeriver(HollowObjectTypeReadState typeState, int[][] fieldPathIndexes, FieldType[] fieldTypes) {
         this.typeState = typeState;
         this.fieldPathIndexes = fieldPathIndexes;
@@ -64,6 +69,7 @@ public class HollowPrimaryKeyValueDeriver {
      * @param keys the primary keys
      * @return true if the ordinal contains the primary keys
      */
+    @Impure
     public boolean keyMatches(int ordinal, Object... keys) {
         if(keys.length != fieldPathIndexes.length)
             return false;
@@ -76,6 +82,7 @@ public class HollowPrimaryKeyValueDeriver {
         return true;
     }
 
+    @Impure
     public boolean keyMatches(Object key, int ordinal, int fieldIdx) {
         HollowObjectTypeReadState typeState = this.typeState;
         HollowObjectSchema schema = typeState.getSchema();
@@ -93,6 +100,7 @@ public class HollowPrimaryKeyValueDeriver {
         return keyMatches(key, fieldTypes[fieldIdx], lastFieldIdx, ordinal, typeState);
     }
 
+    @Impure
     @SuppressWarnings("UnnecessaryUnboxing")
     public static boolean keyMatches(Object key, FieldType fieldType, int lastFieldIdx, int ordinal, HollowObjectTypeDataAccess dataAccess) {
         switch(fieldType) {
@@ -128,6 +136,7 @@ public class HollowPrimaryKeyValueDeriver {
      * @param ordinal the oridinal
      * @return the primary keys
      */
+    @Impure
     public Object[] getRecordKey(int ordinal) {
         Object[] results = new Object[fieldPathIndexes.length];
 
@@ -137,6 +146,7 @@ public class HollowPrimaryKeyValueDeriver {
         return results;
     }
 
+    @Impure
     private Object readValue(int ordinal, int fieldIdx) {
         HollowObjectTypeReadState typeState = this.typeState;
         HollowObjectSchema schema = typeState.getSchema();
@@ -152,10 +162,12 @@ public class HollowPrimaryKeyValueDeriver {
         return HollowReadFieldUtils.fieldValueObject(typeState, ordinal, fieldPathIndexes[fieldIdx][lastFieldPath]);
     }
 
+    @Pure
     public int[][] getFieldPathIndexes() {
         return fieldPathIndexes;
     }
 
+    @Pure
     public FieldType[] getFieldTypes() {
         return fieldTypes;
     }

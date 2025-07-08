@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.consumer.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.checker.mustcall.qual.Owning;
 import static java.util.stream.Collectors.toList;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
@@ -58,6 +61,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
     final String[] matchFieldPaths;
     HollowPrimaryKeyIndex hpki;
 
+    @Impure
     UniqueKeyIndex(
             HollowConsumer consumer,
             Class<T> uniqueType,
@@ -82,6 +86,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
         this.hpki = new HollowPrimaryKeyIndex(consumer.getStateEngine(), uniqueSchemaName, matchFieldPaths);
     }
 
+    @Impure
     static <Q> List<MatchFieldPathArgumentExtractor<Q>> validatePrimaryKeyFieldPaths(
             HollowConsumer consumer, String primaryTypeName,
             PrimaryKey primaryTypeKey, List<MatchFieldPathArgumentExtractor<Q>> matchFields) {
@@ -110,6 +115,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
         return orderedMatchFields;
     }
 
+    @Impure
     UniqueKeyIndex(
             HollowConsumer consumer,
             Class<T> uniqueType,
@@ -124,6 +130,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
                                 FieldPaths::createFieldPathForPrimaryKey));
     }
 
+    @Impure
     UniqueKeyIndex(
             HollowConsumer consumer,
             Class<T> uniqueType,
@@ -146,8 +153,9 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
      * @param key the key
      * @return the unique object
      */
+    @Impure
     @Override
-    public T apply(Q key) {
+    public T apply(@Owning Q key) {
         return findMatch(key);
     }
 
@@ -157,7 +165,8 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
      * @param key the key
      * @return the unique object
      */
-    public T findMatch(Q key) {
+    @Impure
+    public T findMatch(@Owning Q key) {
         Object[] keyArray = new Object[matchFields.size()];
         int keyArrayLogicalSize = 0;
         for (int i = 0; i < matchFields.size(); i++)
@@ -188,9 +197,11 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
 
     // HollowConsumer.RefreshListener
 
+    @SideEffectFree
     @Override public void refreshStarted(long currentVersion, long requestedVersion) {
     }
 
+    @Impure
     @Override public void snapshotUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) {
         HollowPrimaryKeyIndex hpki = this.hpki;
         hpki.detachFromDeltaUpdates();
@@ -200,22 +211,27 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
         this.api = api;
     }
 
+    @Impure
     @Override public void deltaUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) {
         this.api = api;
     }
 
+    @SideEffectFree
     @Override public void blobLoaded(HollowConsumer.Blob transition) {
     }
 
+    @SideEffectFree
     @Override public void refreshSuccessful(long beforeVersion, long afterVersion, long requestedVersion) {
     }
 
+    @SideEffectFree
     @Override public void refreshFailed(
             long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause) {
     }
 
     // HollowConsumer.RefreshRegistrationListener
 
+    @Impure
     @Override public void onBeforeAddition(HollowConsumer c) {
         if (c != consumer) {
             throw new IllegalStateException("The index's consumer and the listener's consumer are not the same");
@@ -223,6 +239,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
         hpki.listenForDeltaUpdates();
     }
 
+    @Impure
     @Override public void onAfterRemoval(HollowConsumer c) {
         hpki.detachFromDeltaUpdates();
     }
@@ -235,6 +252,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
      * @param <T> the unique type
      * @return a builder
      */
+    @Impure
     public static <T extends HollowObject> Builder<T> from(HollowConsumer consumer, Class<T> uniqueType) {
         Objects.requireNonNull(consumer);
         Objects.requireNonNull(uniqueType);
@@ -251,6 +269,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
         final Class<T> uniqueType;
         PrimaryKey primaryTypeKey; // non-null on bindWithPrimaryKeyOnType
 
+        @SideEffectFree
         Builder(HollowConsumer consumer, Class<T> uniqueType) {
             this.consumer = consumer;
             this.uniqueType = uniqueType;
@@ -263,6 +282,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
          * type
          * @throws IllegalArgumentException if there is no primary key associated with the unique type
          */
+        @Impure
         public Builder<T> bindToPrimaryKey() {
             String primaryTypeName = HollowTypeMapper.getDefaultTypeName(uniqueType);
             HollowSchema schema = consumer.getStateEngine().getNonNullSchema(primaryTypeName);
@@ -289,6 +309,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
          * @throws IllegalArgumentException if the builder is bound to the primary key of the unique type and
          * the field paths declared by the key type are not the identical to those declared by the primary key
          */
+        @Impure
         public <Q> UniqueKeyIndex<T, Q> usingBean(Class<Q> keyType) {
             Objects.requireNonNull(keyType);
             return new UniqueKeyIndex<>(consumer, uniqueType, primaryTypeKey,
@@ -308,6 +329,7 @@ public class UniqueKeyIndex<T extends HollowObject, Q>
          * @throws IllegalArgumentException if the builder is bound to the primary key of the unique type and
          * the field path declared by the key type is not identical to the keyFieldPath
          */
+        @Impure
         public <Q> UniqueKeyIndex<T, Q> usingPath(String keyFieldPath, Class<Q> keyFieldType) {
             Objects.requireNonNull(keyFieldPath);
             if (keyFieldPath.isEmpty()) {

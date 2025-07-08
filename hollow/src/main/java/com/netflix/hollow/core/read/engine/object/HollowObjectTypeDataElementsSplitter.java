@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine.object;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.copyRecord;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.varLengthSize;
 
@@ -17,11 +19,14 @@ import com.netflix.hollow.core.schema.HollowObjectSchema;
 public class HollowObjectTypeDataElementsSplitter extends HollowTypeDataElementsSplitter<HollowObjectTypeDataElements> {
     private HollowObjectSchema schema;
 
+    @SideEffectFree
+    @Impure
     public HollowObjectTypeDataElementsSplitter(HollowObjectTypeDataElements from, int numSplits) {
         super(from, numSplits);
         this.schema = from.schema;
     }
 
+    @Impure
     @Override
     public void initToElements() {
         this.to = new HollowObjectTypeDataElements[numSplits];
@@ -30,6 +35,7 @@ public class HollowObjectTypeDataElementsSplitter extends HollowTypeDataElements
         }
     }
 
+    @Impure
     @Override
     public void populateStats() {
         long[][] varLengthSizes = new long[to.length][from.schema.numFields()];
@@ -63,6 +69,7 @@ public class HollowObjectTypeDataElementsSplitter extends HollowTypeDataElements
         }
     }
 
+    @Impure
     @Override
     public void copyRecords() {
         final long[][] currentWriteVarLengthDataPointers = new long[to.length][from.schema.numFields()];

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.api.consumer.HollowConsumer.Blob;
 import com.netflix.hollow.api.custom.HollowAPI;
@@ -27,14 +30,17 @@ import java.io.InputStream;
 @SuppressWarnings("deprecation")
 class HollowClientConsumerBridge {
     
+    @Impure
     static HollowConsumer.BlobRetriever consumerBlobRetrieverFor(final HollowBlobRetriever blobRetriever) {
         return new HollowConsumer.BlobRetriever() {
 
+            @Pure
             @Override
             public HollowConsumer.HeaderBlob retrieveHeaderBlob(long currentVersion) {
                 throw new UnsupportedOperationException();
             }
 
+            @Impure
             @Override
             public Blob retrieveSnapshotBlob(long desiredVersion) {
                 final HollowBlob blob = blobRetriever.retrieveSnapshotBlob(desiredVersion);
@@ -42,11 +48,13 @@ class HollowClientConsumerBridge {
                     return null;
                 
                 return new HollowConsumer.Blob(blob.getFromVersion(), blob.getToVersion()) {
+                    @Impure
                     @Override
                     public InputStream getInputStream() throws IOException {
                         return blob.getInputStream();
                     }
 
+                    @Impure
                     @Override
                     public File getFile() throws IOException {
                         return blob.getFile();
@@ -54,6 +62,7 @@ class HollowClientConsumerBridge {
                 };
             }
 
+            @Impure
             @Override
             public Blob retrieveDeltaBlob(long currentVersion) {
                 final HollowBlob blob = blobRetriever.retrieveDeltaBlob(currentVersion);
@@ -61,11 +70,13 @@ class HollowClientConsumerBridge {
                     return null;
                 
                 return new HollowConsumer.Blob(blob.getFromVersion(), blob.getToVersion()) {
+                    @Impure
                     @Override
                     public InputStream getInputStream() throws IOException {
                         return blob.getInputStream();
                     }
 
+                    @Impure
                     @Override
                     public File getFile() throws IOException {
                         return blob.getFile();
@@ -73,6 +84,7 @@ class HollowClientConsumerBridge {
                 };
             }
             
+            @Impure
             @Override
             public Blob retrieveReverseDeltaBlob(long currentVersion) {
                 final HollowBlob blob = blobRetriever.retrieveReverseDeltaBlob(currentVersion);
@@ -80,11 +92,13 @@ class HollowClientConsumerBridge {
                     return null;
                 
                 return new HollowConsumer.Blob(blob.getFromVersion(), blob.getToVersion()) {
+                    @Impure
                     @Override
                     public InputStream getInputStream() throws IOException {
                         return blob.getInputStream();
                     }
 
+                    @Impure
                     @Override
                     public File getFile() throws IOException {
                         return blob.getFile();
@@ -95,27 +109,35 @@ class HollowClientConsumerBridge {
         };
     }
     
+    @Impure
     static HollowConsumer.RefreshListener consumerRefreshListenerFor(final HollowUpdateListener listener) {
             
         return new HollowConsumer.AbstractRefreshListener() {
 
+            @SideEffectFree
+            @Impure
             @Override
             public void refreshStarted(long currentVersion, long requestedVersion) {
                 listener.refreshStarted(currentVersion, requestedVersion);
             }
 
+            @SideEffectFree
+            @Impure
             @Override
             public void snapshotUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception {
                 listener.dataInitialized(api, stateEngine, version);
             }
             
+            @Impure
             @Override
             public void blobLoaded(final HollowConsumer.Blob transition) {
                 listener.transitionApplied(new HollowBlob(transition.getFromVersion(), transition.getToVersion()) {
+                    @Impure
                     @Override
                     public InputStream getInputStream() throws IOException {
                         return transition.getInputStream();
                     }
+                    @Impure
                     @Override
                     public File getFile() throws IOException {
                         return transition.getFile();
@@ -123,16 +145,22 @@ class HollowClientConsumerBridge {
                 });
             }
 
+            @SideEffectFree
+            @Impure
             @Override
             public void deltaUpdateOccurred(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception {
                 listener.dataUpdated(api, stateEngine, version);
             }
 
+            @SideEffectFree
+            @Impure
             @Override
             public void refreshSuccessful(long beforeVersion, long afterVersion, long requestedVersion) {
                 listener.refreshCompleted(beforeVersion, afterVersion, requestedVersion);
             }
             
+            @SideEffectFree
+            @Impure
             @Override
             public void refreshFailed(long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause) {
                 listener.refreshFailed(beforeVersion, afterVersion, requestedVersion, failureCause);
@@ -140,6 +168,8 @@ class HollowClientConsumerBridge {
         };
     }
     
+    @SideEffectFree
+    @Impure
     static HollowClientDoubleSnapshotConfig doubleSnapshotConfigFor(HollowClientMemoryConfig memoryConfig) {
         return new HollowClientDoubleSnapshotConfig(memoryConfig);
     }
@@ -149,20 +179,25 @@ class HollowClientConsumerBridge {
         private final HollowClientMemoryConfig clientMemCfg;
         private int maxDeltasBeforeDoubleSnapshot = 32;
         
+        @SideEffectFree
         private HollowClientDoubleSnapshotConfig(HollowClientMemoryConfig clientMemCfg) {
             this.clientMemCfg = clientMemCfg;
         }
         
+        @Pure
+        @Impure
         @Override
         public boolean allowDoubleSnapshot() {
             return clientMemCfg.allowDoubleSnapshot();
         }
 
+        @Pure
         @Override
         public int maxDeltasBeforeDoubleSnapshot() {
             return maxDeltasBeforeDoubleSnapshot;
         }
         
+        @Impure
         public void setMaxDeltasBeforeDoubleSnapshot(int maxDeltas) {
             this.maxDeltasBeforeDoubleSnapshot = maxDeltas;
         }

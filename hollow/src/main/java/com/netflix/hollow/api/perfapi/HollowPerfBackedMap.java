@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
 import com.netflix.hollow.core.read.iterator.HollowMapEntryOrdinalIterator;
 import java.util.AbstractMap;
@@ -36,6 +40,8 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
     private final POJOInstantiator<V> valueInstantiator;
     private final HashKeyExtractor hashKeyExtractor;
 
+    @SideEffectFree
+    @Impure
     public HollowPerfBackedMap(
             HollowMapTypePerfAPI typeApi, int ordinal,
             POJOInstantiator<K> keyInstantiator,
@@ -50,6 +56,7 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
         this.hashKeyExtractor = hashKeyExtractor;
     }
 
+    @Impure
     @Override
     public boolean containsKey(Object o) {
         Object[] hashKey = hashKeyExtractor.extractArray(o);
@@ -57,6 +64,7 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
         return dataAccess.findValue(ordinal, hashKey) != -1;
     }
 
+    @Impure
     @Override
     public V get(Object o) {
         Object[] hashKey = hashKeyExtractor.extractArray(o);
@@ -66,9 +74,11 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
         return valueOrdinal == -1 ? null : valueInstantiator.instantiate(valueMaskedTypeIdx | valueOrdinal);
     }
 
+    @Impure
     @Override
     public Set<Entry<K, V>> entrySet() {
         return new AbstractSet<Entry<K, V>>() {
+            @Impure
             @Override
             public Iterator<Entry<K, V>> iterator() {
                 HollowMapEntryOrdinalIterator oi = dataAccess.ordinalIterator(ordinal);
@@ -76,11 +86,13 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
                 return new Iterator<Entry<K, V>>() {
                     boolean next = oi.next();
 
+                    @Pure
                     @Override
                     public boolean hasNext() {
                         return next;
                     }
 
+                    @Impure
                     @Override
                     public Entry<K, V> next() {
                         if (!hasNext()) {
@@ -96,11 +108,13 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
                 };
             }
 
+            @Pure
             @Override
             public int size() {
                 return HollowPerfBackedMap.this.size();
             }
 
+            @Impure
             @Override
             public boolean contains(Object o) {
                 if (!(o instanceof Map.Entry)) {
@@ -122,6 +136,7 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
         };
     }
 
+    @Impure
     @Override
     public int size() {
         return dataAccess.size(ordinal);
@@ -137,11 +152,14 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
         boolean vInstantiated;
         V v;
 
+        @SideEffectFree
         BackedEntry(long kRef, long vRef) {
             this.kRef = kRef;
             this.vRef = vRef;
         }
 
+        @NotOwning
+        @Impure
         @Override
         public K getKey() {
             if (!kInstantiated) {
@@ -151,6 +169,8 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
             return k;
         }
 
+        @NotOwning
+        @Impure
         @Override
         public V getValue() {
             if (!vInstantiated) {
@@ -160,11 +180,13 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
             return v;
         }
 
+        @Pure
         @Override
         public V setValue(V value) {
             throw new UnsupportedOperationException();
         }
 
+        @Pure
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof Map.Entry)) {
@@ -174,6 +196,7 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
             return Objects.equals(getKey(), e.getKey()) && Objects.equals(getValue(), e.getValue());
         }
 
+        @Pure
         @Override
         public int hashCode() {
             K key = getKey();
@@ -182,6 +205,7 @@ public class HollowPerfBackedMap<K, V> extends AbstractMap<K, V> {
                     (value == null ? 0 : value.hashCode());
         }
 
+        @Pure
         public String toString() {
             return getKey() + "=" + getValue();
         }

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.delegateCachedImplName;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.delegateInterfaceName;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.substituteInvalidChars;
@@ -43,12 +44,14 @@ import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
  */
 public class HollowObjectDelegateCachedImplGenerator extends HollowObjectDelegateGenerator {
 
+    @Impure
     public HollowObjectDelegateCachedImplGenerator(String packageName, HollowObjectSchema schema,
             HollowErgonomicAPIShortcuts ergonomicShortcuts, HollowDataset dataset, CodeGeneratorConfig config) {
         super(packageName, schema, ergonomicShortcuts, dataset, config);
         this.className = delegateCachedImplName(schema.getName());
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder builder = new StringBuilder();
@@ -175,6 +178,7 @@ public class HollowObjectDelegateCachedImplGenerator extends HollowObjectDelegat
         return builder.toString();
     }
 
+    @Impure
     private void addAccessor(StringBuilder builder, FieldType fieldType, String fieldName) {
         switch(fieldType) {
         case BOOLEAN:

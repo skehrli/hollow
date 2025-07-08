@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.index.FieldPaths.FieldPathException.ErrorKind.NOT_BINDABLE;
 import static java.util.Objects.requireNonNull;
 
@@ -62,6 +65,7 @@ public class HollowHashIndex implements HollowTypeStateListener {
      * The selectField may span collection elements and/or map keys or values, which can result in multiple matches per record of the specified start type.
      * @param matchFields The query will match on the specified match fields.  The match fields may span collection elements and/or map keys or values.
      */
+    @Impure
     public HollowHashIndex(HollowReadStateEngine stateEngine, String type, String selectField, String... matchFields) {
         this((HollowDataAccess) stateEngine, type, selectField, matchFields);
     }
@@ -75,6 +79,7 @@ public class HollowHashIndex implements HollowTypeStateListener {
      * The selectField may span collection elements and/or map keys or values, which can result in multiple matches per record of the specified start type.
      * @param matchFields The query will match on the specified match fields.  The match fields may span collection elements and/or map keys or values.
      */
+    @Impure
     public HollowHashIndex(HollowDataAccess hollowDataAccess, String type, String selectField, String... matchFields) {
         requireNonNull(type, "Hollow Hash Index creation failed because type was null");
         requireNonNull(hollowDataAccess, "Hollow Hash Index creation on type [" + type
@@ -97,6 +102,7 @@ public class HollowHashIndex implements HollowTypeStateListener {
     /**
      * Recreate the hash index entirely
      */
+    @Impure
     private void reindexHashIndex() {
         HollowHashIndexBuilder builder;
         try {
@@ -125,6 +131,7 @@ public class HollowHashIndex implements HollowTypeStateListener {
      * @return the hash index result to gather the matched ordinals. A {@code null} value indicated no matches were
      * found.
      */
+    @Impure
     public HollowHashIndexResult findMatches(Object... query) {
         if (hashStateVolatile == null) {
             throw new IllegalStateException(this + " wasn't initialized");
@@ -164,6 +171,7 @@ public class HollowHashIndex implements HollowTypeStateListener {
         return result;
     }
 
+    @Impure
     private int keyHashCode(Object key, int fieldIdx) {
         HollowHashIndexState hashState = hashStateVolatile;
         switch(hashState.getMatchFields()[fieldIdx].getFieldType()) {
@@ -188,6 +196,7 @@ public class HollowHashIndex implements HollowTypeStateListener {
         throw new IllegalArgumentException("I don't know how to hash a " + hashState.getMatchFields()[fieldIdx].getFieldType());
     }
 
+    @Impure
     private boolean matchIsEqual(FixedLengthElementArray matchHashTable, long hashBucketBit, Object[] query) {
         HollowHashIndexState hashState = hashStateVolatile;
         for(int i = 0; i< hashState.getMatchFields().length; i++) {
@@ -231,6 +240,7 @@ public class HollowHashIndex implements HollowTypeStateListener {
      * If double-snapshot updates are expected the caller must detach this index instance and initialize a new one. See
      * implementation of {@link com.netflix.hollow.api.consumer.index.UniqueKeyIndex} for a reference implementation.
      */
+    @Impure
     public void listenForDeltaUpdates() {
         if (typeState == null) {
             return;
@@ -246,6 +256,7 @@ public class HollowHashIndex implements HollowTypeStateListener {
      * <p>
      * Call this method before discarding indexes which are currently listening for delta updates.
      */
+    @Impure
     public void detachFromDeltaUpdates() {
         if (typeState == null) {
             return;
@@ -254,15 +265,19 @@ public class HollowHashIndex implements HollowTypeStateListener {
             ((HollowObjectTypeReadState) typeState).removeListener(this);
     }
 
+    @SideEffectFree
     @Override
     public void beginUpdate() { }
 
+    @SideEffectFree
     @Override
     public void addedOrdinal(int ordinal) { }
 
+    @SideEffectFree
     @Override
     public void removedOrdinal(int ordinal) { }
 
+    @Impure
     @Override
     public void endUpdate() {
         if (hashStateVolatile == null) {
@@ -276,22 +291,27 @@ public class HollowHashIndex implements HollowTypeStateListener {
      * @throws ClassCastException thrown if the underlying hollowDataAccess is not a state engine. This occurs if the
      * index was created from a consumer with hollow object longevity enabled.
      */
+    @Pure
     public HollowReadStateEngine getStateEngine() {
         return (HollowReadStateEngine) hollowDataAccess;
     }
 
+    @Pure
     public HollowDataAccess getHollowDataAccess() {
         return hollowDataAccess;
     }
 
+    @Pure
     public String getType() {
         return type;
     }
 
+    @Pure
     public String getSelectField() {
         return selectField;
     }
 
+    @Pure
     public String[] getMatchFields() {
         return matchFields;
     }
@@ -310,6 +330,8 @@ public class HollowHashIndex implements HollowTypeStateListener {
         private final int bitsPerSelectTableSize;
         private final int bitsPerSelectTablePointer;
 
+        @SideEffectFree
+        @Impure
         public HollowHashIndexState(HollowHashIndexBuilder builder) {
             matchHashTable = builder.getFinalMatchHashTable();
             selectHashArray = builder.getFinalSelectHashArray();
@@ -324,51 +346,63 @@ public class HollowHashIndex implements HollowTypeStateListener {
             bitsPerSelectHashEntry = builder.getBitsPerSelectHashEntry();
         }
 
+        @Pure
         public FixedLengthElementArray getSelectHashArray() {
             return selectHashArray;
         }
 
+        @Pure
         public int getBitsPerSelectHashEntry() {
             return bitsPerSelectHashEntry;
         }
 
+        @Pure
         public FixedLengthElementArray getMatchHashTable() {
             return matchHashTable;
         }
 
+        @Pure
         public HollowHashIndexField[] getMatchFields() {
             return matchFields;
         }
 
+        @Pure
         public int getMatchHashMask() {
             return matchHashMask;
         }
 
+        @Pure
         public int getBitsPerMatchHashKey() {
             return bitsPerMatchHashKey;
         }
 
+        @Pure
         public int getBitsPerMatchHashEntry() {
             return bitsPerMatchHashEntry;
         }
 
+        @Pure
         public int[] getBitsPerTraverserField() {
             return bitsPerTraverserField;
         }
 
+        @Pure
         public int[] getOffsetPerTraverserField() {
             return offsetPerTraverserField;
         }
 
+        @Pure
         public int getBitsPerSelectTableSize() {
             return bitsPerSelectTableSize;
         }
 
+        @Pure
         public int getBitsPerSelectTablePointer() {
             return bitsPerSelectTablePointer;
         }
     }
 
+    @SideEffectFree
     @Override
     public String toString() {
         return "HollowHashIndex [type=" + type + ", selectField=" + selectField + ", matchFields=" + Arrays.toString(matchFields) + "]";

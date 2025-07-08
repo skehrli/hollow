@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.dataaccess.proxy;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
@@ -33,43 +36,52 @@ public abstract class HollowTypeProxyDataAccess implements HollowTypeDataAccess 
     protected final HollowProxyDataAccess dataAccess;
     protected HollowTypeDataAccess currentDataAccess;
 
+    @SideEffectFree
     public HollowTypeProxyDataAccess(HollowProxyDataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
 
+    @Impure
     public void setCurrentDataAccess(HollowTypeDataAccess typeDataAccess) {
         this.currentDataAccess = typeDataAccess;
     }
 
+    @Pure
     public HollowTypeDataAccess getCurrentDataAccess() {
         return currentDataAccess;
     }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         return dataAccess;
     }
 
+    @Impure
     @Override
     public HollowTypeReadState getTypeState() {
         return currentDataAccess.getTypeState();
     }
 
+    @Impure
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         currentDataAccess.setSamplingDirector(director);
     }
     
+    @Impure
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         currentDataAccess.setFieldSpecificSamplingDirector(fieldSpec, director);
     }
     
+    @Impure
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         currentDataAccess.ignoreUpdateThreadForSampling(t);
     }
 
+    @Impure
     @Override
     public HollowSampler getSampler() {
         return currentDataAccess.getSampler();

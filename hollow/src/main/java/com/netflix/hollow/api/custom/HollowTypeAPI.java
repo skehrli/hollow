@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.custom;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
 import com.netflix.hollow.api.sampling.SampleResult;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
@@ -34,31 +37,38 @@ public abstract class HollowTypeAPI {
     protected final HollowAPI api;
     protected final HollowTypeDataAccess typeDataAccess;
 
+    @SideEffectFree
     protected HollowTypeAPI(HollowAPI api, HollowTypeDataAccess typeDataAccess) {
         this.api = api;
         this.typeDataAccess = typeDataAccess;
     }
 
+    @Pure
     public HollowAPI getAPI() {
         return api;
     }
 
+    @Pure
     public HollowTypeDataAccess getTypeDataAccess() {
         return typeDataAccess;
     }
 
+    @Impure
     public void setSamplingDirector(HollowSamplingDirector samplingDirector) {
         typeDataAccess.setSamplingDirector(samplingDirector);
     }
     
+    @Impure
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         typeDataAccess.setFieldSpecificSamplingDirector(fieldSpec, director);
     }
     
+    @Impure
     public void ignoreUpdateThreadForSampling(Thread t) {
         typeDataAccess.ignoreUpdateThreadForSampling(t);
     }
 
+    @Impure
     public Collection<SampleResult> getAccessSampleResults() {
         return typeDataAccess.getSampler().getSampleResults();
     }

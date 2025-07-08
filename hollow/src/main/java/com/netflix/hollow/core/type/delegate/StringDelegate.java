@@ -16,15 +16,20 @@
  */
 package com.netflix.hollow.core.type.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.delegate.HollowObjectDelegate;
 import com.netflix.hollow.core.type.StringTypeAPI;
 
 public interface StringDelegate extends HollowObjectDelegate {
 
+    @Impure
     public String getValue(int ordinal);
 
+    @Impure
     public boolean isValueEqual(int ordinal, String testValue);
 
+    @Pure
     @Override
     public StringTypeAPI getTypeAPI();
 

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.metrics;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import java.util.Collection;
@@ -29,10 +31,12 @@ public abstract class HollowMetrics {
     private long totalHeapFootprint = 0L;
     private int totalPopulatedOrdinals = 0;
 
+    @Impure
     protected void update(long version) {
         setCurrentVersion(version);
     }
 
+    @Impure
     protected void update(HollowReadStateEngine hollowReadStateEngine, long version) {
         setCurrentVersion(version);
         calculateTypeMetrics(hollowReadStateEngine);
@@ -42,6 +46,7 @@ public abstract class HollowMetrics {
      * Calculates the memory heap footprint and populated ordinals per type and total
      * @param hollowReadStateEngine
      */
+    @Impure
     void calculateTypeMetrics(HollowReadStateEngine hollowReadStateEngine) {
         Collection<HollowTypeReadState> typeStates = hollowReadStateEngine.getTypeStates();
         if (typeStates == null)
@@ -61,25 +66,31 @@ public abstract class HollowMetrics {
         }
     }
 
+    @Pure
     public HashMap<String, Long> getTypeHeapFootprint() {
         return typeHeapFootprint;
     }
 
+    @Pure
     public HashMap<String, Integer> getTypePopulatedOrdinals() {
         return typePopulatedOrdinals;
     }
 
+    @Pure
     public long getCurrentVersion() {
         return this.currentVersion;
     }
 
+    @Pure
     public long getTotalHeapFootprint() {
         return this.totalHeapFootprint;
     }
 
+    @Pure
     public long getTotalPopulatedOrdinals() {
         return this.totalPopulatedOrdinals;
     }
 
+    @Impure
     public void setCurrentVersion(long version) { this.currentVersion = version; }
 }

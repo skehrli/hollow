@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.producer.listener;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.Status;
 import java.time.Duration;
@@ -34,6 +36,7 @@ public interface AnnouncementListener extends HollowProducerEventListener {
      *
      * @param version of {@code HollowBlob} that will be announced.
      */
+    @Impure
     void onAnnouncementStart(long version);
 
     /**
@@ -44,6 +47,7 @@ public interface AnnouncementListener extends HollowProducerEventListener {
      * @param readState the read state
      *
      */
+    @SideEffectFree
     default void onAnnouncementStart(HollowProducer.ReadState readState) { };
 
     /**
@@ -56,5 +60,6 @@ public interface AnnouncementListener extends HollowProducerEventListener {
      * @param version of {@code HollowBlob} that was announced.
      * @param elapsed duration of the announcement stage in {@code unit} units
      */
+    @Impure
     void onAnnouncementComplete(Status status, HollowProducer.ReadState readState, long version, Duration elapsed);
 }

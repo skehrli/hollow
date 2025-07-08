@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.codegen;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.objects.delegate.HollowListCachedDelegate;
 import com.netflix.hollow.api.objects.delegate.HollowListDelegate;
 import com.netflix.hollow.api.objects.delegate.HollowListLookupDelegate;
@@ -160,18 +163,22 @@ public class HollowCodeGenerationUtils {
         AGGRESSIVE_CLASS_NAME_SUBSTITUTIONS.put("Void", "HVoid");
     }
 
+    @Impure
     public static String typeAPIClassname(String typeName) {
         return uppercase(typeName) + "TypeAPI";
     }
 
+    @Impure
     public static String hollowFactoryClassname(String typeName) {
         return substituteInvalidChars(uppercase(typeName)) + "HollowFactory";
     }
 
+    @Impure
     public static String hollowObjectProviderName(String typeName) {
         return substituteInvalidChars(lowercase(typeName)) + "Provider";
     }
 
+    @Impure
     public static String hollowImplClassname(String typeName, String classPostfix,
             boolean useAggressiveSubstitutions, boolean useHollowPrimitives) {
         String classname = substituteInvalidChars(uppercase(typeName));
@@ -185,10 +192,12 @@ public class HollowCodeGenerationUtils {
         return sub == null ? classname + classPostfix : sub;
     }
 
+    @Impure
     public static String delegateInterfaceName(String typeName) {
         return substituteInvalidChars(uppercase(typeName)) + "Delegate";
     }
 
+    @Impure
     public static String delegateInterfaceName(HollowSchema schema) {
         if(schema instanceof HollowObjectSchema)
             return delegateInterfaceName(schema.getName());
@@ -201,10 +210,12 @@ public class HollowCodeGenerationUtils {
         throw new UnsupportedOperationException("What kind of schema is a " + schema.getClass().getSimpleName() + "?");
     }
 
+    @Impure
     public static String delegateCachedImplName(String typeName) {
         return substituteInvalidChars(uppercase(typeName)) + "DelegateCachedImpl";
     }
 
+    @Impure
     public static String delegateCachedClassname(HollowSchema schema) {
         if(schema instanceof HollowObjectSchema)
             return delegateCachedImplName(schema.getName());
@@ -217,10 +228,12 @@ public class HollowCodeGenerationUtils {
         throw new UnsupportedOperationException("What kind of schema is a " + schema.getClass().getSimpleName() + "?");
     }
 
+    @Impure
     public static String delegateLookupImplName(String typeName) {
         return substituteInvalidChars(uppercase(typeName)) + "DelegateLookupImpl";
     }
 
+    @Impure
     public static String delegateLookupClassname(HollowSchema schema) {
         if(schema instanceof HollowObjectSchema)
             return delegateLookupImplName(schema.getName());
@@ -233,6 +246,7 @@ public class HollowCodeGenerationUtils {
         throw new UnsupportedOperationException("What kind of schema is a " + schema.getClass().getSimpleName() + "?");
     }
 
+    @Impure
     public static String lowercase(String str) {
         if(str == null || str.length() == 0)
             return str;
@@ -245,10 +259,12 @@ public class HollowCodeGenerationUtils {
         return builder.toString();
     }
 
+    @Impure
     public static String uppercase(String str) {
         return upperFirstChar(str);
     }
 
+    @Impure
     public static String upperFirstChar(String str) {
         if(str == null || str.length() == 0)
             return str;
@@ -261,12 +277,14 @@ public class HollowCodeGenerationUtils {
         return builder.toString();
     }
 
+    @SideEffectFree
     public static String substituteInvalidChars(String str) {
         str = str.replace(' ', '_');
         str = str.replace('.', '_');
         return str;
     }
 
+    @SideEffectFree
     public static String getJavaBoxedType(FieldType fieldType) {
         switch(fieldType) {
             case BOOLEAN:
@@ -288,6 +306,7 @@ public class HollowCodeGenerationUtils {
         throw new IllegalArgumentException("Java boxed type is not known for FieldType." + fieldType.toString());
     }
 
+    @SideEffectFree
     public static String getJavaScalarType(FieldType fieldType) {
         switch(fieldType) {
             case BOOLEAN:
@@ -311,6 +330,7 @@ public class HollowCodeGenerationUtils {
 
     private static final Set<String> booleanMethodPrefixes = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             "is", "has", "do", "should", "was", "contains", "enable", "disable", "get")));
+    @Pure
     public static Set<String> getBooleanMethodPrefixes() { return booleanMethodPrefixes; }
 
     /**
@@ -334,6 +354,7 @@ public class HollowCodeGenerationUtils {
      *            type of field
      * @return accessor method name
      */
+    @Impure
     public static String generateAccessortMethodName(String fieldName, Class<?> clazz) {
         String prefix = "get";
         if (boolean.class.equals(clazz) || Boolean.class.equals(clazz)) {
@@ -350,6 +371,7 @@ public class HollowCodeGenerationUtils {
         return substituteInvalidChars(prefix + uppercase(fieldName));
     }
 
+    @Impure
     public static String generateBooleanAccessorMethodName(String fieldName, boolean useBooleanFieldErgonomics) {
         return useBooleanFieldErgonomics ? generateAccessortMethodName(fieldName, boolean.class) : "get" + uppercase(fieldName);
     }
@@ -364,6 +386,7 @@ public class HollowCodeGenerationUtils {
      * @param fieldPath the field path
      * @return the param name
      */
+    @Impure
     public static String normalizeFieldPathToParamName(String fieldPath) {
         String result = null;
         if (fieldPath.contains(".")) {
@@ -384,10 +407,12 @@ public class HollowCodeGenerationUtils {
         return result;
     }
 
+    @Pure
     public static boolean isPrimitiveType(String type) {
         return PRIMITIVE_TYPES.contains(type);
     }
 
+    @Impure
     public static Set<String> getPrimitiveTypes(Collection<HollowSchema> schemaList) {
         Set<String> primitiveTypes = new HashSet<>();
         for (HollowSchema schema : schemaList) {
@@ -399,6 +424,7 @@ public class HollowCodeGenerationUtils {
         return primitiveTypes;
     }
 
+    @Impure
     public static boolean isCollectionType(String schemaName, HollowDataset dataset) {
         return dataset.getSchema(schemaName).getSchemaType() != HollowSchema.SchemaType.OBJECT;
     }

@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.HollowConstants.VERSION_NONE;
 import static java.util.Objects.requireNonNull;
 
@@ -95,6 +98,7 @@ public class HollowHistory {
      * @param initialVersion The initial version of the HollowReadStateEngine
      * @param maxHistoricalStatesToKeep The number of historical states to keep in memory
      */
+    @Impure
     public HollowHistory(HollowReadStateEngine initialHollowStateEngine, long initialVersion, int maxHistoricalStatesToKeep) {
         this(initialHollowStateEngine, initialVersion, maxHistoricalStatesToKeep, true);
     }
@@ -105,6 +109,7 @@ public class HollowHistory {
      * @param maxHistoricalStatesToKeep The number of historical states to keep in memory
      * @param isAutoDiscoverTypeIndex true if scheme types are auto-discovered from the initiate state engine
      */
+    @Impure
     public HollowHistory(HollowReadStateEngine initialHollowStateEngine, long initialVersion, int maxHistoricalStatesToKeep, boolean isAutoDiscoverTypeIndex) {
         this(initialHollowStateEngine, null, initialVersion, VERSION_NONE, maxHistoricalStatesToKeep, isAutoDiscoverTypeIndex);
     }
@@ -120,6 +125,7 @@ public class HollowHistory {
      * @param revInitialVersion The version of {@code revMovingHollowReadStateEngine}, pass VERSION_NONE if revMovingHollowReadStateEngine is null
      * @param maxHistoricalStatesToKeep The number of historical states to keep in memory
      */
+    @Impure
     public HollowHistory(HollowReadStateEngine fwdMovingHollowReadStateEngine,
                          HollowReadStateEngine revMovingHollowReadStateEngine,
                          long fwdInitialVersion,
@@ -145,6 +151,7 @@ public class HollowHistory {
      * @param maxHistoricalStatesToKeep The number of historical states to keep in memory
      * @param isAutoDiscoverTypeIndex true if scheme types are auto-discovered from the initiate state engine
      */
+    @Impure
     public HollowHistory(HollowReadStateEngine fwdMovingHollowReadStateEngine,
                          HollowReadStateEngine revMovingHollowReadStateEngine,
                          long fwdInitialVersion,
@@ -186,6 +193,7 @@ public class HollowHistory {
         }
     }
 
+    @Impure
     public void initializeReverseStateEngine(HollowReadStateEngine revReadStateEngine, long version) {
         requireNonNull(revReadStateEngine, "Non-null revReadStateEngine required");
         if (version == VERSION_NONE) {
@@ -210,6 +218,7 @@ public class HollowHistory {
      * Call this method to indicate that list ordering changes should be identified as modified records when
      * a double snapshot occurs.  By default, these will not be identified as updates.
      */
+    @Impure
     public void ignoreListOrderingOnDoubleSnapshot() {
         this.ignoreListOrderingOnDoubleSnapshot = true;
     }
@@ -217,6 +226,7 @@ public class HollowHistory {
     /**
      * @return The {@link HollowHistoryKeyIndex}, responsible for identifying keyOrdinals.
      */
+    @Pure
     public HollowHistoryKeyIndex getKeyIndex() {
         return keyIndex;
     }
@@ -224,6 +234,7 @@ public class HollowHistory {
     /**
      * @return The {@link HollowReadStateEngine} backing the latest state.
      */
+    @Pure
     public HollowReadStateEngine getLatestState() {
         return latestHollowReadStateEngine;
     }
@@ -231,14 +242,17 @@ public class HollowHistory {
     /**
      * @return The {@link HollowReadStateEngine} backing the oldest state.
      */
+    @Pure
     public HollowReadStateEngine getOldestState() {
         return oldestHollowReadStateEngine;
     }
 
+    @Pure
     public long getLatestVersion() {
         return latestVersion;
     }
 
+    @Pure
     public long getOldestVersion() {
         return oldestVersion;
     }
@@ -246,6 +260,7 @@ public class HollowHistory {
     /**
      * @return An array of each historical state.
      */
+    @SideEffectFree
     public HollowHistoricalState[] getHistoricalStates() {
         return historicalStates.toArray(new HollowHistoricalState[historicalStates.size()]);
     }
@@ -253,6 +268,7 @@ public class HollowHistory {
     /**
      * @return the number of historical states
      */
+    @Pure
     public int getNumberOfHistoricalStates() {
         return historicalStates.size();
     }
@@ -261,6 +277,7 @@ public class HollowHistory {
      * @param version A version in the past
      * @return The {@link HollowHistoricalState} for the specified version, if it exists.
      */
+    @Pure
     public HollowHistoricalState getHistoricalState(long version) {
         if(latestVersion == version)
             return historicalStates.get(0);
@@ -273,6 +290,7 @@ public class HollowHistory {
      *
      * @param newVersion The version of the new state
      */
+    @Impure
     public void deltaOccurred(long newVersion) {
         // When invoked in a listener the delta update has been already applied to latestHollowReadStateEngine, but
         // {@code latestVersion} is still the version from before the delta transition. {@code latestVersion} is
@@ -314,6 +332,7 @@ public class HollowHistory {
      *
      * @param newVersion The version of the new state
      */
+    @Impure
     public void reverseDeltaOccurred(long newVersion) {
         if (oldestHollowReadStateEngine == null) {
             throw new IllegalStateException("Read state engine for reverse direction history computation isn't initialized. " +
@@ -364,6 +383,7 @@ public class HollowHistory {
      * @param newHollowStateEngine the new state engine
      * @param newVersion the new version
      */
+    @Impure
     public void doubleSnapshotOccurred(HollowReadStateEngine newHollowStateEngine, long newVersion) {
         if (newVersion <= latestVersion) {
             throw new UnsupportedOperationException("Double snapshot only supports advancing the latest version");
@@ -415,6 +435,7 @@ public class HollowHistory {
     }
 
     // only called when doing a double snapshot
+    @Impure
     private void remapHistoricalStateOrdinals(final DiffEqualityMappingOrdinalRemapper remapper, final HollowHistoricalStateDataAccess[] remappedDataAccesses, final HollowHistoricalStateKeyOrdinalMapping[] remappedKeyOrdinalMappings) {
         SimultaneousExecutor executor = new SimultaneousExecutor(getClass(), "remap");
         final int numThreads = executor.getCorePoolSize();
@@ -437,6 +458,7 @@ public class HollowHistory {
         }
     }
 
+    @Impure
     private HollowHistoricalStateKeyOrdinalMapping createKeyOrdinalMappingFromDelta(HollowReadStateEngine readStateEngine, boolean reverse) {
         HollowHistoricalStateKeyOrdinalMapping keyOrdinalMapping = new HollowHistoricalStateKeyOrdinalMapping(keyIndex);
 
@@ -483,6 +505,7 @@ public class HollowHistory {
         return keyOrdinalMapping;
     }
 
+    @Impure
     private HollowHistoricalStateKeyOrdinalMapping createKeyOrdinalMappingFromDoubleSnapshot(HollowReadStateEngine newStateEngine, DiffEqualityMappingOrdinalRemapper ordinalRemapper) {
         HollowHistoricalStateKeyOrdinalMapping keyOrdinalMapping = new HollowHistoricalStateKeyOrdinalMapping(keyIndex);
         DiffEqualityMapping mapping = ordinalRemapper.getDiffEqualityMapping();
@@ -523,6 +546,7 @@ public class HollowHistory {
         return keyOrdinalMapping;
     }
 
+    @Impure
     private int countUnmatchedOrdinals(BitSet ordinals, OrdinalIdentityTranslator translator) {
         int count = 0;
         int ordinal = ordinals.nextSetBit(0);
@@ -538,6 +562,7 @@ public class HollowHistory {
     //
     // historicalStates is ordered like: V3 -> V2 -> V1
     // however internally the states are linked like: V1.nextState = V2; V2.nextState = V3; etc.
+    @Impure
     private void addHistoricalState(HollowHistoricalState historicalState) {
         if(historicalStates.size() > 0) {
             historicalStates.get(0).getDataAccess().setNextState(historicalState.getDataAccess());
@@ -556,6 +581,7 @@ public class HollowHistory {
     //
     // historicalStates is ordered like: V3 -> V2 -> V1
     // however internally the states are linked like: V1.nextState = V2; V2.nextState = V3; etc.
+    @Impure
     private void addReverseHistoricalState(HollowHistoricalState historicalState) {
         if (historicalStates.size() > 0) {
             historicalState.getDataAccess().setNextState(historicalStates.get(historicalStates.size()-1).getDataAccess());
@@ -581,6 +607,7 @@ public class HollowHistory {
      * greater than the {@link #getNumberOfHistoricalStates() number} of historical
      * states.
      */
+    @Impure
     public void removeHistoricalStates(int n) {
         if (n < 0) {
             throw new IllegalArgumentException(String.format(

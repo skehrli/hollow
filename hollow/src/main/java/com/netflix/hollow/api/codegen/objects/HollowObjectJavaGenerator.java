@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.objects;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.delegateInterfaceName;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.generateBooleanAccessorMethodName;
 import static com.netflix.hollow.api.codegen.HollowCodeGenerationUtils.isPrimitiveType;
@@ -62,6 +63,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
     private final boolean useBooleanFieldErgonomics;
     private final boolean restrictApiToFieldType;
 
+    @Impure
     public HollowObjectJavaGenerator(String packageName, String apiClassname, HollowObjectSchema schema, Set<String>
             parameterizedTypes, boolean parameterizeClassNames, HollowErgonomicAPIShortcuts ergonomicShortcuts,
             HollowDataset dataset, CodeGeneratorConfig config) {
@@ -78,6 +80,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         this.restrictApiToFieldType = config.isRestrictApiToFieldType();
     }
 
+    @Impure
     private static String computeSubPackageName(HollowObjectSchema schema) {
         String type = schema.getName();
         if (isPrimitiveType(type)) {
@@ -86,6 +89,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return SUB_PACKAGE_NAME;
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder classBuilder = new StringBuilder();
@@ -137,12 +141,14 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return classBuilder.toString();
     }
 
+    @Impure
     private void appendConstructor(StringBuilder classBuilder) {
         classBuilder.append("    public " + className + "(" + delegateInterfaceName(schema.getName()) + " delegate, int ordinal) {\n");
         classBuilder.append("        super(delegate, ordinal);\n");
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendAccessors(StringBuilder classBuilder) {
         for(int i=0;i<schema.numFields();i++) {
             switch(schema.getFieldType(i)) {
@@ -176,6 +182,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         }
     }
 
+    @Impure
     private String generateByteArrayFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -188,6 +195,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateStringFieldAccessors(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -204,6 +212,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateReferenceFieldAccessor(int fieldNum) {
         Shortcut shortcut = ergonomicShortcuts == null ? null : ergonomicShortcuts.getShortcut(schema.getName() + "." + schema.getFieldName(fieldNum));
         String fieldName = substituteInvalidChars(schema.getFieldName(fieldNum));
@@ -274,6 +283,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateFloatFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -293,6 +303,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateDoubleFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -311,6 +322,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateLongFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -329,6 +341,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateIntFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -347,6 +360,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private String generateBooleanFieldAccessor(int fieldNum) {
         StringBuilder builder = new StringBuilder();
 
@@ -366,12 +380,14 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         return builder.toString();
     }
 
+    @Impure
     private void appendAPIAccessor(StringBuilder classBuilder) {
         classBuilder.append("    public " + apiClassname + " api() {\n");
         classBuilder.append("        return typeApi().getAPI();\n");
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendTypeAPIAccessor(StringBuilder classBuilder) {
         String typeAPIClassname = typeAPIClassname(schema.getName());
         classBuilder.append("    public " + typeAPIClassname + " typeApi() {\n");
@@ -379,18 +395,21 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendDelegateAccessor(StringBuilder classBuilder) {
         classBuilder.append("    protected ").append(delegateInterfaceName(schema.getName())).append(" delegate() {\n");
         classBuilder.append("        return (").append(delegateInterfaceName(schema.getName())).append(")delegate;\n");
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendToString(StringBuilder classBuilder) {
         classBuilder.append("    public String toString() {\n");
         classBuilder.append("        return new HollowRecordStringifier().stringify(this);\n");
         classBuilder.append("    }\n\n");
     }
 
+    @Impure
     private void appendPrimaryKey(StringBuilder classBuilder, PrimaryKey pk) {
         if (pk.numFields() == 1) {
             String fieldPath = pk.getFieldPath(0);
@@ -461,6 +480,7 @@ public class HollowObjectJavaGenerator extends HollowConsumerJavaFileGenerator {
         }
     }
 
+    @Impure
     private void appendPrimaryKeyDoc(StringBuilder classBuilder, FieldType type, String keyTypeName) {
         String kindSnippet;
         switch (type) {

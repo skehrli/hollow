@@ -15,6 +15,8 @@
  *
  */
 package com.netflix.hollow.api.codegen;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 
 
 /**
@@ -27,7 +29,9 @@ package com.netflix.hollow.api.codegen;
  */
 public interface HollowJavaFileGenerator {
 
+    @Pure
     public String getClassName();
 
+    @Impure
     public String generate();
 }

@@ -15,6 +15,7 @@
  *
  */
 package com.netflix.hollow.api.consumer.metrics;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * An interface to facilitate reporting of Hollow Consumer refresh metrics.
@@ -33,5 +34,6 @@ public interface RefreshMetricsReporting {
      *
      * @see com.netflix.hollow.api.consumer.metrics.ConsumerRefreshMetrics
      */
+    @SideEffectFree
     void refreshEndMetricsReporting(ConsumerRefreshMetrics refreshMetrics);
 }

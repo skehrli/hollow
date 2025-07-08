@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.codegen.api;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.codegen.CodeGeneratorConfig;
 import com.netflix.hollow.api.codegen.HollowAPIGenerator;
 import com.netflix.hollow.api.codegen.HollowCodeGenerationUtils;
@@ -42,6 +43,7 @@ public class HollowDataAccessorGenerator extends HollowConsumerJavaFileGenerator
     protected final String type;
     protected final HollowObjectSchema schema;
 
+    @Impure
     public HollowDataAccessorGenerator(String packageName, String apiclassName, HollowObjectSchema schema,
             HollowDataset dataset, CodeGeneratorConfig config) {
         super(packageName, SUB_PACKAGE_NAME, dataset, config);
@@ -51,10 +53,12 @@ public class HollowDataAccessorGenerator extends HollowConsumerJavaFileGenerator
         this.schema = schema;
     }
 
+    @Impure
     protected String getClassName(HollowObjectSchema schema) {
         return HollowCodeGenerationUtils.upperFirstChar(schema.getName()) + "DataAccessor";
     }
 
+    @Impure
     @Override
     public String generate() {
         StringBuilder builder = new StringBuilder();
@@ -81,6 +85,7 @@ public class HollowDataAccessorGenerator extends HollowConsumerJavaFileGenerator
         return builder.toString();
     }
 
+    @Impure
     protected void genConstructors(StringBuilder builder) {
         builder.append("    public " + className + "(HollowConsumer consumer) {\n");
         builder.append("        super(consumer, TYPE);\n");
@@ -103,6 +108,7 @@ public class HollowDataAccessorGenerator extends HollowConsumerJavaFileGenerator
         builder.append("    }\n\n");
     }
 
+    @Impure
     protected void genPublicAPIs(StringBuilder builder) {
         builder.append("    @Override public " + type + " getRecord(int ordinal){\n");
         builder.append("        return api.get" + type + "(ordinal);\n");

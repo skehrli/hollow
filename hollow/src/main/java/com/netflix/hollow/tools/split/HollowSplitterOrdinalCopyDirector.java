@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.split;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 
 public class HollowSplitterOrdinalCopyDirector implements HollowSplitterCopyDirector {
@@ -23,21 +25,25 @@ public class HollowSplitterOrdinalCopyDirector implements HollowSplitterCopyDire
     private final int numShards;
     private final String[] topLevelTypes;
     
+    @SideEffectFree
     public HollowSplitterOrdinalCopyDirector(int numShards, String... topLevelTypes) {
         this.numShards = numShards;
         this.topLevelTypes = topLevelTypes;
     }
     
+    @Pure
     @Override
     public String[] getTopLevelTypes() {
         return topLevelTypes;
     }
 
+    @Pure
     @Override
     public int getNumShards() {
         return numShards;
     }
 
+    @Pure
     @Override
     public int getShard(HollowTypeReadState topLevelType, int ordinal) {
         return ordinal % numShards;

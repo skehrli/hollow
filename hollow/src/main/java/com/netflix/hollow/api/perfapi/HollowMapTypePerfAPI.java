@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
 import com.netflix.hollow.core.read.dataaccess.missing.HollowMapMissingDataAccess;
@@ -28,6 +30,7 @@ public class HollowMapTypePerfAPI extends HollowTypePerfAPI {
     final long keyMaskedTypeIdx;
     final long valueMaskedTypeIdx;
     
+    @Impure
     public HollowMapTypePerfAPI(HollowDataAccess dataAccess, String typeName, HollowPerformanceAPI api) {
         super(typeName, api);
         
@@ -44,34 +47,41 @@ public class HollowMapTypePerfAPI extends HollowTypePerfAPI {
         this.typeAccess = typeAccess;
     }
     
+    @Impure
     public int size(long ref) {
         return typeAccess.size(ordinal(ref));
     }
     
+    @Impure
     public HollowPerfMapEntryIterator possibleMatchIter(long ref, int hashCode) {
         HollowMapEntryOrdinalIterator iter = typeAccess.potentialMatchOrdinalIterator(ordinal(ref), hashCode);
         return new HollowPerfMapEntryIterator(iter, keyMaskedTypeIdx, valueMaskedTypeIdx); 
     }
     
+    @Impure
     public HollowPerfMapEntryIterator iterator(long ref) {
         HollowMapEntryOrdinalIterator iter = typeAccess.ordinalIterator(ordinal(ref));
         return new HollowPerfMapEntryIterator(iter, keyMaskedTypeIdx, valueMaskedTypeIdx);
     }
     
+    @Impure
     public long findKey(long ref, Object... hashKey) {
         int ordinal = typeAccess.findKey(ordinal(ref), hashKey);
         return Ref.toRefWithTypeMasked(keyMaskedTypeIdx, ordinal);
     }
 
+    @Impure
     public long findValue(long ref, Object... hashKey) {
         int ordinal = typeAccess.findValue(ordinal(ref), hashKey);
         return Ref.toRefWithTypeMasked(valueMaskedTypeIdx, ordinal);
     }
 
+    @Impure
     public <K,V> Map<K,V> backedMap(long ref, POJOInstantiator<K> keyInstantiator, POJOInstantiator<V> valueInstantiator, HashKeyExtractor hashKeyExtractor) {
         return new HollowPerfBackedMap<K,V>(this, ordinal(ref), keyInstantiator, valueInstantiator, hashKeyExtractor);
     }
 
+    @Pure
     public HollowMapTypeDataAccess typeAccess() {
         return typeAccess;
     }

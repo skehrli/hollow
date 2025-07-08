@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine.set;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowTypeReadStateShard;
 import com.netflix.hollow.core.read.engine.ShardsHolder;
 
@@ -11,6 +13,7 @@ public class HollowSetTypeShardsHolder implements ShardsHolder {
      * Thread safe construction of ShardHolder with given shards
      * @param fromShards shards to be used
      */
+    @Impure
     public HollowSetTypeShardsHolder(HollowTypeReadStateShard[] fromShards) {
         this.shards = new HollowSetTypeReadStateShard[fromShards.length];
         for (int i=0; i<fromShards.length; i++) {
@@ -26,6 +29,7 @@ public class HollowSetTypeShardsHolder implements ShardsHolder {
      * @param newShard a new shard
      * @param newShardIndex index at which to place the new shard
      */
+    @Impure
     HollowSetTypeShardsHolder(HollowSetTypeReadStateShard[] oldShards, HollowSetTypeReadStateShard newShard, int newShardIndex) {
         int numShards = oldShards.length;
         HollowSetTypeReadStateShard[] shards = new HollowSetTypeReadStateShard[numShards];
@@ -40,6 +44,7 @@ public class HollowSetTypeShardsHolder implements ShardsHolder {
         this.shardNumberMask = numShards - 1;
     }
 
+    @Pure
     @Override
     public HollowTypeReadStateShard[] getShards() {
         return shards;

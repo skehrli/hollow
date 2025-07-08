@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory.encoding;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +55,7 @@ public class FixedLengthMultipleOccurrenceElementArray {
     private volatile FixedLengthElementArray storage;
     private volatile int maxElementsPerNode;
 
+    @Impure
     public FixedLengthMultipleOccurrenceElementArray(ArraySegmentRecycler memoryRecycler,
             long numNodes, int bitsPerElement, int maxElementsPerNodeEstimate) {
         this.nodesWithOrdinalZero = new FixedLengthElementArray(memoryRecycler, numNodes);
@@ -74,6 +77,7 @@ public class FixedLengthMultipleOccurrenceElementArray {
      * @param nodeIndex the node index
      * @param element the element to add
      */
+    @Impure
     public void addElement(long nodeIndex, long element) {
         if (element > elementMask) {
             throw new IllegalArgumentException("Element " + element + " does not fit in "
@@ -117,6 +121,7 @@ public class FixedLengthMultipleOccurrenceElementArray {
      * @param nodeIndex the node index
      * @return a list of element at the node index, or null if nodeIndex is negative
      */
+    @Impure
     public List<Long> getElements(long nodeIndex) {
         if (nodeIndex < 0) {
             return null;
@@ -142,6 +147,7 @@ public class FixedLengthMultipleOccurrenceElementArray {
     /**
      * A destructor function - call to free up the underlying memory.
      */
+    @Impure
     public void destroy() {
         storage.destroy(memoryRecycler);
     }
@@ -149,6 +155,7 @@ public class FixedLengthMultipleOccurrenceElementArray {
     /**
      * Resize the underlying storage to a multiple of what it currently is. This method is not thread-safe.
      */
+    @Impure
     private void resizeElementsPerNode() {
         LOG.warning("Dynamically resizing no. of elements per node is an expensive operation, it can be avoided by specifying a better estimate upfront");
         int currentElementsPerNode = maxElementsPerNode;
@@ -180,10 +187,13 @@ public class FixedLengthMultipleOccurrenceElementArray {
         maxElementsPerNode = newElementsPerNode;
     }
 
+    @Pure
     public int getMaxElementsPerNode() {
         return maxElementsPerNode;
     }
 
+    @Pure
+    @Impure
     public long approxHeapFootprintInBytes() {
         return storage.approxHeapFootprintInBytes()
                 + nodesWithOrdinalZero.approxHeapFootprintInBytes();

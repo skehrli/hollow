@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
 
 public abstract class HollowTypePerfAPI {
@@ -23,18 +26,24 @@ public abstract class HollowTypePerfAPI {
     private final HollowPerformanceAPI api;
     protected final long maskedTypeIdx;
 
+    @SideEffectFree
+    @Impure
     public HollowTypePerfAPI(String typeName, HollowPerformanceAPI api) {
         int typeIdx = api.types.getIdx(typeName);
         this.maskedTypeIdx = Ref.toTypeMasked(typeIdx);
         this.api = api;
     }
     
+    @Pure
+    @Impure
     public long refForOrdinal(int ordinal) {
         return Ref.toRefWithTypeMasked(maskedTypeIdx, ordinal);
     }
 
+    @Pure
     public abstract HollowTypeDataAccess typeAccess();
 
+    @Pure
     public HollowPerformanceAPI api() {
         return api;
     }
@@ -45,6 +54,7 @@ public abstract class HollowTypePerfAPI {
      * @return the ordinal
      * @throws IllegalArgumentException if the reference's type differs
      */
+    @Impure
     public int ordinal(long ref) {
         if (!Ref.isRefOfTypeMasked(maskedTypeIdx, ref)) {
             String expectedType = api.types.getTypeName(Ref.type(maskedTypeIdx));
@@ -59,6 +69,8 @@ public abstract class HollowTypePerfAPI {
         return Ref.ordinal(ref);
     }
     
+    @Pure
+    @Impure
     public boolean isMissingType() {
         return maskedTypeIdx == Ref.toTypeMasked(Ref.TYPE_ABSENT);
     }

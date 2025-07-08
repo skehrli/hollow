@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,9 +26,11 @@ import java.util.concurrent.TimeUnit;
  */
 @Deprecated
 public class AbstractIncrementalCycleListener implements IncrementalCycleListener {
+    @SideEffectFree
     @Override
     public void onCycleComplete(IncrementalCycleStatus status, long elapsed, TimeUnit unit) { }
 
+    @SideEffectFree
     @Override
     public void onCycleFail(IncrementalCycleStatus status, long elapsed, TimeUnit unit) { }
 }

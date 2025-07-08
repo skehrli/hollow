@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.api.custom;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowSetTypeDataAccess;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 
@@ -26,34 +29,43 @@ import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
  */
 public class HollowSetTypeAPI extends HollowTypeAPI {
 
+    @SideEffectFree
+    @Impure
     public HollowSetTypeAPI(HollowAPI api, HollowSetTypeDataAccess typeDataAccess) {
         super(api, typeDataAccess);
     }
 
+    @Impure
     public int size(int ordinal) {
         return getTypeDataAccess().size(ordinal);
     }
     
+    @Impure
     public boolean contains(int ordinal, int value) {
         return getTypeDataAccess().contains(ordinal, value);
     }
 
+    @Impure
     public boolean contains(int ordinal, int value, int hashCode) {
         return getTypeDataAccess().contains(ordinal, value, hashCode);
     }
     
+    @Impure
     public int findElement(int ordinal, Object... hashKey) {
         return getTypeDataAccess().findElement(ordinal, hashKey);
     }
 
+    @Impure
     public HollowOrdinalIterator potentialMatchOrdinalIterator(int ordinal, int hashCode) {
         return getTypeDataAccess().potentialMatchOrdinalIterator(ordinal, hashCode);
     }
     
+    @Impure
     public HollowOrdinalIterator getOrdinalIterator(int ordinal) {
         return getTypeDataAccess().ordinalIterator(ordinal);
     }
 
+    @Pure
     @Override
     public HollowSetTypeDataAccess getTypeDataAccess() {
         return (HollowSetTypeDataAccess) typeDataAccess;

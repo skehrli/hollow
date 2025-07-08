@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.producer.listener;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.core.schema.HollowSchema;
 import java.time.Duration;
@@ -37,5 +38,6 @@ public interface DataModelInitializationListener extends HollowProducerEventList
      * Called after the {@code HollowProducer} has initialized its data model.
      * @param elapsed the elapsed duration
      */
+    @Impure
     void onProducerInit(Duration elapsed);
 }

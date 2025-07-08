@@ -15,6 +15,8 @@
  *
  */
 package com.netflix.hollow.core.read.iterator;
+import org.checkerframework.dataflow.qual.Deterministic;
+import org.checkerframework.dataflow.qual.Impure;
 
 /**
  * A {@link HollowMapEntryOrdinalIterator} allows for iteration over key/value entries in a Hollow MAP record. 
@@ -32,9 +34,12 @@ package com.netflix.hollow.core.read.iterator;
  */
 public interface HollowMapEntryOrdinalIterator {
 
+    @Impure
     public boolean next();
 
+    @Deterministic
     public int getKey();
+    @Deterministic
     public int getValue();
 
 }

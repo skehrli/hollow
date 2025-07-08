@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.tools.history;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.sampling.DisabledSamplingDirector;
 import com.netflix.hollow.api.sampling.HollowMapSampler;
 import com.netflix.hollow.core.index.key.PrimaryKey;
@@ -31,15 +33,18 @@ public class HollowHistoricalMapDataAccess extends HollowHistoricalTypeDataAcces
 
     private HistoricalPrimaryKeyMatcher keyMatcher;
     
+    @Impure
     public HollowHistoricalMapDataAccess(HollowHistoricalStateDataAccess dataAccess, HollowTypeReadState typeState) {
         super(dataAccess, typeState, new HollowMapSampler(typeState.getSchema().getName(), DisabledSamplingDirector.INSTANCE));
     }
     
+    @Impure
     @Override
     public HollowMapSchema getSchema() {
         return (HollowMapSchema) removedRecords.getSchema();
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         sampler().recordSize();
@@ -50,6 +55,7 @@ public class HollowHistoricalMapDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().size(getMappedOrdinal(ordinal));
     }
 
+    @Impure
     @Override
     public int get(int ordinal, int keyOrdinal) {
         sampler().recordGet();
@@ -60,6 +66,7 @@ public class HollowHistoricalMapDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().get(getMappedOrdinal(ordinal), keyOrdinal);
     }
 
+    @Impure
     @Override
     public int get(int ordinal, int keyOrdinal, int hashCode) {
         sampler().recordGet();
@@ -70,16 +77,19 @@ public class HollowHistoricalMapDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().get(getMappedOrdinal(ordinal), keyOrdinal, hashCode);
     }
     
+    @Impure
     @Override
     public int findKey(int ordinal, Object... hashKey) {
         return (int)(findEntry(ordinal, hashKey) >> 32);
     }
 
+    @Impure
     @Override
     public int findValue(int ordinal, Object... hashKey) {
         return (int)findEntry(ordinal, hashKey);
     }
 
+    @Impure
     @Override
     public long findEntry(int ordinal, Object... hashKey) {
         sampler().recordGet();
@@ -114,6 +124,7 @@ public class HollowHistoricalMapDataAccess extends HollowHistoricalTypeDataAcces
     }
     
 
+    @Impure
     @Override
     public HollowMapEntryOrdinalIterator potentialMatchOrdinalIterator(int ordinal, int hashCode) {
         sampler().recordIterator();
@@ -124,6 +135,7 @@ public class HollowHistoricalMapDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().potentialMatchOrdinalIterator(getMappedOrdinal(ordinal), hashCode);
     }
 
+    @Impure
     @Override
     public HollowMapEntryOrdinalIterator ordinalIterator(int ordinal) {
         sampler().recordIterator();
@@ -134,6 +146,7 @@ public class HollowHistoricalMapDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().ordinalIterator(getMappedOrdinal(ordinal));
     }
 
+    @Impure
     @Override
     public long relativeBucket(int ordinal, int bucketIndex) {
         sampler().recordBucketRetrieval();
@@ -144,14 +157,17 @@ public class HollowHistoricalMapDataAccess extends HollowHistoricalTypeDataAcces
         return removedRecords().relativeBucket(getMappedOrdinal(ordinal), bucketIndex);
     }
 
+    @Pure
     private HollowMapTypeReadState removedRecords() {
         return (HollowMapTypeReadState) removedRecords;
     }
 
+    @Pure
     private HollowMapSampler sampler() {
         return (HollowMapSampler) sampler;
     }
     
+    @Impure
     void buildKeyMatcher() {
         PrimaryKey hashKey = getSchema().getHashKey();
         if(hashKey != null)

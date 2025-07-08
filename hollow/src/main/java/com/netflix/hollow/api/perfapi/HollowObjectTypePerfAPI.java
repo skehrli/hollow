@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.api.perfapi;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
 import com.netflix.hollow.core.read.dataaccess.missing.HollowObjectMissingDataAccess;
@@ -30,6 +32,7 @@ public abstract class HollowObjectTypePerfAPI extends HollowTypePerfAPI {
     protected final int[] fieldIdx;
     protected final long[] refMaskedTypeIdx;
     
+    @Impure
     public HollowObjectTypePerfAPI(HollowDataAccess dataAccess, String typeName, HollowPerformanceAPI api, String[] fieldNames) {
         super(typeName, api);
         
@@ -56,6 +59,7 @@ public abstract class HollowObjectTypePerfAPI extends HollowTypePerfAPI {
         this.typeAccess = typeAccess;
     }
 
+    @Pure
     public HollowObjectTypeDataAccess typeAccess() {
         return typeAccess;
     }

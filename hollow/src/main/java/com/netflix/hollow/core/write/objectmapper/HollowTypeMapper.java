@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.core.memory.ByteDataArray;
 import com.netflix.hollow.core.write.HollowTypeWriteState;
@@ -38,25 +40,35 @@ public abstract class HollowTypeMapper {
     
     private final ThreadLocal<ByteDataArray> flatRecBuffer = new ThreadLocal<>();
 
+    @Pure
+    @Impure
     protected abstract String getTypeName();
 
+    @Impure
     protected abstract int write(Object obj);
 
+    @Impure
     protected abstract int writeFlat(Object obj, FlatRecordWriter flatRecordWriter);
 
+    @Impure
     protected abstract Object parseHollowRecord(HollowRecord record);
 
+    @Impure
     protected abstract Object parseFlatRecord(FlatRecordTraversalNode node);
     
+    @Impure
     protected abstract HollowWriteRecord newWriteRecord();
 
+    @Pure
     protected abstract HollowTypeWriteState getTypeWriteState();
 
+    @Impure
     protected void addTypeState(HollowWriteStateEngine stateEngine) {
         if(stateEngine.getTypeState(getTypeName()) == null)
             stateEngine.addTypeState(getTypeWriteState());
     }
 
+    @Impure
     protected HollowWriteRecord writeRecord() {
         HollowWriteRecord rec = writeRec.get();
         if(rec == null) {
@@ -67,6 +79,7 @@ public abstract class HollowTypeMapper {
         return rec;
     }
     
+    @Impure
     protected ByteDataArray flatRecBuffer() {
     	ByteDataArray buf = flatRecBuffer.get();
     	if(buf == null) {
@@ -98,6 +111,7 @@ public abstract class HollowTypeMapper {
      * @param type the type
      * @return the type name.
      */
+    @Impure
     public static String getDefaultTypeName(Type type) {
         if(type instanceof Class) {
             Class<?> clazz = (Class<?>)type;
@@ -120,6 +134,8 @@ public abstract class HollowTypeMapper {
         return clazz.getSimpleName();
     }
     
+    @Pure
+    @Impure
     protected long cycleSpecificAssignedOrdinalBits() {
         return getTypeWriteState().getStateEngine().getNextStateRandomizedTag() & ASSIGNED_ORDINAL_CYCLE_MASK;
     }

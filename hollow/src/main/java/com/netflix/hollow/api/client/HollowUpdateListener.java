@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.client;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -44,6 +45,7 @@ public interface HollowUpdateListener extends HollowConsumer.ObjectLongevityDete
      * @param version the version
      * @throws Exception if there was an error processing this event
      */
+    @SideEffectFree
     void dataInitialized(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception;
 
 
@@ -57,6 +59,7 @@ public interface HollowUpdateListener extends HollowConsumer.ObjectLongevityDete
      * @param version the version
      * @throws Exception if there was an error processing this event
      */
+    @SideEffectFree
     void dataUpdated(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception;
 
     /**
@@ -65,6 +68,7 @@ public interface HollowUpdateListener extends HollowConsumer.ObjectLongevityDete
      * @param currentVersion the current version
      * @param requestedVersion the requested version
      */
+    @SideEffectFree
     void refreshStarted(long currentVersion, long requestedVersion);
 
     /**
@@ -74,6 +78,7 @@ public interface HollowUpdateListener extends HollowConsumer.ObjectLongevityDete
      * @param afterVersion - The version when the refresh completed
      * @param requestedVersion - The specific version which was requested
      */
+    @SideEffectFree
     void refreshCompleted(long beforeVersion, long afterVersion, long requestedVersion);
 
 
@@ -85,6 +90,7 @@ public interface HollowUpdateListener extends HollowConsumer.ObjectLongevityDete
      * @param requestedVersion - The specific version which was requested
      * @param failureCause - The Exception which caused the failure.
      */
+    @SideEffectFree
     void refreshFailed(long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause);
 
 
@@ -93,16 +99,25 @@ public interface HollowUpdateListener extends HollowConsumer.ObjectLongevityDete
      * 
      * @param transition The transition which was applied.
      */
+    @SideEffectFree
     void transitionApplied(HollowBlob transition);
 
     HollowUpdateListener DEFAULT_LISTENER = new HollowUpdateListener() {
+        @SideEffectFree
         @Override public void dataInitialized(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception { }
+        @SideEffectFree
         @Override public void dataUpdated(HollowAPI api, HollowReadStateEngine stateEngine, long version) throws Exception { }
+        @SideEffectFree
         @Override public void transitionApplied(HollowBlob transition) { }
+        @SideEffectFree
         @Override public void refreshStarted(long currentVersion, long requestedVersion) { }
+        @SideEffectFree
         @Override public void refreshCompleted(long beforeVersion, long afterVersion, long requestedVersion) { }
+        @SideEffectFree
         @Override public void refreshFailed(long beforeVersion, long afterVersion, long requestedVersion, Throwable failureCause) { }
+        @SideEffectFree
         @Override public void staleReferenceExistenceDetected(int count) { }
+        @SideEffectFree
         @Override public void staleReferenceUsageDetected(int count) { }
     };
     

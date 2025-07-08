@@ -15,6 +15,10 @@
  *
  */
 package com.netflix.hollow.api.testdata;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 @SuppressWarnings("rawtypes")
 public class HollowTestDataMapEntry<K extends HollowTestRecord, V extends HollowTestRecord> {
@@ -22,19 +26,26 @@ public class HollowTestDataMapEntry<K extends HollowTestRecord, V extends Hollow
     private final K key;
     private final V value;
     
+    @SideEffectFree
     public HollowTestDataMapEntry(K key, V value) {
         this.key = key;
         this.value = value;
     }
     
+    @NotOwning
+    @Pure
     public K key() {
         return key;
     }
     
+    @NotOwning
+    @Pure
     public V value() {
         return value;
     }
     
+    @SideEffectFree
+    @Impure
     public static <K extends HollowTestRecord, V extends HollowTestRecord> HollowTestDataMapEntry<K, V> entry(K key, V value) {
         return new HollowTestDataMapEntry<>(key, value);
     }

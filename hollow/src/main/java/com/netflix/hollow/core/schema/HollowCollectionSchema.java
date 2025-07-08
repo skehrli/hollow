@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 
 /**
@@ -28,12 +31,16 @@ import com.netflix.hollow.core.read.engine.HollowTypeReadState;
  */
 public abstract class HollowCollectionSchema extends HollowSchema {
 
+    @SideEffectFree
+    @Impure
     public HollowCollectionSchema(String name) {
         super(name);
     }
 
+    @Pure
     public abstract String getElementType();
 
+    @Pure
     public abstract HollowTypeReadState getElementTypeState();
 
 }

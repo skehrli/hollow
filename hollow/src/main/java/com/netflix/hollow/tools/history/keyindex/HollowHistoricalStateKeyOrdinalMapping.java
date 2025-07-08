@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.tools.history.keyindex;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.tools.combine.OrdinalRemapper;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +27,7 @@ public class HollowHistoricalStateKeyOrdinalMapping {
 
     private final Map<String, HollowHistoricalStateTypeKeyOrdinalMapping> typeMappings;
 
+    @Impure
     public HollowHistoricalStateKeyOrdinalMapping(HollowHistoryKeyIndex keyIndex) {
         this.typeMappings = new HashMap<String, HollowHistoricalStateTypeKeyOrdinalMapping>();
 
@@ -32,10 +36,12 @@ public class HollowHistoricalStateKeyOrdinalMapping {
         }
     }
 
+    @SideEffectFree
     private HollowHistoricalStateKeyOrdinalMapping(Map<String, HollowHistoricalStateTypeKeyOrdinalMapping> typeMappings) {
         this.typeMappings = typeMappings;
     }
 
+    @Impure
     public HollowHistoricalStateKeyOrdinalMapping remap(OrdinalRemapper remapper) {
         Map<String, HollowHistoricalStateTypeKeyOrdinalMapping> typeMappings = new HashMap<String, HollowHistoricalStateTypeKeyOrdinalMapping>();
 
@@ -46,10 +52,12 @@ public class HollowHistoricalStateKeyOrdinalMapping {
         return new HollowHistoricalStateKeyOrdinalMapping(typeMappings);
     }
 
+    @Pure
     public HollowHistoricalStateTypeKeyOrdinalMapping getTypeMapping(String typeName) {
         return typeMappings.get(typeName);
     }
 
+    @Pure
     public Map<String, HollowHistoricalStateTypeKeyOrdinalMapping> getTypeMappings() {
         return typeMappings;
     }
