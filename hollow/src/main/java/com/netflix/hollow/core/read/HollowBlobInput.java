@@ -3,7 +3,6 @@ package com.netflix.hollow.core.read;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.checker.mustcall.qual.MustCall;
 import org.checkerframework.checker.mustcall.qual.NotOwning;
 import org.checkerframework.checker.mustcall.qual.Owning;
 import org.checkerframework.checker.calledmethods.qual.EnsuresCalledMethods;
@@ -30,11 +29,11 @@ import java.nio.channels.FileChannel;
 public class HollowBlobInput implements Closeable {
     private final MemoryMode memoryMode;
 
-    private final @Owning @MustCall("close") Object input;
+    private final @Owning Closeable input;
     private BlobByteBuffer buffer;
 
     @SideEffectFree
-    private HollowBlobInput(MemoryMode memoryMode, @Owning @MustCall("close") Object input) {
+    private HollowBlobInput(MemoryMode memoryMode, @Owning Closeable input) {
         this.memoryMode = memoryMode;
         this.input = input;
     }
@@ -330,12 +329,8 @@ public class HollowBlobInput implements Closeable {
     @Override
     @EnsuresCalledMethods(value="input", methods="close")
     public void close() throws IOException {
-        if (input instanceof RandomAccessFile) {
-            ((RandomAccessFile) input).close();
-        } else if (input instanceof DataInputStream) {
-            ((DataInputStream) input).close();
-        } else {
-            throw new UnsupportedOperationException("Unknown Hollow Blob Input type");
+        if (input != null) {
+            input.close();
         }
     }
 
