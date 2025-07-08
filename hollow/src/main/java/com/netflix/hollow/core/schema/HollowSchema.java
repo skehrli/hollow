@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.checker.mustcall.qual.Owning;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.Impure;
@@ -92,11 +93,16 @@ public abstract class HollowSchema {
     @Impure
     public static HollowSchema readFrom(InputStream is) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
-        return readFrom(hbi);
+        try {
+            return readFrom(hbi);
+        } catch (IOException e) {
+            hbi.close();
+            throw e;
+        }
     }
 
     @Impure
-    public static HollowSchema readFrom(HollowBlobInput in) throws IOException {
+    public static HollowSchema readFrom(@Owning HollowBlobInput in) throws IOException {
         int schemaTypeId = in.read();
 
         String schemaName = in.readUTF();
@@ -116,7 +122,7 @@ public abstract class HollowSchema {
     }
 
     @Impure
-    private static HollowObjectSchema readObjectSchemaFrom(HollowBlobInput in, String schemaName, boolean hasPrimaryKey) throws IOException {
+    private static HollowObjectSchema readObjectSchemaFrom(@Owning HollowBlobInput in, String schemaName, boolean hasPrimaryKey) throws IOException {
         String[] keyFieldPaths = null;
         if (hasPrimaryKey) {
             int numFields = VarInt.readVInt(in);
@@ -136,11 +142,12 @@ public abstract class HollowSchema {
             schema.addField(fieldName, fieldType, referencedType);
         }
 
+        in.close();
         return schema;
     }
 
     @Impure
-    private static HollowSetSchema readSetSchemaFrom(HollowBlobInput in, String schemaName, boolean hasHashKey) throws IOException {
+    private static HollowSetSchema readSetSchemaFrom(@Owning HollowBlobInput in, String schemaName, boolean hasHashKey) throws IOException {
         String elementType = in.readUTF();
 
         String hashKeyFields[] = null;
@@ -153,18 +160,20 @@ public abstract class HollowSchema {
             }
         }
 
+        in.close();
         return new HollowSetSchema(schemaName, elementType, hashKeyFields);
     }
 
     @Impure
-    private static HollowListSchema readListSchemaFrom(HollowBlobInput in, String schemaName) throws IOException {
+    private static HollowListSchema readListSchemaFrom(@Owning HollowBlobInput in, String schemaName) throws IOException {
         String elementType = in.readUTF();
 
+        in.close();
         return new HollowListSchema(schemaName, elementType);
     }
 
     @Impure
-    private static HollowMapSchema readMapSchemaFrom(HollowBlobInput in, String schemaName, boolean hasHashKey) throws IOException {
+    private static HollowMapSchema readMapSchemaFrom(@Owning HollowBlobInput in, String schemaName, boolean hasHashKey) throws IOException {
         String keyType = in.readUTF();
         String valueType = in.readUTF();
 
@@ -178,6 +187,7 @@ public abstract class HollowSchema {
             }
         }
 
+        in.close();
         return new HollowMapSchema(schemaName, keyType, valueType, hashKeyFields);
     }
 
