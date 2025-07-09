@@ -85,6 +85,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
     
     @Impure
+    @CreatesMustCallFor("this")
     public Map<String, HollowBlobInput> getInputsByPartName(MemoryMode mode) throws IOException {
         Map<String, HollowBlobInput> map = new HashMap<>(inputsByPartName.size());
         
