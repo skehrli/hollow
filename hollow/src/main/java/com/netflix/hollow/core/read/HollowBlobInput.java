@@ -4,6 +4,7 @@ import org.checkerframework.checker.mustcall.qual.CreatesMustCallFor;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.checker.mustcall.qual.MustCallAlias;
 import org.checkerframework.checker.mustcall.qual.NotOwning;
 import org.checkerframework.checker.mustcall.qual.Owning;
 import org.checkerframework.checker.calledmethods.qual.EnsuresCalledMethods;
@@ -34,7 +35,7 @@ public class HollowBlobInput implements Closeable {
     private BlobByteBuffer buffer;
 
     @SideEffectFree
-    private HollowBlobInput(MemoryMode memoryMode, @Owning Closeable input) {
+    private @MustCallAlias HollowBlobInput(MemoryMode memoryMode, @Owning @MustCallAlias Closeable input) {
         this.memoryMode = memoryMode;
         this.input = input;
     }

@@ -19,6 +19,7 @@ package com.netflix.hollow.api.objects.generic;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
 import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
 import com.netflix.hollow.api.objects.HollowRecord;
 import java.util.Iterator;
@@ -40,7 +41,7 @@ class GenericHollowIterable<T extends HollowRecord> implements Iterable<T> {
         return new Iterator<T>() {
             @Pure
             @Override
-            public boolean hasNext() {
+            public boolean hasNext(@NotOwningCollection GenericHollowIterable<T> this) {
                 return iter.hasNext();
             }
 

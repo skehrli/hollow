@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.checker.mustcall.qual.MustCallAlias;
 import org.checkerframework.checker.mustcall.qual.Owning;
 import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowBlobHeader;
@@ -85,7 +86,7 @@ public class HollowBlobHeaderReader {
     public HollowBlobOptionalPartHeader readPartHeader(InputStream is) throws IOException {
         HollowBlobInput in = HollowBlobInput.serial(is);
         try {
-            return readPartHeader(HollowBlobInput.serial(is));
+            return readPartHeader(in);
         } catch (IOException e) {
             in.close();
             throw e;
@@ -93,7 +94,7 @@ public class HollowBlobHeaderReader {
     }
 
     @Impure
-    public HollowBlobOptionalPartHeader readPartHeader(HollowBlobInput in) throws IOException {
+    public HollowBlobOptionalPartHeader readPartHeader(@Owning HollowBlobInput in) throws IOException {
         int headerVersion = in.readInt();
         if(headerVersion != HollowBlobOptionalPartHeader.HOLLOW_BLOB_PART_VERSION_HEADER) {
             throw new IOException("The HollowBlob optional part you are trying to read is incompatible. "
@@ -111,6 +112,7 @@ public class HollowBlobHeaderReader {
         /// forwards-compatibility, new data can be added here.
         skipForwardCompatibilityBytes(in);
 
+        in.close();
         return header;
     }
     

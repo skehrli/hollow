@@ -22,6 +22,7 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
 import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
 import com.netflix.hollow.api.objects.delegate.HollowMapDelegate;
 import com.netflix.hollow.api.objects.delegate.HollowRecordDelegate;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
@@ -158,18 +159,18 @@ public abstract class HollowMap<K, V> extends AbstractMap<K, V> implements Hollo
 
         @Impure
         @Override
-        public Iterator<Map.Entry<K, V>> iterator(@PolyOwningCollection HollowMap<K, V>.EntrySet this) {
+        public Iterator<Entry<K, V>> iterator(@PolyOwningCollection EntrySet this) {
             return new EntryItr();
         }
 
         @Impure
         @Override
-        public int size(@NotOwningCollection HollowMap<K, V>.EntrySet this) {
+        public int size(@NotOwningCollection EntrySet this) {
             return delegate.size(ordinal);
         }
     }
 
-    private final class EntryItr implements Iterator<Map.Entry<K, V>> {
+    private final class EntryItr implements Iterator<Entry<K, V>> {
 
         private final HollowMapEntryOrdinalIterator ordinalIterator;
         private Map.Entry<K, V> next;
@@ -182,13 +183,13 @@ public abstract class HollowMap<K, V> extends AbstractMap<K, V> implements Hollo
 
         @Pure
         @Override
-        public boolean hasNext(@NotOwningCollection HollowMap<K, V>.EntryItr this) {
+        public boolean hasNext(@NotOwningCollection EntryItr this) {
             return next != null;
         }
 
         @Impure
         @Override
-        public Map.Entry<K, V> next(@NotOwningCollection HollowMap<K, V>.EntryItr this) {
+        public @NotOwning Entry<K, V> next(@NotOwningCollection EntryItr this) {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -199,7 +200,7 @@ public abstract class HollowMap<K, V> extends AbstractMap<K, V> implements Hollo
         }
 
         @Impure
-        private void positionNext() {
+        private void positionNext(@NotOwningCollection EntryItr this) {
             if(ordinalIterator.next()) {
                 next = new OrdinalEntry<>(HollowMap.this, ordinalIterator.getKey(), ordinalIterator.getValue());
             } else {

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read;
 
+import org.checkerframework.checker.mustcall.qual.CreatesMustCallFor;
 import org.checkerframework.framework.qual.EnsuresQualifier;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
@@ -81,6 +82,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
     
     @Impure
+    @CreatesMustCallFor("this")
     public Map<String, HollowBlobInput> getInputsByPartName(MemoryMode mode) throws IOException {
         Map<String, HollowBlobInput> map = new HashMap<>(inputsByPartName.size());
         
