@@ -1,5 +1,8 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
+import org.checkerframework.framework.qual.EnsuresQualifier;
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -67,21 +70,24 @@ public class FlatRecordTraversalSetNode extends AbstractSet<FlatRecordTraversalN
     return new IteratorImpl<>();
   }
 
+  @EnsuresQualifier(expression="this", qualifier=org.checkerframework.checker.collectionownership.qual.PolyOwningCollection.class)
   @Impure
   @Override
-  public Iterator<FlatRecordTraversalNode> iterator() {
+  public Iterator<FlatRecordTraversalNode> iterator(@PolyOwningCollection @NotOwningCollection FlatRecordTraversalSetNode this) {
     return new IteratorImpl<>();
   }
 
+  @EnsuresQualifier(expression="this", qualifier=org.checkerframework.checker.collectionownership.qual.NotOwningCollection.class)
   @Pure
   @Override
-  public int size() {
+  public int size(@NotOwningCollection FlatRecordTraversalSetNode this) {
     return elementOrdinals.length;
   }
 
+  @EnsuresQualifier(expression="this", qualifier=org.checkerframework.checker.collectionownership.qual.NotOwningCollection.class)
   @Impure
   @Override
-  public int hashCode() {
+  public int hashCode(@NotOwningCollection FlatRecordTraversalSetNode this) {
     int h = 0;
     for (FlatRecordTraversalNode obj : this) {
       if (obj != null && commonSchemaMap.containsKey(obj.getSchema().getName())) {
@@ -97,13 +103,13 @@ public class FlatRecordTraversalSetNode extends AbstractSet<FlatRecordTraversalN
 
     @Pure
     @Override
-    public boolean hasNext() {
+    public boolean hasNext(@NotOwningCollection FlatRecordTraversalSetNode.IteratorImpl<T> this) {
       return index < elementOrdinals.length;
     }
 
     @Impure
     @Override
-    public T next() {
+    public T next(@NotOwningCollection FlatRecordTraversalSetNode.IteratorImpl<T> this) {
       int elementOrdinal = elementOrdinals[index++];
       if (elementOrdinal == -1) {
         return null;

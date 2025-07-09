@@ -1,5 +1,6 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowMapSchema;
@@ -53,7 +54,7 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
 
     @Impure
     @Override
-    public Set<Entry<FlatRecordTraversalNode, FlatRecordTraversalNode>> entrySet() {
+    public Set<Entry<FlatRecordTraversalNode, FlatRecordTraversalNode>> entrySet(@NotOwningCollection FlatRecordTraversalMapNode this) {
         return new AbstractSet<Entry<FlatRecordTraversalNode, FlatRecordTraversalNode>>() {
             @Impure
             @Override
@@ -79,13 +80,13 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
 
         @Pure
         @Override
-        public boolean hasNext() {
+        public boolean hasNext(@NotOwningCollection FlatRecordTraversalMapNode.EntrySetIteratorImpl<K, V> this) {
             return index < keyOrdinals.length;
         }
 
         @Impure
         @Override
-        public Entry<K, V> next() {
+        public Entry<K, V> next(@NotOwningCollection FlatRecordTraversalMapNode.EntrySetIteratorImpl<K, V> this) {
             if (index >= keyOrdinals.length) {
                 throw new IllegalStateException("No more elements");
             }

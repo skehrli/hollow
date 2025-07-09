@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.checker.collectionownership.qual.OwningCollection;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
@@ -290,7 +291,7 @@ public class HollowBlobReader {
     }
 
     @Impure
-    private List<HollowBlobOptionalPartHeader> readPartHeaders(HollowBlobHeader header, Map<String, HollowBlobInput> inputsByPartName, MemoryMode mode) throws IOException {
+    private List<HollowBlobOptionalPartHeader> readPartHeaders(HollowBlobHeader header, @OwningCollection Map<String, HollowBlobInput> inputsByPartName, MemoryMode mode) throws IOException {
         if(inputsByPartName == null)
             return Collections.emptyList();
 

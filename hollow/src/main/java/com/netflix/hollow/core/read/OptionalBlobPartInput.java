@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read;
 
+import org.checkerframework.framework.qual.EnsuresQualifier;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Pure;
@@ -39,6 +40,7 @@ public class OptionalBlobPartInput implements Closeable {
     private final Map<String, Object> inputsByPartName;
     private final List<InputStream> streamsToClose;
 
+    @EnsuresQualifier(expression="this.streamsToClose", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
     @Impure
     public OptionalBlobPartInput() {
         this.inputsByPartName = new HashMap<>();
@@ -103,6 +105,7 @@ public class OptionalBlobPartInput implements Closeable {
         return map;
     }
 
+    @EnsuresQualifier(expression="this.streamsToClose", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
     @Impure
     @Override
     public void close() throws IOException {

@@ -1,5 +1,6 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
+import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowListSchema;
@@ -25,7 +26,7 @@ public interface FlatRecordTraversalNode {
   void setCommonSchema(Map<String, HollowObjectSchema> commonSchema);
 
   @Impure
-  default FlatRecordTraversalNode createNode(FlatRecordOrdinalReader reader, int ordinal) {
+  default FlatRecordTraversalNode createNode(@NotOwningCollection FlatRecordTraversalNode this, FlatRecordOrdinalReader reader, int ordinal) {
     HollowSchema schema = reader.readSchema(ordinal);
     switch (schema.getSchemaType()) {
       case OBJECT:
