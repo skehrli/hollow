@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.Arrays;
 
 /**
@@ -26,36 +29,46 @@ public class LongList {
     private long values[];
     private int size;
 
+    @SideEffectFree
+    @Impure
     public LongList() {
         this(12);
     }
 
+    @SideEffectFree
     public LongList(int initialSize) {
         this.values = new long[initialSize];
     }
 
+    @Pure
     public long get(int index) {
         return values[index];
     }
 
+    @Impure
     public void add(long value) {
         if(values.length == size)
             values = Arrays.copyOf(values, (values.length * 3) / 2);
         values[size++] = value;
     }
 
+    @Pure
     public int size() {
         return size;
     }
 
+    @Impure
     public void clear() {
         size = 0;
     }
 
+    @Impure
     public void sort() {
         Arrays.sort(values, 0, size);
     }
 
+    @Pure
+    @Impure
     @Override
     public boolean equals(Object other) {
         if(other instanceof LongList) {
@@ -71,6 +84,7 @@ public class LongList {
         return false;
     }
 
+    @Pure
     @Override
     public int hashCode() {
         int result = size;

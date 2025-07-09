@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.write.HollowHashableWriteRecord.HashBehavior.IGNORED_HASHES;
 import static com.netflix.hollow.core.write.HollowHashableWriteRecord.HashBehavior.MIXED_HASHES;
 
@@ -30,6 +33,8 @@ import java.util.List;
 public class HollowMapWriteRecord implements HollowHashableWriteRecord {
 
     private static final Comparator<HollowMapEntry> MAP_ENTRY_COMPARATOR = new Comparator<HollowMapEntry>() {
+        @Pure
+        @Impure
         public int compare(HollowMapEntry o1, HollowMapEntry o2) {
             int res = o1.getKeyOrdinal() - o2.getKeyOrdinal();
             if (res == 0) {
@@ -46,24 +51,29 @@ public class HollowMapWriteRecord implements HollowHashableWriteRecord {
         this(HashBehavior.MIXED_HASHES);
     }
     
+    @SideEffectFree
     public HollowMapWriteRecord(HashBehavior defaultHashBehavior) {
         this.entryList = new ArrayList<HollowMapEntry>();
         this.defaultHashBehavior = defaultHashBehavior;
     }
 
+    @Impure
     public void addEntry(int keyOrdinal, int valueOrdinal) {
         addEntry(keyOrdinal, valueOrdinal, keyOrdinal);
     }
 
+    @Impure
     public void addEntry(int keyOrdinal, int valueOrdinal, int hashCode) {
         entryList.add(new HollowMapEntry(keyOrdinal, valueOrdinal, hashCode));
     }
 
+    @Impure
     @Override
     public void writeDataTo(ByteDataArray buf) {
         writeDataTo(buf, defaultHashBehavior);
     }
 
+    @Impure
     @Override
     public void writeDataTo(ByteDataArray buf, HashBehavior hashBehavior) {
         Collections.sort(entryList, MAP_ENTRY_COMPARATOR);
@@ -93,6 +103,7 @@ public class HollowMapWriteRecord implements HollowHashableWriteRecord {
         }
     }
 
+    @Impure
     @Override
     public void reset() {
         entryList.clear();
@@ -103,20 +114,24 @@ public class HollowMapWriteRecord implements HollowHashableWriteRecord {
         private final int valueOrdinal;
         private final int hashCode;
 
+        @SideEffectFree
         public HollowMapEntry(int keyOrdinal, int valueOrdinal, int hashCode) {
             this.keyOrdinal = keyOrdinal;
             this.valueOrdinal = valueOrdinal;
             this.hashCode = hashCode;
         }
 
+        @Pure
         public int getKeyOrdinal() {
             return keyOrdinal;
         }
 
+        @Pure
         public int getValueOrdinal() {
             return valueOrdinal;
         }
 
+        @Pure
         public int getHashCode() {
             return hashCode;
         }

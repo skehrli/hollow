@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.dataaccess.disabled;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.client.StaleHollowReferenceDetector;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
@@ -35,51 +37,62 @@ public class HollowDisabledDataAccess implements HollowDataAccess {
 
     public static final HollowDisabledDataAccess INSTANCE = new HollowDisabledDataAccess();
 
+    @SideEffectFree
     private HollowDisabledDataAccess() { }
 
+    @Pure
     @Override
     public HollowTypeDataAccess getTypeDataAccess(String typeName) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowTypeDataAccess getTypeDataAccess(String typeName, int ordinal) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public Collection<String> getAllTypes() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowObjectHashCodeFinder getHashCodeFinder() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public MissingDataHandler getMissingDataHandler() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public List<HollowSchema> getSchemas() {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowSchema getSchema(String name) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @Pure
     @Override
     public HollowSchema getNonNullSchema(String name) {
         throw new IllegalStateException("Data Access is Disabled");
     }
 
+    @SideEffectFree
     @Override
     public void resetSampling() { }
 
+    @Pure
     @Override
     public boolean hasSampleResults() {
         return false;

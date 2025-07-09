@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.error.SchemaNotFoundException;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.schema.HollowSchema;
@@ -80,16 +82,22 @@ public interface HollowStateEngine extends HollowDataset {
      */
     String HEADER_TAG_DELTA_CHAIN_VERSION_COUNTER = "hollow.delta.chain.version.counter";
 
+    @Impure
     @Override
     List<HollowSchema> getSchemas();
 
+    @Pure
+    @Impure
     @Override
     HollowSchema getSchema(String typeName);
 
+    @Impure
     @Override
     HollowSchema getNonNullSchema(String typeName) throws SchemaNotFoundException;
 
+    @Pure
     Map<String, String> getHeaderTags();
 
+    @Pure
     String getHeaderTag(String name);
 }

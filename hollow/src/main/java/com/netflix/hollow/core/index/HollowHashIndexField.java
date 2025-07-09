@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
@@ -27,6 +30,7 @@ public class HollowHashIndexField {
     private final HollowTypeDataAccess baseDataAccess;
     private final FieldType fieldType;
 
+    @SideEffectFree
     public HollowHashIndexField(int baseIteratorFieldIdx, FieldPathSegment[] remainingPath, HollowTypeDataAccess baseDataAccess, FieldType fieldType) {
         this.baseIteratorFieldIdx = baseIteratorFieldIdx;
         this.schemaFieldPositionPath = remainingPath;
@@ -34,22 +38,27 @@ public class HollowHashIndexField {
         this.fieldType = fieldType;
     }
 
+    @Pure
     public HollowTypeDataAccess getBaseDataAccess() {
         return baseDataAccess;
     }
 
+    @Pure
     public int getBaseIteratorFieldIdx() {
         return baseIteratorFieldIdx;
     }
 
+    @Pure
     public FieldPathSegment[] getSchemaFieldPositionPath() {
         return schemaFieldPositionPath;
     }
 
+    @Pure
     FieldPathSegment getLastFieldPositionPathElement() {
         return schemaFieldPositionPath[schemaFieldPositionPath.length - 1];
     }
 
+    @Pure
     public FieldType getFieldType() {
         return fieldType;
     }
@@ -68,6 +77,7 @@ public class HollowHashIndexField {
          */
         private final HollowObjectTypeDataAccess objectTypeDataAccess;
 
+        @SideEffectFree
         FieldPathSegment(int fieldPosition, HollowObjectTypeDataAccess objectTypeDataAccess) {
             this.fieldPosition = fieldPosition;
             this.objectTypeDataAccess = objectTypeDataAccess;
@@ -77,14 +87,17 @@ public class HollowHashIndexField {
          * @param ordinal ordinal of record containing the desired field.
          * @return ordinal of the record referenced by the field
          */
+        @Impure
         int getOrdinalForField(int ordinal) {
             return this.objectTypeDataAccess.readOrdinal(ordinal, fieldPosition);
         }
 
+        @Pure
         int getSegmentFieldPosition() {
             return fieldPosition;
         }
 
+        @Pure
         HollowObjectTypeDataAccess getObjectTypeDataAccess() {
             return objectTypeDataAccess;
         }

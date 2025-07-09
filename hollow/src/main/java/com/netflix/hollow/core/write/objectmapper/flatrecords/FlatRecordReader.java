@@ -1,5 +1,8 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.memory.encoding.ZigZag;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -11,35 +14,42 @@ public class FlatRecordReader {
 
   public int pointer;
 
+  @SideEffectFree
   public FlatRecordReader(FlatRecord record) {
     this.record = record;
     this.pointer = record.dataStartByte;
   }
 
+  @Impure
   public void reset() {
     this.pointer = record.dataStartByte;
   }
 
+  @Impure
   public void resetTo(int position) {
     this.pointer = position;
   }
 
+  @Pure
   public boolean hasMore() {
     return pointer < record.dataEndByte;
   }
 
+  @Impure
   public HollowSchema readSchema() {
     int schemaId = VarInt.readVInt(record.data, this.pointer);
     this.pointer += VarInt.sizeOfVInt(schemaId);
     return record.schemaIdMapper.getSchema(schemaId);
   }
 
+  @Impure
   public int readCollectionSize() {
     int size = VarInt.readVInt(record.data, this.pointer);
     this.pointer += VarInt.sizeOfVInt(size);
     return size;
   }
 
+  @Impure
   public int readOrdinal() {
     if (VarInt.readVNull(record.data, this.pointer)) {
       this.pointer += 1;
@@ -52,6 +62,7 @@ public class FlatRecordReader {
     return value;
   }
 
+  @Impure
   public Boolean readBoolean() {
     if(VarInt.readVNull(record.data, this.pointer)) {
       this.pointer += 1;
@@ -64,6 +75,7 @@ public class FlatRecordReader {
     return value == 1 ? Boolean.TRUE : Boolean.FALSE;
   }
 
+  @Impure
   public int readInt() {
     if (VarInt.readVNull(record.data, this.pointer)) {
       this.pointer += 1;
@@ -76,6 +88,7 @@ public class FlatRecordReader {
     return ZigZag.decodeInt(value);
   }
 
+  @Impure
   public long readLong() {
     if (VarInt.readVNull(record.data, this.pointer)) {
       this.pointer += 1;
@@ -87,6 +100,7 @@ public class FlatRecordReader {
     return ZigZag.decodeLong(value);
   }
 
+  @Impure
   public float readFloat() {
     int value = record.data.readIntBits(this.pointer);
     this.pointer += 4;
@@ -96,6 +110,7 @@ public class FlatRecordReader {
     return Float.intBitsToFloat(value);
   }
 
+  @Impure
   public double readDouble() {
     long value = record.data.readLongBits(this.pointer);
     this.pointer += 8;
@@ -105,6 +120,7 @@ public class FlatRecordReader {
     return Double.longBitsToDouble(value);
   }
 
+  @Impure
   public String readString() {
     if (VarInt.readVNull(record.data, this.pointer)) {
         this.pointer += 1;
@@ -126,6 +142,7 @@ public class FlatRecordReader {
     return new String(s);
   }
 
+  @Impure
   public byte[] readBytes() {
     if (VarInt.readVNull(record.data, this.pointer)) {
         this.pointer += 1;
@@ -143,6 +160,7 @@ public class FlatRecordReader {
     return b;
   }
 
+  @Impure
   public void skipSchema(HollowSchema schema) {
     switch (schema.getSchemaType()) {
       case OBJECT: {
@@ -172,6 +190,7 @@ public class FlatRecordReader {
     }
   }
 
+  @Impure
   public void skipField(HollowObjectSchema.FieldType fieldType) {
     switch(fieldType) {
       case BOOLEAN:

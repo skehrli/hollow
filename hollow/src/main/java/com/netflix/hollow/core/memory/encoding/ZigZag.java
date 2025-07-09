@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.memory.encoding;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
 
 /**
@@ -24,18 +25,22 @@ import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
  */
 public class ZigZag {
 
+    @Pure
     public static long encodeLong(long l) {
         return (l << 1) ^ (l >> 63);
     }
 
+    @Pure
     public static long decodeLong(long l) {
         return (l >>> 1) ^ ((l << 63) >> 63);
     }
 
+    @Pure
     public static int encodeInt(int i) {
         return (i << 1) ^ (i >> 31);
     }
 
+    @Pure
     public static int decodeInt(int i) {
         return (i >>> 1) ^ ((i << 31) >> 31);
     }

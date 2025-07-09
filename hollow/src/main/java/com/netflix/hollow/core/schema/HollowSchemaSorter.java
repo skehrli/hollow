@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.HollowStateEngine;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
@@ -35,6 +38,7 @@ public class HollowSchemaSorter {
      * @param dataset the data set
      * @return the dependent schema
      */
+    @Impure
     public static List<HollowSchema> dependencyOrderedSchemaList(HollowDataset dataset) {
         return dependencyOrderedSchemaList(dataset.getSchemas());
     }
@@ -45,6 +49,7 @@ public class HollowSchemaSorter {
      * @param schemas the schema
      * @return the dependent schema
      */
+    @Impure
     public static List<HollowSchema> dependencyOrderedSchemaList(Collection<HollowSchema> schemas) {
         DependencyIndex idx = new DependencyIndex();
         Map<String, HollowSchema> schemaMap = new HashMap<String, HollowSchema>();
@@ -67,11 +72,13 @@ public class HollowSchemaSorter {
         private final Map<String, Set<String>> dependencyIndex;
         private final Map<String, Set<String>> reverseDependencyIndex;
 
+        @Impure
         public DependencyIndex() {
             this.dependencyIndex = new HashMap<String, Set<String>>();
             this.reverseDependencyIndex = new HashMap<String, Set<String>>();
         }
 
+        @SideEffectFree
         public boolean hasMoreTypes() {
             for(Map.Entry<String, Set<String>> entry : dependencyIndex.entrySet()) {
                 if(entry.getValue().isEmpty()) {
@@ -82,6 +89,7 @@ public class HollowSchemaSorter {
             return false;
         }
 
+        @Impure
         public String getNextType() {
             List<String> availableTypes = new ArrayList<String>();
             for(Map.Entry<String, Set<String>> entry : dependencyIndex.entrySet()) {
@@ -101,6 +109,7 @@ public class HollowSchemaSorter {
             return firstAvailableType;
         }
 
+        @Impure
         private void indexSchema(HollowSchema schema, Collection<HollowSchema> allSchemas) {
             if(schema instanceof HollowCollectionSchema) {
                 String elementType = ((HollowCollectionSchema) schema).getElementType();
@@ -125,6 +134,7 @@ public class HollowSchemaSorter {
             getList(schema.getName(), reverseDependencyIndex);
         }
 
+        @Impure
         private void removeType(String type) {
             Set<String> dependents = reverseDependencyIndex.remove(type);
 
@@ -134,6 +144,7 @@ public class HollowSchemaSorter {
             dependencyIndex.remove(type);
         }
 
+        @Impure
         private void addDependency(String dependent, String dependency, Collection<HollowSchema> allSchemas) {
             if(schemaExists(dependency, allSchemas)) {
                 getList(dependent, dependencyIndex).add(dependency);
@@ -141,6 +152,8 @@ public class HollowSchemaSorter {
             }
         }
 
+        @Pure
+        @Impure
         private boolean schemaExists(String schemaName, Collection<HollowSchema> allSchemas) {
             for(HollowSchema schema : allSchemas) {
                 if(schema.getName().equals(schemaName))
@@ -149,6 +162,7 @@ public class HollowSchemaSorter {
             return false;
         }
 
+        @Impure
         private Set<String> getList(String key, Map<String, Set<String>> dependencyIndex2) {
             Set<String> list = dependencyIndex2.get(key);
             if(list == null) {
@@ -165,6 +179,7 @@ public class HollowSchemaSorter {
      * @param dependencyType the dependency type name
      * @return Whether or not the dependencyType is equal to, referenced by, or transitively referenced by the dependentType. 
      */
+    @Impure
     public static boolean typeIsTransitivelyDependent(HollowStateEngine stateEngine, String dependentType, String dependencyType) {
         if(dependentType.equals(dependencyType))
             return true;

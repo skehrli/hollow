@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
 
@@ -31,6 +34,8 @@ public class FieldStatistics {
     private int numBitsPerRecord;
     private final int bitOffsetForField[];
 
+    @SideEffectFree
+    @Impure
     public FieldStatistics(HollowObjectSchema schema) {
         this.schema = schema;
         this.maxBitsForField = new int[schema.numFields()];
@@ -39,31 +44,38 @@ public class FieldStatistics {
         this.bitOffsetForField = new int[schema.numFields()];
     }
 
+    @Pure
     public int getNumBitsPerRecord() {
         return numBitsPerRecord;
     }
 
+    @Pure
     public int getFieldBitOffset(int fieldIndex) {
         return bitOffsetForField[fieldIndex];
     }
 
+    @Pure
     public int getMaxBitsForField(int fieldIndex) {
         return maxBitsForField[fieldIndex];
     }
 
+    @Pure
     public long getNullValueForField(int fieldIndex) {
         return nullValueForField[fieldIndex];
     }
 
+    @Impure
     public void addFixedLengthFieldRequiredBits(int fieldIndex, int numberOfBits) {
         if(numberOfBits > maxBitsForField[fieldIndex])
             maxBitsForField[fieldIndex] = numberOfBits;
     }
 
+    @Impure
     public void addVarLengthFieldSize(int fieldIndex, int fieldSize) {
         totalSizeOfVarLengthField[fieldIndex] += fieldSize;
     }
 
+    @Impure
     public void completeCalculations() {
         for(int i=0;i<schema.numFields();i++) {
             if(schema.getFieldType(i) == FieldType.STRING || schema.getFieldType(i) == FieldType.BYTES) {
@@ -77,6 +89,7 @@ public class FieldStatistics {
         }
     }
     
+    @Pure
     public long getTotalSizeOfAllVarLengthData() {
         long totalVarLengthDataSize = 0;
         for(int i=0;i<totalSizeOfVarLengthField.length;i++) 
@@ -84,6 +97,7 @@ public class FieldStatistics {
         return totalVarLengthDataSize;
     }
 
+    @Pure
     private int bitsRequiredForRepresentation(long value) {
         return 64 - Long.numberOfLeadingZeros(value + 1);
     }

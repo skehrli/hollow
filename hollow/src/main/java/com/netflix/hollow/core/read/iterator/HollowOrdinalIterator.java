@@ -15,6 +15,7 @@
  *
  */
 package com.netflix.hollow.core.read.iterator;
+import org.checkerframework.dataflow.qual.Impure;
 
 /**
  * An iterator over ordinals.  The general pattern for use is:
@@ -41,6 +42,7 @@ public interface HollowOrdinalIterator {
     /**
      * @return The next ordinal, or {@link HollowOrdinalIterator#NO_MORE_ORDINALS} if no more ordinals are available in this iteration.
      */
+    @Impure
     public int next();
 
 }

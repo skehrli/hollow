@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Pure;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -59,5 +60,6 @@ public @interface HollowHashKey {
      *
      * @return the field paths of the hash key
      */
+    @Pure
     String[] fields();
 }

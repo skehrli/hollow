@@ -16,15 +16,19 @@
  */
 package com.netflix.hollow.core.write.objectmapper.flatrecords;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
 import com.netflix.hollow.core.schema.HollowSchema;
 
 public interface HollowSchemaIdentifierMapper {
 	
+	@Pure
 	public HollowSchema getSchema(int identifier);
 	
+	@Pure
 	public FieldType[] getPrimaryKeyFieldTypes(int identifier);
 	
+	@Pure
 	public int getSchemaId(HollowSchema schema);
 	
 }

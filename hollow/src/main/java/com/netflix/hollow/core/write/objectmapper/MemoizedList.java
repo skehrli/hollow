@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -31,14 +32,17 @@ public class MemoizedList<E> extends ArrayList<E> {
     private static final long serialVersionUID = 4055358559110722153L;
 
 
+    @SideEffectFree
     public MemoizedList() {
         super();
     }
 
+    @SideEffectFree
     public MemoizedList(int initialCapacity) {
         super(initialCapacity);
     }
 
+    @SideEffectFree
     public MemoizedList(Collection<? extends E> c) {
         super(c);
     }

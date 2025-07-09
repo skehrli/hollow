@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,6 +29,7 @@ public class DefaultHashCodeFinder implements HollowObjectHashCodeFinder {
 
     private final Set<String> typesWithDefinedHashCodes;
     
+    @Impure
     public DefaultHashCodeFinder(String... typesWithDefinedHashCodes) { 
         this.typesWithDefinedHashCodes = new HashSet<String>(typesWithDefinedHashCodes.length);
         
@@ -35,18 +38,22 @@ public class DefaultHashCodeFinder implements HollowObjectHashCodeFinder {
         }
     }
     
+    @Pure
+    @Impure
     @Deprecated
     @Override
     public int hashCode(int ordinal, Object objectToHash) {
         return hashCode(null, ordinal, objectToHash);
     }
 
+    @Impure
     @Deprecated
     @Override
     public int hashCode(Object objectToHash) {
         return hashCode(null, objectToHash);
     }
    
+    @Pure
     public int hashCode(String typeName, int ordinal, Object objectToHash) {
         if(!typesWithDefinedHashCodes.contains(typeName))
             return ordinal;
@@ -54,12 +61,14 @@ public class DefaultHashCodeFinder implements HollowObjectHashCodeFinder {
         return objectToHash.hashCode();
     }
 
+    @Impure
     public int hashCode(String typeName, Object objectToHash) {
         if(objectToHash instanceof HollowRecord)
             return ((HollowRecord)objectToHash).getOrdinal();
         return objectToHash.hashCode();
     }
 
+    @Pure
     @Override
     public Set<String> getTypesWithDefinedHashCodes() {
         return typesWithDefinedHashCodes;

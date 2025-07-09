@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine.set;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.FixedLengthDataFactory;
 import com.netflix.hollow.core.read.engine.HollowTypeDataElementsJoiner;
 
@@ -12,16 +14,20 @@ import com.netflix.hollow.core.read.engine.HollowTypeDataElementsJoiner;
  */
 class HollowSetTypeDataElementsJoiner extends HollowTypeDataElementsJoiner<HollowSetTypeDataElements> {
 
+    @SideEffectFree
+    @Impure
     public HollowSetTypeDataElementsJoiner(HollowSetTypeDataElements[] from) {
         super(from);
     }
 
+    @Impure
     @Override
     public void initToElements() {
         this.to = new HollowSetTypeDataElements(from[0].memoryMode, from[0].memoryRecycler);
         to.bitsPerElement = 0;
     }
 
+    @Impure
     @Override
     public void populateStats() {
         for(int fromIndex=0;fromIndex<from.length;fromIndex++) {
@@ -60,6 +66,7 @@ class HollowSetTypeDataElementsJoiner extends HollowTypeDataElementsJoiner<Hollo
         to.bitsPerFixedLengthSetPortion = to.bitsPerSetPointer + to.bitsPerSetSizeValue;
     }
 
+    @Impure
     @Override
     public void copyRecords() {
         long bucketCounter = 0;

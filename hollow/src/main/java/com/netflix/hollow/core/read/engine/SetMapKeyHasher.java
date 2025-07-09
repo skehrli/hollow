@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
 
@@ -32,6 +33,7 @@ public class SetMapKeyHasher {
      * @param fieldType the respective FieldTypes of each key.
      * @return the hash code
      */
+    @Impure
     public static int hash(Object key[], FieldType fieldType[]) {
         int hash = 0;
 
@@ -50,6 +52,7 @@ public class SetMapKeyHasher {
      * @param fieldType the FieldType of the key.
      * @return the hash code
      */
+    @Impure
     public static int hash(Object key, FieldType fieldType) {
         switch(fieldType) {
         case INT:

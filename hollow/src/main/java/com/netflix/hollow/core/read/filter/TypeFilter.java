@@ -1,5 +1,8 @@
 package com.netflix.hollow.core.read.filter;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.read.filter.TypeActions.newTypeActions;
 import static com.netflix.hollow.core.read.filter.TypeFilter.Builder.Action.exclude;
 import static com.netflix.hollow.core.read.filter.TypeFilter.Builder.Action.excludeRecursive;
@@ -49,6 +52,7 @@ public interface TypeFilter {
      *
      * @return the filter
      */
+    @Impure
     public static TypeFilter.Builder newTypeFilter() {
         return new Builder().includeAll();
     }
@@ -59,6 +63,7 @@ public interface TypeFilter {
      * @param type the type to check
      * @return true if the type should be included, false otherwise
      */
+    @Impure
     boolean includes(String type);
 
     /**
@@ -70,6 +75,7 @@ public interface TypeFilter {
      * @return true if the field should be included, false otherwise
      * @see com.netflix.hollow.core.schema.HollowSchema.SchemaType
      */
+    @Impure
     boolean includes(String type, String field);
 
     /**
@@ -79,6 +85,7 @@ public interface TypeFilter {
      * @param schemas schemas to resolve against
      * @return a resolved type filter
      */
+    @Impure
     default TypeFilter resolve(List<HollowSchema> schemas) {
         return this;
     }
@@ -133,16 +140,19 @@ public interface TypeFilter {
     final class Builder {
         List<Rule> rules;
 
+        @SideEffectFree
         private Builder() {
             rules = new ArrayList<>();
         }
 
+        @Impure
         public Builder includeAll() {
             rules.clear();
             rules.add(INCLUDE_ALL);
             return this;
         }
 
+        @Impure
         public Builder excludeAll() {
             rules.clear();
             rules.add(EXCLUDE_ALL);
@@ -157,6 +167,7 @@ public interface TypeFilter {
          * @see #includeRecursive(String)
          * @see #include(String, String)
          */
+        @Impure
         public Builder include(String type) {
             requireNonNull(type, "type required");
             rules.add((t,f) -> type.equals(t) ? include : next);
@@ -172,6 +183,7 @@ public interface TypeFilter {
          * @param type type to include
          * @return this builder
          */
+        @Impure
         public Builder includeRecursive(String type) {
             requireNonNull(type, "type required");
             rules.add((t,f) -> type.equals(t) ? includeRecursive : next);
@@ -181,6 +193,7 @@ public interface TypeFilter {
         /**
          * <p>Include the field on the specified type. Non-recursive. Has no effect on non-{@code OBJECT} types.</p>
          */
+        @Impure
         @com.netflix.hollow.Internal
         public Builder include(String type, String field) {
             requireNonNull(type, "type required");
@@ -194,6 +207,7 @@ public interface TypeFilter {
          * type will be included as if calling {@code includeRecursive(referencedType)}. Has no effect on non-{@code OBJECT}
          * types.</p>
          */
+        @Impure
         @com.netflix.hollow.Internal
         public Builder includeRecursive(String type, String field) {
             requireNonNull(type, "type required");
@@ -210,6 +224,7 @@ public interface TypeFilter {
          * @see #excludeRecursive(String)
          * @see #exclude(String, String)
          */
+        @Impure
         public Builder exclude(String type) {
             requireNonNull(type, "type required");
             rules.add((t,f) -> type.equals(t) ? exclude : next);
@@ -225,6 +240,7 @@ public interface TypeFilter {
          * @param type type to exclude
          * @return this builder
          */
+        @Impure
         public Builder excludeRecursive(String type) {
             requireNonNull(type, "type required");
             rules.add((t,f) -> type.equals(t) ? excludeRecursive : next);
@@ -234,6 +250,7 @@ public interface TypeFilter {
         /**
          * <p>Exclude the field on the specified type. Non-recursive. Has no effect on non-{@code OBJECT} types.</p>
          */
+        @Impure
         public Builder exclude(String type, String field) {
             requireNonNull(type, "type required");
             requireNonNull(field, "field name required");
@@ -246,6 +263,7 @@ public interface TypeFilter {
          * type will be excluded as if calling {@code excludeRecursive(referencedType)}. Has no effect on
          * non-{@code OBJECT} types.</p>
          */
+        @Impure
         public Builder excludeRecursive(String type, String field) {
             requireNonNull(type, "type required");
             requireNonNull(field, "field name required");
@@ -253,10 +271,13 @@ public interface TypeFilter {
             return this;
         }
 
+        @Impure
         public TypeFilter resolve(List<HollowSchema> schemas) {
             return new Resolver(rules, schemas).resolve();
         }
 
+        @SideEffectFree
+        @Impure
         public TypeFilter build() {
             return new UnresolvedTypeFilter(rules);
         }
@@ -264,6 +285,7 @@ public interface TypeFilter {
         @FunctionalInterface
         @com.netflix.hollow.Internal
         interface Rule extends BiFunction<String,String, Action> {
+            @Pure
             @Override
             Action apply(String type, String field);
         }
@@ -297,6 +319,7 @@ public interface TypeFilter {
             /** {@code true} if action applies to target's descendants, {@code false} otherwise. */
             final boolean recursive;
 
+            @Impure
             Action(boolean included, boolean recursive) {
                 this.included = included;
                 this.recursive = recursive;
@@ -312,10 +335,12 @@ public interface TypeFilter {
 class ResolvedTypeFilter implements TypeFilter {
     private final Map<String, TypeActions> actionsMap;
 
+    @Impure
     ResolvedTypeFilter(Map<String, TypeActions> actionsMap) {
         this.actionsMap = unmodifiableMap(new LinkedHashMap<>(actionsMap));
     }
 
+    @Impure
     @Override
     public boolean includes(String type) {
         requireNonNull(type, "type name required");
@@ -323,6 +348,8 @@ class ResolvedTypeFilter implements TypeFilter {
         return ta != null && ta.actions().values().stream().anyMatch(action -> action.included);
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public boolean includes(String type, String field) {
         requireNonNull(type, "type name required");
@@ -349,22 +376,26 @@ class ResolvedTypeFilter implements TypeFilter {
 class UnresolvedTypeFilter implements TypeFilter {
     private final List<Rule> rules;
 
+    @SideEffectFree
     UnresolvedTypeFilter(List<Rule> rules) {
         this.rules = rules;
     }
 
+    @Impure
     @Override
     public boolean includes(String type) {
         requireNonNull(type);
         throw new IllegalStateException("unresolved type filter");
     }
 
+    @Impure
     @Override
     public boolean includes(String type, String field) {
         requireNonNull(type);
         throw new IllegalStateException("unresolved type filter");
     }
 
+    @Impure
     @Override
     public TypeFilter resolve(List<HollowSchema> schemas) {
         return new Resolver(rules, schemas).resolve();
@@ -376,12 +407,14 @@ final class Resolver {
     private final Map<String,HollowSchema> schemas;
     private final List<Rule> rules;
 
+    @Impure
     Resolver(List<Rule> rules, List<HollowSchema> schemas) {
         assert !rules.isEmpty();
         this.rules = rules;
         this.schemas = schemas.stream().collect(toMap(HollowSchema::getName, identity()));
     }
 
+    @Impure
     TypeFilter resolve() {
         Map<String, TypeActions> resolved = rules
                 .stream()
@@ -395,6 +428,7 @@ final class Resolver {
         return new ResolvedTypeFilter(resolved);
     }
 
+    @Impure
     private Stream<TypeActions> descendants(Rule rule, HollowSchema schema) {
         String type = schema.getName();
         Action action = rule.apply(type, null);
@@ -463,14 +497,17 @@ final class Resolver {
 @com.netflix.hollow.Internal
 class TypeActions {
     private static final String ALL = new String("*"); // avoid interning
+    @Impure
     static TypeActions newTypeActions(String type, Action action) {
         return new TypeActions(type, singletonMap(ALL, action));
     }
 
+    @Impure
     static TypeActions newTypeActions(String type, String field, Action action) {
         return new TypeActions(type, singletonMap(field, action));
     }
 
+    @Pure
     String type() {
         return type;
     }
@@ -478,23 +515,28 @@ class TypeActions {
     private final String type;
     private final Map<String, Action> actions;
 
+    @SideEffectFree
     private TypeActions(String type, Map<String, Action> actions) {
         this.type = type;
         this.actions = actions;
     }
 
+    @Pure
     Map<String, Action> actions() {
         return actions;
     }
 
+    @Pure
     Action action() {
         return actions.getOrDefault(ALL, next);
     }
 
+    @Pure
     Action action(String field) {
         return actions.getOrDefault(field, next);
     }
 
+    @Impure
     TypeActions merge(TypeActions other) {
         Map<String, Action> m = new LinkedHashMap<>();
 
@@ -509,6 +551,7 @@ class TypeActions {
         return new TypeActions(type, m);
     }
 
+    @Pure
     @Override
     public String toString() {
         return type + actions;

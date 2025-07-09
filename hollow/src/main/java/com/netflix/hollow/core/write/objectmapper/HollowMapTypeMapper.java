@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import com.netflix.hollow.api.objects.generic.GenericHollowMap;
 import com.netflix.hollow.core.schema.HollowMapSchema;
@@ -51,6 +53,7 @@ public class HollowMapTypeMapper extends HollowTypeMapper {
     private HollowTypeMapper keyMapper;
     private HollowTypeMapper valueMapper;
 
+    @Impure
     public HollowMapTypeMapper(HollowObjectMapper parentMapper, ParameterizedType type, String declaredName, String[] hashKeyFieldPaths,
                                int numShards, HollowWriteStateEngine stateEngine, boolean useDefaultHashKeys, Set<Type> visited) {
         this.keyMapper = parentMapper.getTypeMapper(type.getActualTypeArguments()[0], null, null, -1, visited);
@@ -67,11 +70,14 @@ public class HollowMapTypeMapper extends HollowTypeMapper {
         this.writeState = typeState != null ? typeState : new HollowMapTypeWriteState(schema, numShards);
     }
 
+    @Pure
+    @Impure
     @Override
     protected String getTypeName() {
         return schema.getName();
     }
 
+    @Impure
     @Override
     protected int write(Object obj) {
         if(obj instanceof MemoizedMap) {
@@ -94,12 +100,14 @@ public class HollowMapTypeMapper extends HollowTypeMapper {
         return assignedOrdinal;
     }
     
+    @Impure
     @Override
     protected int writeFlat(Object obj, FlatRecordWriter flatRecordWriter) {
     	HollowMapWriteRecord rec = copyToWriteRecord((Map<?,?>)obj, flatRecordWriter);
     	return flatRecordWriter.write(schema, rec);
     }
 
+    @Impure
     private HollowMapWriteRecord copyToWriteRecord(Map<?, ?> m, FlatRecordWriter flatRecordWriter) {
         HollowMapWriteRecord rec = (HollowMapWriteRecord) writeRecord();
         for (Map.Entry<?, ?> entry : m.entrySet()) {
@@ -128,6 +136,7 @@ public class HollowMapTypeMapper extends HollowTypeMapper {
         return rec;
     }
 
+    @Impure
     @Override
     protected Object parseHollowRecord(HollowRecord record) {
         GenericHollowMap hollowMap = (GenericHollowMap) record;
@@ -140,6 +149,7 @@ public class HollowMapTypeMapper extends HollowTypeMapper {
         return m;
     }
 
+    @Impure
     @Override
     protected Object parseFlatRecord(FlatRecordTraversalNode node) {
         FlatRecordTraversalMapNode mapNode = (FlatRecordTraversalMapNode) node;
@@ -153,11 +163,13 @@ public class HollowMapTypeMapper extends HollowTypeMapper {
         return collection;
     }
 
+    @Impure
     @Override
     protected HollowWriteRecord newWriteRecord() {
         return new HollowMapWriteRecord();
     }
 
+    @Pure
     @Override
     protected HollowTypeWriteState getTypeWriteState() {
         return writeState;

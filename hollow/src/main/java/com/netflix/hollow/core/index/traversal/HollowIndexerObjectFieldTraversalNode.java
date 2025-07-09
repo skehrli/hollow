@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index.traversal;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
 import com.netflix.hollow.core.util.IntList;
@@ -25,23 +28,28 @@ import com.netflix.hollow.core.util.IntList;
  */
 class HollowIndexerObjectFieldTraversalNode extends HollowIndexerTraversalNode {
 
+    @Impure
     public HollowIndexerObjectFieldTraversalNode(HollowTypeDataAccess dataAccess, IntList[] fieldMatches) {
         super(dataAccess, fieldMatches);
     }
 
+    @SideEffectFree
     @Override
     protected void setUpChildren() { }
 
+    @Pure
     @Override
     public int doTraversal(int ordinal) { 
         return 1;
     }
 
+    @Pure
     @Override
     protected HollowTypeDataAccess dataAccess() {
         return (HollowObjectTypeDataAccess) dataAccess;
     }
 
+    @Pure
     @Override
     protected boolean followingChildrenMultipliesTraversal() {
         return false;

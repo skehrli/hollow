@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.dataaccess.proxy;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowMapTypeDataAccess;
@@ -50,10 +53,12 @@ public class HollowProxyDataAccess implements HollowDataAccess {
     private HollowDataAccess currentDataAccess;
     private final ConcurrentHashMap<String, HollowTypeProxyDataAccess> typeDataAccessMap;
 
+    @Impure
     public HollowProxyDataAccess() {
         this.typeDataAccessMap = new ConcurrentHashMap<String, HollowTypeProxyDataAccess>();
     }
 
+    @Impure
     public void setDataAccess(HollowDataAccess currentDataAccess) {
         this.currentDataAccess = currentDataAccess;
         for(String type : currentDataAccess.getAllTypes()) {
@@ -78,6 +83,7 @@ public class HollowProxyDataAccess implements HollowDataAccess {
         }
     }
 
+    @Impure
     public void disableDataAccess() {
         this.currentDataAccess = HollowDisabledDataAccess.INSTANCE;
         for(Map.Entry<String, HollowTypeProxyDataAccess> entry : typeDataAccessMap.entrySet()) {
@@ -95,56 +101,67 @@ public class HollowProxyDataAccess implements HollowDataAccess {
         }
     }
 
+    @Pure
     @Override
     public HollowTypeDataAccess getTypeDataAccess(String typeName) {
         return typeDataAccessMap.get(typeName);
     }
 
+    @Pure
     @Override
     public HollowTypeDataAccess getTypeDataAccess(String typeName, int ordinal) {
         return typeDataAccessMap.get(typeName);
     }
 
+    @Impure
     @Override
     public HollowObjectHashCodeFinder getHashCodeFinder() {
         return currentDataAccess.getHashCodeFinder();
     }
 
+    @Impure
     @Override
     public MissingDataHandler getMissingDataHandler() {
         return currentDataAccess.getMissingDataHandler();
     }
 
+    @SideEffectFree
     @Override
     public Collection<String> getAllTypes() {
         return typeDataAccessMap.keySet();
     }
 
+    @Impure
     @Override
     public List<HollowSchema> getSchemas() {
         return currentDataAccess.getSchemas();
     }
 
+    @Impure
     @Override
     public HollowSchema getSchema(String name) {
         return currentDataAccess.getSchema(name);
     }
 
+    @Impure
     @Override
     public HollowSchema getNonNullSchema(String name) {
         return currentDataAccess.getNonNullSchema(name);
     }
 
+    @Impure
     @Override
     public void resetSampling() {
         currentDataAccess.resetSampling();
     }
 
+    @Impure
     @Override
     public boolean hasSampleResults() {
         return currentDataAccess.hasSampleResults();
     }
 
+    @Pure
     public HollowDataAccess getProxiedDataAccess() {
         return currentDataAccess;
     }

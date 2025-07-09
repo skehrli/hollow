@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Pure;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -63,5 +64,6 @@ public @interface HollowShardLargeType {
      *
      * @return the number of shards to partition a hollow record
      */
+    @Pure
     int numShards();
 }

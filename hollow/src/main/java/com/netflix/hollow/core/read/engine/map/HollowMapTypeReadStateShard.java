@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine.map;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.memory.encoding.HashCodes;
@@ -28,26 +31,31 @@ class HollowMapTypeReadStateShard implements HollowTypeReadStateShard {
     final HollowMapTypeDataElements dataElements;
     final int shardOrdinalShift;
 
+    @Pure
     @Override
     public HollowMapTypeDataElements getDataElements() {
         return dataElements;
     }
 
+    @Pure
     @Override
     public int getShardOrdinalShift() {
         return shardOrdinalShift;
     }
 
+    @SideEffectFree
     public HollowMapTypeReadStateShard(HollowMapTypeDataElements dataElements, int shardOrdinalShift) {
         this.shardOrdinalShift = shardOrdinalShift;
         this.dataElements = dataElements;
     }
 
+    @Impure
     public int size(int ordinal) {
         int size = (int)dataElements.mapPointerAndSizeData.getElementValue(((long)ordinal * dataElements.bitsPerFixedLengthMapPortion) + dataElements.bitsPerMapPointer, dataElements.bitsPerMapSizeValue);
         return size;
     }
 
+    @Impure
     int get(int hashCode, long startBucket, long endBucket, int keyOrdinal)  {
         hashCode = HashCodes.hashInt(hashCode);
         long bucket = startBucket + (hashCode & (endBucket - startBucket - 1));
@@ -65,6 +73,7 @@ class HollowMapTypeReadStateShard implements HollowTypeReadStateShard {
         return ORDINAL_NONE;
     }
 
+    @Impure
     public long relativeBucket(long absoluteBucketIndex) {
         long bucketValue;
         long key = dataElements.getBucketKeyByAbsoluteIndex(absoluteBucketIndex);
@@ -74,6 +83,7 @@ class HollowMapTypeReadStateShard implements HollowTypeReadStateShard {
         return bucketValue;
     }
 
+    @Impure
     protected void applyShardToChecksum(HollowChecksum checksum, BitSet populatedOrdinals, int shardNumber, int numShards) {
         int ordinal = populatedOrdinals.nextSetBit(shardNumber);
         while(ordinal != ORDINAL_NONE) {
@@ -101,6 +111,7 @@ class HollowMapTypeReadStateShard implements HollowTypeReadStateShard {
         }
     }
 
+    @Pure
     public long getApproximateHeapFootprintInBytes() {
         long requiredBitsForMapPointers = ((long)dataElements.maxOrdinal + 1) * dataElements.bitsPerFixedLengthMapPortion;
         long requiredBitsForMapBuckets = (long)dataElements.totalNumberOfBuckets * dataElements.bitsPerMapEntry;
@@ -108,6 +119,7 @@ class HollowMapTypeReadStateShard implements HollowTypeReadStateShard {
         return requiredBits / 8;
     }
     
+    @Pure
     public long getApproximateHoleCostInBytes(BitSet populatedOrdinals, int shardNumber, int numShards) {
         long holeBits = 0;
         

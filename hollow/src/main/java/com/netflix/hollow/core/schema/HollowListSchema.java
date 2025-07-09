@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -35,30 +38,38 @@ public class HollowListSchema extends HollowCollectionSchema {
 
     private HollowTypeReadState elementTypeState;
 
+    @SideEffectFree
+    @Impure
     public HollowListSchema(String schemaName, String elementType) {
         super(schemaName);
         this.elementType = elementType;
     }
 
+    @Pure
     @Override
     public String getElementType() {
         return elementType;
     }
 
+    @Impure
     public void setElementTypeState(HollowTypeReadState typeState) {
         this.elementTypeState = typeState;
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getElementTypeState() {
         return elementTypeState;
     }
 
+    @Pure
     @Override
     public SchemaType getSchemaType() {
         return SchemaType.LIST;
     }
     
+    @Pure
+    @Impure
     @Override
     public boolean equals(Object other) {
         if (this == other)
@@ -72,6 +83,8 @@ public class HollowListSchema extends HollowCollectionSchema {
         return getElementType().equals(otherSchema.getElementType());
     }
 
+    @Pure
+    @Impure
     @Override
     public int hashCode() {
         int result = getName().hashCode();
@@ -80,11 +93,14 @@ public class HollowListSchema extends HollowCollectionSchema {
         return result;
     }
 
+    @Pure
+    @Impure
     @Override
     public String toString() {
         return getName() + " List<" + getElementType() + ">;";
     }
     
+    @Impure
     @Override
     public void writeTo(OutputStream os) throws IOException {
         DataOutputStream dos = new DataOutputStream(os);

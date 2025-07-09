@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowMapSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.write.objectmapper.flatrecords.FlatRecordOrdinalReader;
@@ -19,6 +21,7 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
 
     private Map<String, HollowObjectSchema> commonSchemaMap;
 
+    @Impure
     public FlatRecordTraversalMapNode(FlatRecordOrdinalReader reader, HollowMapSchema schema, int ordinal) {
         this.reader = reader;
         this.schema = schema;
@@ -30,29 +33,35 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
         reader.readMapElementsInto(ordinal, keyOrdinals, valueOrdinals);
     }
 
+    @Pure
     @Override
     public HollowMapSchema getSchema() {
         return schema;
     }
 
+    @Pure
     @Override
     public int getOrdinal() {
         return ordinal;
     }
 
+    @Impure
     @Override
     public void setCommonSchema(Map<String, HollowObjectSchema> commonSchema) {
         this.commonSchemaMap = commonSchema;
     }
 
+    @Impure
     @Override
     public Set<Entry<FlatRecordTraversalNode, FlatRecordTraversalNode>> entrySet() {
         return new AbstractSet<Entry<FlatRecordTraversalNode, FlatRecordTraversalNode>>() {
+            @Impure
             @Override
             public Iterator<Entry<FlatRecordTraversalNode, FlatRecordTraversalNode>> iterator() {
                 return new EntrySetIteratorImpl<>();
             }
 
+            @Pure
             @Override
             public int size() {
                 return keyOrdinals.length;
@@ -60,6 +69,7 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
         };
     }
 
+    @Impure
     public <K extends FlatRecordTraversalNode, V extends FlatRecordTraversalNode> Iterator<Entry<K, V>> entrySetIterator() {
         return new EntrySetIteratorImpl<>();
     }
@@ -67,11 +77,13 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
     private class EntrySetIteratorImpl<K extends FlatRecordTraversalNode, V extends FlatRecordTraversalNode> implements Iterator<Entry<K, V>> {
         private int index = 0;
 
+        @Pure
         @Override
         public boolean hasNext() {
             return index < keyOrdinals.length;
         }
 
+        @Impure
         @Override
         public Entry<K, V> next() {
             if (index >= keyOrdinals.length) {
@@ -83,6 +95,7 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
             index++;
 
             return new Entry<K, V>() {
+                @Impure
                 @Override
                 public K getKey() {
                     if (keyOrdinal == -1) {
@@ -91,6 +104,7 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
                     return (K) createNode(reader, keyOrdinal);
                 }
 
+                @Impure
                 @Override
                 public V getValue() {
                     if (valueOrdinal == -1) {
@@ -99,6 +113,7 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
                     return (V) createNode(reader, valueOrdinal);
                 }
 
+                @Pure
                 @Override
                 public V setValue(V value) {
                     throw new UnsupportedOperationException();
@@ -107,6 +122,7 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
         }
     }
 
+    @Impure
     @Override
     public int hashCode() {
         int h = 0;

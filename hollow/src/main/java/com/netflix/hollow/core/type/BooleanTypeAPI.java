@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.type;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.api.custom.HollowObjectTypeAPI;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
@@ -25,6 +27,7 @@ public class BooleanTypeAPI extends HollowObjectTypeAPI {
 
     private final BooleanDelegateLookupImpl delegateLookupImpl;
 
+    @Impure
     public BooleanTypeAPI(HollowAPI api, HollowObjectTypeDataAccess typeDataAccess) {
         super(api, typeDataAccess, new String[] {
             "value"
@@ -32,18 +35,21 @@ public class BooleanTypeAPI extends HollowObjectTypeAPI {
         this.delegateLookupImpl = new BooleanDelegateLookupImpl(this);
     }
 
+    @Impure
     public boolean getValue(int ordinal) {
         if(fieldIndex[0] == -1)
             return missingDataHandler().handleBoolean("Boolean", ordinal, "value") == Boolean.TRUE;
         return getTypeDataAccess().readBoolean(ordinal, fieldIndex[0]) == Boolean.TRUE;
     }
 
+    @Impure
     public Boolean getValueBoxed(int ordinal) {
         if(fieldIndex[0] == -1)
             return missingDataHandler().handleBoolean("Boolean", ordinal, "value");
         return getTypeDataAccess().readBoolean(ordinal, fieldIndex[0]);
     }
 
+    @Pure
     public BooleanDelegateLookupImpl getDelegateLookupImpl() {
         return delegateLookupImpl;
     }

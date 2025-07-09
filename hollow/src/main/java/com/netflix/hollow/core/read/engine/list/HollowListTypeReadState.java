@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine.list;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.sampling.DisabledSamplingDirector;
 import com.netflix.hollow.api.sampling.HollowListSampler;
 import com.netflix.hollow.api.sampling.HollowSampler;
@@ -54,32 +57,39 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
 
     volatile HollowListTypeShardsHolder shardsVolatile;
 
+    @Pure
     @Override
     public ShardsHolder getShardsVolatile() {
         return shardsVolatile;
     }
 
+    @Impure
     @Override
     public void updateShardsVolatile(HollowTypeReadStateShard[] shards) {
         this.shardsVolatile = new HollowListTypeShardsHolder(shards);
     }
 
+    @Pure
     @Override
     public HollowTypeDataElements[] createTypeDataElements(int len) {
         return new HollowListTypeDataElements[len];
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public HollowTypeReadStateShard createTypeReadStateShard(HollowSchema schema, HollowTypeDataElements dataElements, int shardOrdinalShift) {
         return new HollowListTypeReadStateShard((HollowListTypeDataElements) dataElements, shardOrdinalShift);
     }
 
+    @Impure
     public HollowListTypeReadState(HollowReadStateEngine stateEngine, MemoryMode memoryMode, HollowListSchema schema) {
         super(stateEngine, memoryMode, schema);
         this.sampler = new HollowListSampler(schema.getName(), DisabledSamplingDirector.INSTANCE);
         this.shardsVolatile = null;
     }
 
+    @Impure
     public HollowListTypeReadState(HollowListSchema schema, HollowListTypeDataElements dataElements) {
         super(null, MemoryMode.ON_HEAP, schema);
         this.sampler = new HollowListSampler(schema.getName(), DisabledSamplingDirector.INSTANCE);
@@ -89,6 +99,7 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
         this.maxOrdinal = dataElements.maxOrdinal;
     }
 
+    @Impure
     @Override
     public void readSnapshot(HollowBlobInput in, ArraySegmentRecycler memoryRecycler, int numShards) throws IOException {
         if(numShards > 1)
@@ -109,6 +120,7 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
         SnapshotPopulatedOrdinalsReader.readOrdinals(in, stateListeners);
     }
 
+    @Impure
     @Override
     public void applyDelta(HollowBlobInput in, HollowSchema schema, ArraySegmentRecycler memoryRecycler, int deltaNumShards) throws IOException {
         if(shardsVolatile.shards.length > 1)
@@ -156,30 +168,36 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
             maxOrdinal = shardsVolatile.shards[0].dataElements.maxOrdinal;
     }
 
+    @Impure
     public static void discardSnapshot(HollowBlobInput in, int numShards) throws IOException {
         discardType(in, numShards, false);
     }
 
+    @Impure
     public static void discardDelta(HollowBlobInput in, int numShards) throws IOException {
         discardType(in, numShards, true);
     }
 
+    @Impure
     public static void discardType(HollowBlobInput in, int numShards, boolean delta) throws IOException {
         HollowListTypeDataElements.discardFromStream(in, numShards, delta);
         if(!delta)
             SnapshotPopulatedOrdinalsReader.discardOrdinals(in);
     }
 
+    @Pure
     @Override
     public HollowListSchema getSchema() {
         return (HollowListSchema) schema;
     }
 
+    @Pure
     @Override
     public int maxOrdinal() {
         return maxOrdinal;
     }
 
+    @Impure
     @Override
     public int getElementOrdinal(int ordinal, int listIndex) {
         sampler.recordGet();
@@ -207,6 +225,7 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
         return elementOrdinal;
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         sampler.recordSize();
@@ -224,12 +243,14 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
         return size;
     }
 
+    @Impure
     @Override
     public HollowOrdinalIterator ordinalIterator(int ordinal) {
         sampler.recordIterator();
         return new HollowListOrdinalIterator(ordinal, this);
     }
 
+    @Impure
     private boolean readWasUnsafe(HollowListTypeShardsHolder shardsHolder, int ordinal, HollowListTypeReadStateShard shard) {
         HollowUnsafeHandle.getUnsafe().loadFence();
         HollowListTypeShardsHolder currShardsHolder = shardsVolatile;
@@ -237,26 +258,31 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
             && (shard != currShardsHolder.shards[ordinal & currShardsHolder.shardNumberMask]);
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         return sampler;
     }
 
+    @Impure
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         sampler.setSamplingDirector(director);
     }
     
+    @Impure
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         sampler.setFieldSpecificSamplingDirector(fieldSpec, director);
     }
 
+    @Impure
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         sampler.setUpdateThread(t);
     }
 
+    @Impure
     @Override
     protected void invalidate() {
         stateListeners = EMPTY_LISTENERS;
@@ -269,6 +295,7 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
         this.shardsVolatile = new HollowListTypeShardsHolder(newShards);
     }
 
+    @Impure
     HollowListTypeDataElements[] currentDataElements() {
         final HollowListTypeReadStateShard[] shards = this.shardsVolatile.shards;
         HollowListTypeDataElements[] elements = new HollowListTypeDataElements[shards.length];
@@ -278,6 +305,7 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
         return elements;
     }
 
+    @Impure
     @Override
     protected void applyToChecksum(HollowChecksum checksum, HollowSchema withSchema) {
         final HollowListTypeReadStateShard[] shards = this.shardsVolatile.shards;
@@ -290,6 +318,8 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
             shards[i].applyShardToChecksum(checksum, populatedOrdinals, i, shards.length);
     }
 
+	@Pure
+	@Impure
 	@Override
 	public long getApproximateHeapFootprintInBytes() {
         final HollowListTypeReadStateShard[] shards = this.shardsVolatile.shards;
@@ -301,6 +331,8 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
         return totalApproximateHeapFootprintInBytes;
 	}
 	
+	@Pure
+	@Impure
 	@Override
     public long getApproximateHoleCostInBytes() {
         final HollowListTypeReadStateShard[] shards = this.shardsVolatile.shards;
@@ -314,6 +346,7 @@ public class HollowListTypeReadState extends HollowCollectionTypeReadState imple
         return totalApproximateHoleCostInBytes;
     }
 
+    @Pure
     @Override
     public int numShards() {
         return this.shardsVolatile.shards.length;

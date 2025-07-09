@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write.objectmapper.flatrecords;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.memory.ArrayByteData;
@@ -47,6 +49,7 @@ public class FlatRecordWriter {
     private final Map<Integer, List<RecordLocation>> recordLocationsByHashCode;
     private final IntList recordLocationsByOrdinal;
 
+    @Impure
     public FlatRecordWriter(HollowDataset dataset, HollowSchemaIdentifierMapper schemaIdMapper) {
         this.dataset = dataset;
         this.schemaIdMapper = schemaIdMapper;
@@ -55,6 +58,7 @@ public class FlatRecordWriter {
         this.recordLocationsByHashCode = new HashMap<>();
     }
 
+    @Impure
     public int write(HollowSchema schema, HollowWriteRecord rec) {
         int schemaOrdinal = schemaIdMapper.getSchemaId(schema);
         int nextRecordOrdinal = recordLocationsByOrdinal.size();
@@ -103,6 +107,7 @@ public class FlatRecordWriter {
         }
     }
 
+    @Impure
     public FlatRecord generateFlatRecord() {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             writeTo(baos);
@@ -114,6 +119,7 @@ public class FlatRecordWriter {
         }
     }
 
+    @Impure
     public void writeTo(OutputStream os) throws IOException {
         if (recordLocationsByOrdinal.size() == 0)
             throw new IOException("No data to write!");
@@ -149,6 +155,7 @@ public class FlatRecordWriter {
         }
     }
 
+    @Impure
     private int locatePrimaryKeyField(int locationOfCurrentRecord, int[] fieldPathIndex, int idx) {
         int schemaIdOfRecord = VarInt.readVInt(buf.getUnderlyingArray(), locationOfCurrentRecord);
         HollowObjectSchema recordSchema = (HollowObjectSchema) schemaIdMapper.getSchema(schemaIdOfRecord);
@@ -165,6 +172,7 @@ public class FlatRecordWriter {
         return locatePrimaryKeyField(offsetOfNextRecord, fieldPathIndex, idx + 1);
     }
 
+    @Impure
     private int navigateToField(HollowObjectSchema schema, int fieldIdx, int offset) {
         for (int i = 0; i < fieldIdx; i++) {
             switch (schema.getFieldType(i)) {
@@ -194,6 +202,7 @@ public class FlatRecordWriter {
         return offset;
     }
 
+    @Impure
     public void reset() {
         buf.reset();
         recordLocationsByHashCode.clear();
@@ -205,6 +214,7 @@ public class FlatRecordWriter {
         private final long start;
         private final int len;
 
+        @SideEffectFree
         public RecordLocation(int ordinal, long start, int len) {
             this.ordinal = ordinal;
             this.start = start;

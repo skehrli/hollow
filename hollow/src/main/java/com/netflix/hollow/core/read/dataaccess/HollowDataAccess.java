@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.dataaccess;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.missing.MissingDataHandler;
@@ -36,6 +39,7 @@ public interface HollowDataAccess extends HollowDataset {
      * @param typeName the type name
      * @return The handle to data for a specific type in this dataset.
      */
+    @Pure
     HollowTypeDataAccess getTypeDataAccess(String typeName);
 
     /**
@@ -43,26 +47,34 @@ public interface HollowDataAccess extends HollowDataset {
      * @param ordinal optional parameter.  When known, may provide a more optimal data access implementation for traversal of historical data access.
      * @return The handle to data for a specific type in this dataset.
      */
+    @Pure
     HollowTypeDataAccess getTypeDataAccess(String typeName, int ordinal);
 
     /**
      * @return The names of all types in this dataset
      */
+    @SideEffectFree
     Collection<String> getAllTypes();
     
+    @Impure
     @Override
     List<HollowSchema> getSchemas();
     
+    @Impure
     @Override
     HollowSchema getSchema(String name);
 
+    @Impure
     @Deprecated
     HollowObjectHashCodeFinder getHashCodeFinder();
 
+    @Impure
     MissingDataHandler getMissingDataHandler();
 
+    @Impure
     void resetSampling();
 
+    @Impure
     boolean hasSampleResults();
 
 }

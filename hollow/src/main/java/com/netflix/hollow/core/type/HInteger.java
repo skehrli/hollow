@@ -16,32 +16,41 @@
  */
 package com.netflix.hollow.core.type;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowAPI;
 import com.netflix.hollow.api.objects.HollowObject;
 import com.netflix.hollow.core.type.delegate.IntegerDelegate;
 
 public class HInteger extends HollowObject {
 
+    @Impure
     public HInteger(IntegerDelegate delegate, int ordinal) {
         super(delegate, ordinal);
     }
 
+    @Impure
     public int getValue() {
         return delegate().getValue(ordinal);
     }
 
+    @Impure
     public Integer getValueBoxed() {
         return delegate().getValueBoxed(ordinal);
     }
 
+    @Impure
     public HollowAPI api() {
         return typeApi().getAPI();
     }
 
+    @Pure
+    @Impure
     public IntegerTypeAPI typeApi() {
         return delegate().getTypeAPI();
     }
 
+    @Pure
     protected IntegerDelegate delegate() {
         return (IntegerDelegate)delegate;
     }

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.engine.list;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.FixedLengthData;
 import com.netflix.hollow.core.memory.FixedLengthDataFactory;
 import com.netflix.hollow.core.memory.MemoryMode;
@@ -41,22 +43,29 @@ public class HollowListTypeDataElements extends HollowTypeDataElements {
     int bitsPerElement;
     long totalNumberOfElements;
 
+    @SideEffectFree
+    @Impure
     public HollowListTypeDataElements(ArraySegmentRecycler memoryRecycler) {
         this(MemoryMode.ON_HEAP, memoryRecycler);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowListTypeDataElements(MemoryMode memoryMode, ArraySegmentRecycler memoryRecycler) {
         super(memoryMode, memoryRecycler);
     }
 
+    @Impure
     void readSnapshot(HollowBlobInput in) throws IOException {
         readFromInput(in,false);
     }
 
+    @Impure
     void readDelta(HollowBlobInput in) throws IOException {
         readFromInput(in,true);
     }
 
+    @Impure
     private void readFromInput(HollowBlobInput in, boolean isDelta) throws IOException {
         maxOrdinal = VarInt.readVInt(in);
 
@@ -73,6 +82,7 @@ public class HollowListTypeDataElements extends HollowTypeDataElements {
         elementData = FixedLengthDataFactory.get(in, memoryMode, memoryRecycler);
     }
 
+    @Impure
     static void discardFromStream(HollowBlobInput in, int numShards, boolean isDelta) throws IOException {
         if(numShards > 1)
             VarInt.readVInt(in); /// max ordinal
@@ -97,24 +107,29 @@ public class HollowListTypeDataElements extends HollowTypeDataElements {
         }
     }
 
+    @Impure
     public void applyDelta(HollowListTypeDataElements fromData, HollowListTypeDataElements deltaData) {
         new HollowListDeltaApplicator(fromData, deltaData, this).applyDelta();
     }
 
+    @Impure
     @Override
     public void destroy() {
         FixedLengthDataFactory.destroy(listPointerData, memoryRecycler);
         FixedLengthDataFactory.destroy(elementData, memoryRecycler);
     }
 
+    @Impure
     long getStartElement(int ordinal) {
         return ordinal == 0 ? 0 : listPointerData.getElementValue(((long)(ordinal-1) * bitsPerListPointer), bitsPerListPointer);
     }
 
+    @Impure
     long getEndElement(int ordinal) {
         return listPointerData.getElementValue((long)ordinal * bitsPerListPointer, bitsPerListPointer);
     }
 
+    @Impure
     void copyElementsFrom(long startElement, HollowListTypeDataElements src, long srcStartElement, long srcEndElement) {
         if (bitsPerElement == src.bitsPerElement) {
             // fast path can bulk copy elements

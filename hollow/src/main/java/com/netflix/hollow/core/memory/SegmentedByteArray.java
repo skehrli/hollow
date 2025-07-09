@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import java.io.IOException;
@@ -49,6 +52,7 @@ public class SegmentedByteArray implements VariableLengthData {
     private final int bitmask;
     private final ArraySegmentRecycler memoryRecycler;
 
+    @Impure
     public SegmentedByteArray(ArraySegmentRecycler memoryRecycler) {
         this.segments = new byte[2][];
         this.log2OfSegmentSize = memoryRecycler.getLog2OfByteSegmentSize();
@@ -61,6 +65,7 @@ public class SegmentedByteArray implements VariableLengthData {
      * @param index the index
      * @param value the byte value
      */
+    @Impure
     public void set(long index, byte value) {
         int segmentIndex = (int)(index >> log2OfSegmentSize);
         ensureCapacity(segmentIndex);
@@ -72,11 +77,13 @@ public class SegmentedByteArray implements VariableLengthData {
      * @param index the index
      * @return the byte value
      */
+    @Pure
     @Override
     public byte get(long index) {
         return segments[(int)(index >>> log2OfSegmentSize)][(int)(index & bitmask)];
     }
 
+    @Impure
     @Override
     public void copy(ByteData src, long srcPos, long destPos, long length) {
         for(long i=0;i<length;i++) {
@@ -92,6 +99,7 @@ public class SegmentedByteArray implements VariableLengthData {
      * @param destPos the position to begin writing in this array
      * @param length the length of the data to copy
      */
+    @Impure
     public void copy(SegmentedByteArray src, long srcPos, long destPos, long length) {
         int segmentLength = 1 << log2OfSegmentSize;
         int currentSegment = (int)(destPos >>> log2OfSegmentSize);
@@ -120,6 +128,7 @@ public class SegmentedByteArray implements VariableLengthData {
      * @param length the length of the data to copy
      * @return the number of bytes copied
      */
+    @SideEffectFree
     public int copy(long srcPos, byte[] data, int destPos, int length) {
         int segmentSize = 1 << log2OfSegmentSize;
         int remainingBytesInSegment = (int)(segmentSize - (srcPos & bitmask));
@@ -150,6 +159,8 @@ public class SegmentedByteArray implements VariableLengthData {
      * @param length the length of the comparison range
      * @return
      */
+    @Pure
+    @Impure
     public boolean rangeEquals(long rangeStart, SegmentedByteArray compareTo, long cmpStart, int length) {
     	for(int i=0;i<length;i++)
     		if(get(rangeStart + i) != compareTo.get(cmpStart + i))
@@ -157,6 +168,7 @@ public class SegmentedByteArray implements VariableLengthData {
     	return true;
     }
 
+    @Impure
     @Override
     public void orderedCopy(VariableLengthData src, long srcPos, long destPos, long length) {
         int segmentLength = 1 << log2OfSegmentSize;
@@ -188,6 +200,7 @@ public class SegmentedByteArray implements VariableLengthData {
      * @param length the length of the data to copy
      * @return the number of bytes copied
      */
+    @Impure
     private int orderedCopy(long srcPos, byte[] data, int destPos, int length) {
         int segmentSize = 1 << log2OfSegmentSize;
         int remainingBytesInSegment = (int)(segmentSize - (srcPos & bitmask));
@@ -209,6 +222,7 @@ public class SegmentedByteArray implements VariableLengthData {
         return dataPosition - destPos;
     }
 
+    @Impure
     @Override
     public void loadFrom(HollowBlobInput is, long length) throws IOException {
         int segmentSize = 1 << log2OfSegmentSize;
@@ -236,6 +250,7 @@ public class SegmentedByteArray implements VariableLengthData {
      * @param len the length of the data to copy
      * @throws IOException if the write to the output stream could not be performed
      */
+    @Impure
     public void writeTo(OutputStream os, long startPosition, long len) throws IOException {
         int segmentSize = 1 << log2OfSegmentSize;
         int remainingBytesInSegment = segmentSize - (int)(startPosition & bitmask);
@@ -252,6 +267,7 @@ public class SegmentedByteArray implements VariableLengthData {
         }
     }
 
+    @Impure
     private void orderedCopy(byte[] src, int srcPos, byte[] dest, int destPos, int length) {
         int endSrcPos = srcPos + length;
         destPos += Unsafe.ARRAY_BYTE_BASE_OFFSET;
@@ -266,6 +282,7 @@ public class SegmentedByteArray implements VariableLengthData {
      *
      * @param segmentIndex the segment index
      */
+    @Impure
     private void ensureCapacity(int segmentIndex) {
         while(segmentIndex >= segments.length) {
             segments = Arrays.copyOf(segments, segments.length * 3 / 2);
@@ -276,6 +293,7 @@ public class SegmentedByteArray implements VariableLengthData {
         }
     }
 
+    @Impure
     public void destroy() {
         for(int i=0;i<segments.length;i++) {
             if(segments[i] != null)
@@ -283,6 +301,7 @@ public class SegmentedByteArray implements VariableLengthData {
         }
     }
 
+    @Pure
     @Override
     public long size() {
         long size = 0;

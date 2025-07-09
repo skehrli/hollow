@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -30,18 +31,22 @@ public class MemoizedSet<E> extends HashSet<E> {
 
     private static final long serialVersionUID = -3603271528350592970L;
 
+    @Impure
     public MemoizedSet() {
         super();
     }
 
+    @Impure
     public MemoizedSet(int initialCapacity) {
         super(initialCapacity);
     }
     
+    @Impure
     public MemoizedSet(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
     }
 
+    @Impure
     public MemoizedSet(Collection<? extends E> c) {
         super(c);
     }

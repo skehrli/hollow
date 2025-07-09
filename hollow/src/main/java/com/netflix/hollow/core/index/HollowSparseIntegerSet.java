@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeStateListener;
 import java.util.BitSet;
@@ -40,10 +43,12 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
     private int maxValueToSet;
 
     public interface IndexPredicate {
+        @Pure
         boolean shouldIndex(int ordinal);
     }
 
     private final static IndexPredicate DEFAULT_PREDICATE = new IndexPredicate() {
+        @Pure
         @Override
         public boolean shouldIndex(int ordinal) {
             return true;
@@ -57,6 +62,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
      * @param type the type name
      * @param fieldPath the field path
      */
+    @Impure
     public HollowSparseIntegerSet(HollowReadStateEngine readStateEngine, String type, String fieldPath) {
         this(readStateEngine, type, fieldPath, DEFAULT_PREDICATE);
     }
@@ -69,6 +75,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
      * @param fieldPath       path to the integer values
      * @param predicate       implementation of IndexPredicate, indicating if the record passes the condition for indexing.
      */
+    @Impure
     public HollowSparseIntegerSet(HollowReadStateEngine readStateEngine, String type, String fieldPath, IndexPredicate predicate) {
 
         // check arguments
@@ -86,6 +93,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
         build();
     }
 
+    @Impure
     protected void build() {
 
         // initialize an instance of SparseBitSet
@@ -103,10 +111,12 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
         compact();
     }
 
+    @Impure
     protected void initSet(int maxValue) {
         sparseBitSetVolatile = new SparseBitSet(maxValue);
     }
 
+    @Impure
     protected void set(int ordinal) {
         if (predicate.shouldIndex(ordinal)) {
             Object[] values = fieldPath.findValues(ordinal);
@@ -119,6 +129,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
         }
     }
 
+    @Impure
     protected void compact() {
         SparseBitSet current = sparseBitSetVolatile;
         SparseBitSet compactedSet = SparseBitSet.compact(current);
@@ -132,6 +143,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
      * @param i the integer value
      * @return {@code true} if the value is present
      */
+    @Impure
     public boolean get(int i) {
         SparseBitSet current;
         boolean result;
@@ -147,6 +159,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
      *
      * @return Calculates the total number of bits used by longs in underlying data structure.
      */
+    @Impure
     public long size() {
         SparseBitSet current;
         long size;
@@ -160,6 +173,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
     /**
      * @return the total number of integers added to the set.
      */
+    @Impure
     public int cardinality() {
         SparseBitSet current;
         int cardinality;
@@ -175,6 +189,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
      * Remember to call detachFromDeltaUpdates to stop the delta changes.
      * NOTE: Each delta updates creates a new prefix index and swaps the new with current.
      */
+    @Impure
     public void listenForDeltaUpdates() {
         readStateEngine.getTypeState(type).addListener(this);
     }
@@ -182,10 +197,12 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
     /**
      * Stop delta updates for this index.
      */
+    @Impure
     public void detachFromDeltaUpdates() {
         readStateEngine.getTypeState(type).removeListener(this);
     }
 
+    @Impure
     @Override
     public void beginUpdate() {
         valuesToSet.clear();
@@ -193,6 +210,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
         maxValueToSet = -1;
     }
 
+    @Impure
     @Override
     public void addedOrdinal(int ordinal) {
         if (predicate.shouldIndex(ordinal)) {
@@ -204,6 +222,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
         }
     }
 
+    @Impure
     @Override
     public void removedOrdinal(int ordinal) {
         Object[] values = fieldPath.findValues(ordinal);
@@ -211,6 +230,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
             valuesToClear.add((int) value);
     }
 
+    @Impure
     @Override
     public void endUpdate() {
         boolean didSomeWork = false;
@@ -261,23 +281,27 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
             private long idx;
             private long[] longs;
 
+            @SideEffectFree
             private Bucket(long idx, long[] longs) {
                 this.idx = idx;
                 this.longs = longs;
             }
         }
 
+        @Impure
         SparseBitSet(int maxValue) {
             int totalBuckets = maxValue >>> BUCKET_SHIFT;
             this.maxValue = maxValue;
             this.buckets = new AtomicReferenceArray<>(totalBuckets + 1);
         }
 
+        @SideEffectFree
         private SparseBitSet(int maxValue, AtomicReferenceArray<Bucket> buckets) {
             this.maxValue = maxValue;
             this.buckets = buckets;
         }
 
+        @Pure
         private static int getIndex(int i) {
             // logical right shift
             return i >>> BUCKET_SHIFT;
@@ -293,6 +317,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
          * @param bitInIndex
          * @return
          */
+        @Pure
         private static int getOffset(long longAtIndex, long bitInIndex) {
             // set all bits to one before the bit that is set in bitInIndex
             // example : 000...0100 will become 000...011
@@ -301,6 +326,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
             return Long.bitCount(offset);
         }
 
+        @Impure
         boolean get(int i) {
             if (i > maxValue || i < 0)
                 return false;
@@ -327,6 +353,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
         }
 
         // thread-safe
+        @Impure
         void set(int i) {
 
             if (i > maxValue)
@@ -404,6 +431,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
         }
 
         // thread-safe
+        @Impure
         void clear(int i) {
             if (i > maxValue || i < 0) return;
 
@@ -467,6 +495,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
             }
         }
 
+        @Impure
         int findMaxValue() {
             // find the last index that is initialized
             int index = buckets.length() - 1;
@@ -488,6 +517,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
             return (int) ((index << BUCKET_SHIFT) + (highestBitSetInIndexAtLong << 6) + highestBitSetInLong);
         }
 
+        @Impure
         int cardinality() {
             int cardinality = 0;
             int index = 0;
@@ -503,6 +533,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
             return cardinality;
         }
 
+        @Impure
         long estimateBitsUsed() {
             long longsUsed = 0;
             long idxCounts = 0;
@@ -530,6 +561,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
          * @param sparseBitSet
          * @return new SparseBitSet that is compact, does not hold null references beyond the max int value added in the given input.
          */
+        @Impure
         static SparseBitSet compact(SparseBitSet sparseBitSet) {
             int maxValueAdded = sparseBitSet.findMaxValue();
             // if the given set is empty then compact the sparseBitSet to have only 1 bucket i.e. 64 longs
@@ -541,6 +573,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
             return copyWithNewLength(sparseBitSet, newLength, newLength, maxValueAdded);
         }
 
+        @Impure
         static SparseBitSet resize(SparseBitSet sparseBitSet, int newMaxValue) {
             if (sparseBitSet.findMaxValue() < newMaxValue) {
                 int indexForNewMaxValue = getIndex(newMaxValue);
@@ -550,6 +583,7 @@ public class HollowSparseIntegerSet implements HollowTypeStateListener {
             return sparseBitSet;
         }
 
+        @Impure
         private static SparseBitSet copyWithNewLength(SparseBitSet sparseBitSet, int newLength, int lengthToClone, int newMaxValue) {
             AtomicReferenceArray<Bucket> compactBuckets = new AtomicReferenceArray<Bucket>(newLength);
             for (int i = 0; i < lengthToClone; i++) {

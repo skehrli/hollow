@@ -15,6 +15,8 @@
  *
  */
 package com.netflix.hollow.core.memory;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 
 /**
  * This interface is used to hide the underlying implementation of a range of bytes.
@@ -29,6 +31,7 @@ package com.netflix.hollow.core.memory;
  */
 public interface ByteData {
 
+    @Impure
     default long readLongBits(long position) {
         long longBits = (long) (get(position++) & 0xFF) << 56;
         longBits |= (long) (get(position++) & 0xFF) << 48;
@@ -41,6 +44,7 @@ public interface ByteData {
         return longBits;
     }
 
+    @Impure
     default int readIntBits(long position) {
         int intBits = (get(position++) & 0xFF) << 24;
         intBits |= (get(position++) & 0xFF) << 16;
@@ -49,6 +53,7 @@ public interface ByteData {
         return intBits;
     }
 
+    @Pure
     default long length() {
         throw new UnsupportedOperationException();
     }
@@ -58,6 +63,7 @@ public interface ByteData {
      * @param index the position (in byte units)
      * @return the byte value
      */
+    @Impure
     byte get(long index);
 
 }

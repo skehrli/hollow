@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.encoding.GapEncodedVariableLengthIntegerReader;
 
 /**
@@ -16,6 +18,7 @@ public abstract class HollowTypeDataElementsSplitter<T extends HollowTypeDataEle
 
     public T[] to;
 
+    @SideEffectFree
     public HollowTypeDataElementsSplitter(T from, int numSplits) {
         this.from = from;
         this.numSplits = numSplits;
@@ -33,6 +36,7 @@ public abstract class HollowTypeDataElementsSplitter<T extends HollowTypeDataEle
         }
     }
 
+    @Impure
     public T[] split() {
 
         initToElements();
@@ -57,16 +61,19 @@ public abstract class HollowTypeDataElementsSplitter<T extends HollowTypeDataEle
     /**
      * Initialize the target data elements.
      */
+    @Impure
     public abstract void initToElements();
 
     /**
      * Populate the stats of the target data elements.
      */
+    @Impure
     public abstract void populateStats();
 
     /**
      * Copy records from the source data elements to the target data elements.
      */
+    @Impure
     public abstract void copyRecords();
 
 

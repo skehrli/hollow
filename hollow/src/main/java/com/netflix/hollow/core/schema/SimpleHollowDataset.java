@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.error.SchemaNotFoundException;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.write.HollowWriteStateEngine;
@@ -32,10 +35,12 @@ public class SimpleHollowDataset implements HollowDataset {
 
     private final Map<String, HollowSchema> schemas;
     
+    @SideEffectFree
     public SimpleHollowDataset(Map<String, HollowSchema> schemas) {
         this.schemas = schemas;
     }
     
+    @Impure
     public SimpleHollowDataset(List<HollowSchema> schemas) {
         Map<String, HollowSchema> schemaMap = new HashMap<>(schemas.size());
         
@@ -46,16 +51,19 @@ public class SimpleHollowDataset implements HollowDataset {
         this.schemas = schemaMap;
     }
     
+    @SideEffectFree
     @Override
     public List<HollowSchema> getSchemas() {
         return new ArrayList<>(schemas.values());
     }
 
+    @Pure
     @Override
     public HollowSchema getSchema(String typeName) {
         return schemas.get(typeName);
     }
 
+    @Impure
     @Override
     public HollowSchema getNonNullSchema(String typeName) throws SchemaNotFoundException {
         HollowSchema schema = getSchema(typeName);
@@ -64,6 +72,7 @@ public class SimpleHollowDataset implements HollowDataset {
         return schema;
     }
 
+    @Impure
     public static SimpleHollowDataset fromClassDefinitions(Class<?>... classes) {
         HollowWriteStateEngine stateEngine = new HollowWriteStateEngine();
         HollowObjectMapper mapper = new HollowObjectMapper(stateEngine);

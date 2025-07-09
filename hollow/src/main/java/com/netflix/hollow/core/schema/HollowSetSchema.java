@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -39,35 +42,44 @@ public class HollowSetSchema extends HollowCollectionSchema {
 
     private HollowTypeReadState elementTypeState;
 
+    @SideEffectFree
+    @Impure
     public HollowSetSchema(String schemaName, String elementType, String... hashKeyFieldPaths) {
         super(schemaName);
         this.elementType = elementType;
         this.hashKey = hashKeyFieldPaths == null || hashKeyFieldPaths.length == 0 ? null : new PrimaryKey(elementType, hashKeyFieldPaths);
     }
 
+    @Pure
     @Override
     public String getElementType() {
         return elementType;
     }
 
+    @Pure
     public PrimaryKey getHashKey() {
         return hashKey;
     }
 
+    @Impure
     public void setElementTypeState(HollowTypeReadState elementTypeState) {
         this.elementTypeState = elementTypeState;
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getElementTypeState() {
         return elementTypeState;
     }
 
+    @Pure
     @Override
     public SchemaType getSchemaType() {
         return SchemaType.SET;
     }
 
+    @Pure
+    @Impure
     @Override
     public boolean equals(Object other) {
         if (this == other)
@@ -83,6 +95,8 @@ public class HollowSetSchema extends HollowCollectionSchema {
         return isNullableObjectEquals(hashKey, otherSchema.getHashKey());
     }
 
+    @Pure
+    @Impure
     @Override
     public int hashCode() {
         int result = getName().hashCode();
@@ -92,6 +106,7 @@ public class HollowSetSchema extends HollowCollectionSchema {
         return result;
     }
 
+    @Impure
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(getName());
@@ -112,6 +127,7 @@ public class HollowSetSchema extends HollowCollectionSchema {
         return builder.toString();
     }
 
+    @Impure
     @Override
     public void writeTo(OutputStream os) throws IOException {
         DataOutputStream dos = new DataOutputStream(os);

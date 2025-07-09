@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.dataaccess.proxy;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
 import com.netflix.hollow.core.read.iterator.HollowListOrdinalIterator;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
@@ -28,30 +31,37 @@ import com.netflix.hollow.core.schema.HollowListSchema;
  */
 public class HollowListProxyDataAccess extends HollowTypeProxyDataAccess implements HollowListTypeDataAccess {
 
+    @SideEffectFree
+    @Impure
     public HollowListProxyDataAccess(HollowProxyDataAccess dataAccess) {
         super(dataAccess);
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         return currentDataAccess().size(ordinal);
     }
 
+    @Impure
     @Override
     public HollowOrdinalIterator ordinalIterator(int ordinal) {
         return new HollowListOrdinalIterator(ordinal, this);
     }
 
+    @Impure
     @Override
     public HollowListSchema getSchema() {
         return currentDataAccess().getSchema();
     }
 
+    @Impure
     @Override
     public int getElementOrdinal(int ordinal, int listIndex) {
         return currentDataAccess().getElementOrdinal(ordinal, listIndex);
     }
 
+    @Pure
     private HollowListTypeDataAccess currentDataAccess() {
         return (HollowListTypeDataAccess)currentDataAccess;
     }

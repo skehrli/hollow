@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Pure;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,5 +45,6 @@ public @interface HollowPrimaryKey {
      *
      * @return the field paths of the primary key
      */
+    @Pure
     String[] fields();
 }

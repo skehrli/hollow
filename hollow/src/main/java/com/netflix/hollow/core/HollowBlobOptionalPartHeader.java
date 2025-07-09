@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.schema.HollowSchema;
 import java.util.Collections;
 import java.util.List;
@@ -29,34 +32,42 @@ public class HollowBlobOptionalPartHeader {
     private long originRandomizedTag;
     private long destinationRandomizedTag;
 
+    @SideEffectFree
     public HollowBlobOptionalPartHeader(String partName) {
         this.partName = partName;
     }
 
+    @Pure
     public List<HollowSchema> getSchemas() {
         return schemas;
     }
 
+    @Impure
     public void setSchemas(List<HollowSchema> schemas) {
         this.schemas = schemas;
     }
 
+    @Pure
     public long getOriginRandomizedTag() {
         return originRandomizedTag;
     }
 
+    @Impure
     public void setOriginRandomizedTag(long originRandomizedTag) {
         this.originRandomizedTag = originRandomizedTag;
     }
 
+    @Pure
     public long getDestinationRandomizedTag() {
         return destinationRandomizedTag;
     }
 
+    @Impure
     public void setDestinationRandomizedTag(long destinationRandomizedTag) {
         this.destinationRandomizedTag = destinationRandomizedTag;
     }
 
+    @Pure
     public String getPartName() {
         return partName;
     }

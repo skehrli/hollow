@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.write.copy;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.list.HollowListTypeReadState;
@@ -40,6 +43,7 @@ public abstract class HollowRecordCopier {
     protected final OrdinalRemapper ordinalRemapper;
     protected final boolean preserveHashPositions;
 
+    @SideEffectFree
     protected HollowRecordCopier(HollowTypeReadState readTypeState, HollowWriteRecord writeRecord, OrdinalRemapper ordinalRemapper, boolean preserveHashPositions) {
         this.readTypeState = readTypeState;
         this.writeRecord = writeRecord;
@@ -47,24 +51,30 @@ public abstract class HollowRecordCopier {
         this.preserveHashPositions = preserveHashPositions;
     }
 
+    @Pure
     public HollowTypeReadState getReadTypeState() {
         return readTypeState;
     }
 
+    @Impure
     public abstract HollowWriteRecord copy(int ordinal);
 
+    @Impure
     public static HollowRecordCopier createCopier(HollowTypeReadState typeState) {
         return createCopier(typeState, typeState.getSchema());
     }
 
+    @Impure
     public static HollowRecordCopier createCopier(HollowTypeReadState typeState, HollowSchema destinationSchema) {
         return createCopier(typeState, destinationSchema, IdentityOrdinalRemapper.INSTANCE, true);
     }
 
+    @Impure
     public static HollowRecordCopier createCopier(HollowTypeReadState typeState, OrdinalRemapper remapper, boolean preserveHashPositions) {
         return createCopier(typeState, typeState.getSchema(), remapper, preserveHashPositions);
     }
 
+    @Impure
     public static HollowRecordCopier createCopier(HollowTypeReadState typeState, HollowSchema destinationSchema, OrdinalRemapper ordinalRemapper, boolean preserveHashPositions) {
         if(typeState instanceof HollowObjectTypeReadState)
             return new HollowObjectCopier((HollowObjectTypeReadState) typeState, (HollowObjectSchema)destinationSchema, ordinalRemapper);

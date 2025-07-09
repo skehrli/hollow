@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -29,65 +32,81 @@ public class IntList {
     private int values[];
     private int size;
 
+    @SideEffectFree
+    @Impure
     public IntList() {
         this(12);
     }
 
+    @SideEffectFree
     public IntList(int initialSize) {
         this.values = new int[initialSize];
     }
 
+    @Pure
     public int get(int index) {
         return values[index];
     }
 
+    @Impure
     public void add(int value) {
         if(values.length == size)
             values = Arrays.copyOf(values, (values.length * 3) / 2);
         values[size++] = value;
     }
 
+    @Impure
     public void addAll(IntList list) {
         for(int i=0;i<list.size;i++)
             add(list.get(i));
     }
 
+    @Impure
     public void set(int index, int value) {
         values[index] = value;
     }
 
+    @Pure
     public int size() {
         return size;
     }
 
+    @Impure
     public void clear() {
         size = 0;
     }
 
+    @Impure
     public void sort() {
         Arrays.sort(values, 0, size);
     }
     
+    @Impure
     public int binarySearch(int value) {
         return Arrays.binarySearch(values, 0, size, value);
     }
 
+    @Impure
     public void expandTo(int size) {
         if(values.length < size)
             values = Arrays.copyOf(values, size);
         this.size = size;
     }
 
+    @Impure
     public void trim() {
         values = Arrays.copyOf(values, Math.max(size, 12));
     }
 
+    @SideEffectFree
     public int[] arrayCopyOfRange(int beginIdx, int endIdx) {
         int arr[] = new int[endIdx - beginIdx];
         System.arraycopy(values, beginIdx, arr, 0, endIdx - beginIdx);
         return arr;
     }
 
+    @Pure
+    @Impure
     @Override
     public boolean equals(Object other) {
         if(other instanceof IntList) {
@@ -103,6 +122,7 @@ public class IntList {
         return false;
     }
 
+    @Pure
     @Override
     public int hashCode() {
         int result = size;
@@ -110,6 +130,7 @@ public class IntList {
         return result;
     }
 
+    @Impure
     public static Set<Integer> createSetFromIntList(IntList list) {
         if (Objects.isNull(list)) {
             return new HashSet<>();
@@ -124,6 +145,7 @@ public class IntList {
         return result;
     }
 
+    @Impure
     public static IntList createIntListFromSet(Set<Integer> set) {
         if (Objects.isNull(set)) {
             return new IntList(0);

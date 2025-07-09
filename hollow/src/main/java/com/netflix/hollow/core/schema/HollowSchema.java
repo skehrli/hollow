@@ -16,6 +16,10 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.mustcall.qual.Owning;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
@@ -48,6 +52,7 @@ public abstract class HollowSchema {
 
     private final String name;
 
+    @SideEffectFree
     public HollowSchema(String name) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Type name in Hollow Schema was " + (name == null ? "null" : "an empty string"));
@@ -55,14 +60,19 @@ public abstract class HollowSchema {
         this.name = name;
     }
 
+    @Pure
     public String getName() {
         return name;
     }
 
+    @Pure
     public abstract SchemaType getSchemaType();
 
+    @Impure
     public abstract void writeTo(OutputStream os) throws IOException;
     
+    @SideEffectFree
+    @Impure
     public static HollowSchema withoutKeys(HollowSchema schema) {
         switch(schema.getSchemaType()) {
         case SET:
@@ -80,11 +90,13 @@ public abstract class HollowSchema {
         }
     }
 
+    @Impure
     public static HollowSchema readFrom(InputStream is) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
         return readFrom(hbi);
     }
 
+    @Impure
     public static HollowSchema readFrom(HollowBlobInput in) throws IOException {
         int schemaTypeId = in.read();
 
@@ -104,6 +116,7 @@ public abstract class HollowSchema {
         throw new IOException();
     }
 
+    @Impure
     private static HollowObjectSchema readObjectSchemaFrom(HollowBlobInput in, String schemaName, boolean hasPrimaryKey) throws IOException {
         String[] keyFieldPaths = null;
         if (hasPrimaryKey) {
@@ -127,6 +140,7 @@ public abstract class HollowSchema {
         return schema;
     }
 
+    @Impure
     private static HollowSetSchema readSetSchemaFrom(HollowBlobInput in, String schemaName, boolean hasHashKey) throws IOException {
         String elementType = in.readUTF();
 
@@ -143,12 +157,14 @@ public abstract class HollowSchema {
         return new HollowSetSchema(schemaName, elementType, hashKeyFields);
     }
 
+    @Impure
     private static HollowListSchema readListSchemaFrom(HollowBlobInput in, String schemaName) throws IOException {
         String elementType = in.readUTF();
 
         return new HollowListSchema(schemaName, elementType);
     }
 
+    @Impure
     private static HollowMapSchema readMapSchemaFrom(HollowBlobInput in, String schemaName, boolean hasHashKey) throws IOException {
         String keyType = in.readUTF();
         String valueType = in.readUTF();
@@ -166,7 +182,8 @@ public abstract class HollowSchema {
         return new HollowMapSchema(schemaName, keyType, valueType, hashKeyFields);
     }
 
-    protected static <T> boolean isNullableObjectEquals(T o1, T o2) {
+    @Pure
+    protected static <T> boolean isNullableObjectEquals(@Owning T o1, @Owning T o2) {
         if (o1==o2) return true;
         if (o1==null && o2==null) return true;
         if (o1!=null && o1.equals(o2)) return true;
@@ -182,19 +199,23 @@ public abstract class HollowSchema {
         private final int typeId;
         private final int typeIdWithPrimaryKey;
 
+        @Impure
         private SchemaType(int typeId, int typeIdWithPrimaryKey) {
             this.typeId = typeId;
             this.typeIdWithPrimaryKey = typeIdWithPrimaryKey;
         }
 
+        @Pure
         public int getTypeId() {
             return typeId;
         }
 
+        @Pure
         public int getTypeIdWithPrimaryKey() {
             return typeIdWithPrimaryKey;
         }
 
+        @Pure
         public static SchemaType fromTypeId(int id) {
             switch(id) {
                 case 0:
@@ -212,11 +233,13 @@ public abstract class HollowSchema {
             throw new IllegalArgumentException("Cannot recognize HollowSchema type id " + id);
         }
 
+        @Pure
         public static boolean hasKey(int typeId) {
             return typeId == 4 || typeId == 5 || typeId == 6;
         }
 
         public static class UnrecognizedSchemaTypeException extends IllegalStateException {
+            @SideEffectFree
             public UnrecognizedSchemaTypeException(String name, SchemaType type) {
                 super("unrecognized schema type; name=" + name + " type=" + type);
             }

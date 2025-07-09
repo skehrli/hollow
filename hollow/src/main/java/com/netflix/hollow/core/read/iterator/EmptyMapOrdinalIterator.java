@@ -16,24 +16,31 @@
  */
 package com.netflix.hollow.core.read.iterator;
 
+import org.checkerframework.dataflow.qual.Deterministic;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.NoSuchElementException;
 
 public class EmptyMapOrdinalIterator implements HollowMapEntryOrdinalIterator {
 
     public static final EmptyMapOrdinalIterator INSTANCE = new EmptyMapOrdinalIterator();
 
+    @SideEffectFree
     private EmptyMapOrdinalIterator() { }
 
+    @Pure
     @Override
     public boolean next() {
         return false;
     }
 
+    @Deterministic
     @Override
     public int getKey() {
         throw new NoSuchElementException("This MapEntryOrdinalIterator is empty");
     }
 
+    @Deterministic
     @Override
     public int getValue() {
         throw new NoSuchElementException("This MapEntryOrdinalIterator is empty");

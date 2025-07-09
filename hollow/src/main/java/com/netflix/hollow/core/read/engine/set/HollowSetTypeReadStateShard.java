@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine.set;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.memory.encoding.HashCodes;
@@ -28,26 +31,31 @@ class HollowSetTypeReadStateShard implements HollowTypeReadStateShard {
     final HollowSetTypeDataElements dataElements;
     final int shardOrdinalShift;
 
+    @Pure
     @Override
     public HollowSetTypeDataElements getDataElements() {
         return dataElements;
     }
 
+    @Pure
     @Override
     public int getShardOrdinalShift() {
         return shardOrdinalShift;
     }
 
+    @SideEffectFree
     public HollowSetTypeReadStateShard(HollowSetTypeDataElements dataElements, int shardOrdinalShift) {
         this.shardOrdinalShift = shardOrdinalShift;
         this.dataElements = dataElements;
     }
 
+    @Impure
     public int size(int ordinal) {
         int size = (int)dataElements.setPointerAndSizeData.getElementValue(((long)ordinal * dataElements.bitsPerFixedLengthSetPortion) + dataElements.bitsPerSetPointer, dataElements.bitsPerSetSizeValue);
         return size;
     }
 
+    @Impure
     boolean foundData(int hashCode, long startBucket, long endBucket, int value) {
         hashCode = HashCodes.hashInt(hashCode);
         long bucket = startBucket + (hashCode & (endBucket - startBucket - 1));
@@ -65,6 +73,7 @@ class HollowSetTypeReadStateShard implements HollowTypeReadStateShard {
         return false;
     }
 
+    @Impure
     protected void applyShardToChecksum(HollowChecksum checksum, BitSet populatedOrdinals, int shardNumber, int numShards) {
         int ordinal = populatedOrdinals.nextSetBit(shardNumber);
         while(ordinal != ORDINAL_NONE) {
@@ -91,6 +100,7 @@ class HollowSetTypeReadStateShard implements HollowTypeReadStateShard {
         }
     }
 
+    @Pure
     public long getApproximateHeapFootprintInBytes() {
         long requiredBitsForSetPointers = ((long)dataElements.maxOrdinal + 1) * dataElements.bitsPerFixedLengthSetPortion;
         long requiredBitsForBuckets = dataElements.totalNumberOfBuckets * dataElements.bitsPerElement;
@@ -98,6 +108,7 @@ class HollowSetTypeReadStateShard implements HollowTypeReadStateShard {
         return requiredBits / 8;
     }
     
+    @Pure
     public long getApproximateHoleCostInBytes(BitSet populatedOrdinals, int shardNumber, int numShards) {
         long holeBits = 0;
         

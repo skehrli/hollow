@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine.list;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.read.engine.HollowTypeReadStateShard;
@@ -27,21 +30,25 @@ class HollowListTypeReadStateShard implements HollowTypeReadStateShard {
     final HollowListTypeDataElements dataElements;
     final int shardOrdinalShift;
 
+    @Pure
     @Override
     public HollowListTypeDataElements getDataElements() {
         return dataElements;
     }
 
+    @Pure
     @Override
     public int getShardOrdinalShift() {
         return shardOrdinalShift;
     }
 
+    @SideEffectFree
     public HollowListTypeReadStateShard(HollowListTypeDataElements dataElements, int shardOrdinalShift) {
         this.shardOrdinalShift = shardOrdinalShift;
         this.dataElements = dataElements;
     }
 
+    @Impure
     public int size(int ordinal) {
         long startElement = dataElements.getStartElement(ordinal);
         long endElement = dataElements.getEndElement(ordinal);
@@ -50,6 +57,7 @@ class HollowListTypeReadStateShard implements HollowTypeReadStateShard {
         return size;
     }
 
+    @Impure
     protected void applyShardToChecksum(HollowChecksum checksum, BitSet populatedOrdinals, int shardNumber, int numShards) {
         int ordinal = populatedOrdinals.nextSetBit(shardNumber);
         while(ordinal != ORDINAL_NONE) {
@@ -73,6 +81,7 @@ class HollowListTypeReadStateShard implements HollowTypeReadStateShard {
         }
     }
 
+    @Impure
     int getElementOrdinal(long startElement, long endElement, int listIndex) {
         long elementIndex = startElement + listIndex;
         if(elementIndex >= endElement)
@@ -82,6 +91,7 @@ class HollowListTypeReadStateShard implements HollowTypeReadStateShard {
         return elementOrdinal;
     }
 
+    @Pure
     public long getApproximateHeapFootprintInBytes() {
         long requiredListPointerBits = ((long)dataElements.maxOrdinal + 1) * dataElements.bitsPerListPointer;
         long requiredElementBits = dataElements.totalNumberOfElements * dataElements.bitsPerElement;
@@ -89,6 +99,7 @@ class HollowListTypeReadStateShard implements HollowTypeReadStateShard {
         return requiredBits / 8;
     }
     
+    @Pure
     public long getApproximateHoleCostInBytes(BitSet populatedOrdinals, int shardNumber, int numShards) {
         long holeBits = 0;
         

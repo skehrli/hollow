@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.error.IncompatibleSchemaException;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.memory.encoding.VarInt;
@@ -49,10 +51,12 @@ public class HollowObjectSchema extends HollowSchema {
 
     private int size;
 
+    @Impure
     public HollowObjectSchema(String schemaName, int numFields, String... keyFieldPaths) {
         this(schemaName, numFields, keyFieldPaths == null || keyFieldPaths.length == 0 ? null : new PrimaryKey(schemaName, keyFieldPaths));
     }
 
+    @Impure
     public HollowObjectSchema(String schemaName, int numFields, PrimaryKey primaryKey) {
         super(schemaName);
 
@@ -64,18 +68,22 @@ public class HollowObjectSchema extends HollowSchema {
         this.primaryKey = primaryKey;
     }
 
+    @Pure
     public int numFields() {
         return size;
     }
 
+    @Pure
     public PrimaryKey getPrimaryKey() {
         return primaryKey;
     }
 
+    @Impure
     public int addField(String fieldName, FieldType fieldType) {
         return addField(fieldName, fieldType, null);
     }
 
+    @Impure
     public int addField(String fieldName, FieldType fieldType, String referencedType) {
         if (fieldType == FieldType.REFERENCE && referencedType == null) {
             throw new RuntimeException(
@@ -98,6 +106,7 @@ public class HollowObjectSchema extends HollowSchema {
      * {@link #setReferencedTypeState(int, HollowTypeReadState)} with the returned integer. This
      * method will be removed in a future release.
      */
+    @Impure
     @Deprecated
     public int addField(String fieldName, FieldType fieldType, String referencedType, HollowTypeReadState referencedTypeState) {
         return addField(fieldName, fieldType, referencedType);
@@ -111,6 +120,7 @@ public class HollowObjectSchema extends HollowSchema {
      * @param fieldName the field name
      * @return the position
      */
+    @Pure
     public int getPosition(String fieldName) {
         Integer index = nameFieldIndexLookup.get(fieldName);
         if (index == null) {
@@ -119,10 +129,13 @@ public class HollowObjectSchema extends HollowSchema {
         return index;
     }
 
+    @Pure
     public String getFieldName(int fieldPosition) {
         return fieldNames[fieldPosition];
     }
 
+    @Pure
+    @Impure
     public FieldType getFieldType(String fieldName) {
         int fieldPosition = getPosition(fieldName);
 
@@ -132,10 +145,13 @@ public class HollowObjectSchema extends HollowSchema {
         return getFieldType(fieldPosition);
     }
 
+    @Pure
     public FieldType getFieldType(int fieldPosition) {
         return fieldTypes[fieldPosition];
     }
 
+    @Pure
+    @Impure
     public String getReferencedType(String fieldName) {
         int fieldPosition = getPosition(fieldName);
 
@@ -145,18 +161,22 @@ public class HollowObjectSchema extends HollowSchema {
         return getReferencedType(fieldPosition);
     }
 
+    @Pure
     public String getReferencedType(int fieldPosition) {
         return referencedTypes[fieldPosition];
     }
 
+    @Impure
     public void setReferencedTypeState(int fieldPosition, HollowTypeReadState state) {
         referencedFieldTypeStates[fieldPosition] = state;
     }
 
+    @Pure
     public HollowTypeReadState getReferencedTypeState(int fieldPosition) {
         return referencedFieldTypeStates[fieldPosition];
     }
 
+    @Impure
     public HollowObjectSchema findCommonSchema(HollowObjectSchema otherSchema) {
         if(!getName().equals(otherSchema.getName())) {
             throw new IllegalArgumentException("Cannot find common schema of two schemas with different names!");
@@ -193,6 +213,7 @@ public class HollowObjectSchema extends HollowSchema {
         return commonSchema;
     }
 
+    @Impure
     public HollowObjectSchema findUnionSchema(HollowObjectSchema otherSchema) {
         if(!getName().equals(otherSchema.getName())) {
             throw new IllegalArgumentException("Cannot find common schema of two schemas with different names!");
@@ -221,6 +242,7 @@ public class HollowObjectSchema extends HollowSchema {
         return unionSchema;
     }
 
+    @Impure
     public HollowObjectSchema filterSchema(HollowFilterConfig config) {
         /*
          * This method is preserved for binary compat from before TypeFilter was introduced.
@@ -229,6 +251,7 @@ public class HollowObjectSchema extends HollowSchema {
         return filterSchema((TypeFilter)config);
     }
 
+    @Impure
     public HollowObjectSchema filterSchema(TypeFilter filter) {
         String type = getName();
 
@@ -251,17 +274,21 @@ public class HollowObjectSchema extends HollowSchema {
         return filteredSchema;
     }
 
+    @Pure
     private boolean referencedTypesEqual(String type1, String type2) {
         if(type1 == null)
             return type2 == null;
         return type1.equals(type2);
     }
 
+    @Pure
     @Override
     public SchemaType getSchemaType() {
         return SchemaType.OBJECT;
     }
 
+    @Pure
+    @Impure
     @Override
     public boolean equals(Object other) {
         if (this == other)
@@ -289,6 +316,8 @@ public class HollowObjectSchema extends HollowSchema {
         return true;
     }
 
+    @Pure
+    @Impure
     @Override
     public int hashCode() {
         int result = getName().hashCode();
@@ -299,6 +328,7 @@ public class HollowObjectSchema extends HollowSchema {
         return result;
     }
 
+    @Impure
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -330,6 +360,7 @@ public class HollowObjectSchema extends HollowSchema {
         return builder.toString();
     }
 
+    @Impure
     @Override
     public void writeTo(OutputStream os) throws IOException {
         DataOutputStream dos = new DataOutputStream(os);
@@ -409,15 +440,18 @@ public class HollowObjectSchema extends HollowSchema {
         private final int fixedLength;
         private final boolean varIntEncodesLength;
 
+        @Impure
         FieldType(int fixedLength, boolean varIntEncodesLength) {
             this.fixedLength = fixedLength;
             this.varIntEncodesLength = varIntEncodesLength;
         }
 
+        @Pure
         public int getFixedLength() {
             return fixedLength;
         }
 
+        @Pure
         public boolean isVariableLength() {
             return varIntEncodesLength;
         }

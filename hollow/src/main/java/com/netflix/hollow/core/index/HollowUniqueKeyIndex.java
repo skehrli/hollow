@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
@@ -96,6 +99,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param type             type of object being indexed
      * @param fieldPaths       paths to fields being indexed
      */
+    @Impure
     public HollowUniqueKeyIndex(HollowDataAccess hollowDataAccess, String type, String... fieldPaths) {
         this(hollowDataAccess, WastefulRecycler.DEFAULT_INSTANCE, type, fieldPaths);
     }
@@ -110,6 +114,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param hollowDataAccess hollow data access. <b>For object longevity, this must be from {@link HollowAPI#getDataAccess()}</b>
      * @param primaryKey       primary key definition. This does not have to match the primary key defined in the type.
      */
+    @Impure
     public HollowUniqueKeyIndex(HollowDataAccess hollowDataAccess, PrimaryKey primaryKey) {
         this(hollowDataAccess, primaryKey, WastefulRecycler.DEFAULT_INSTANCE);
     }
@@ -126,6 +131,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param fieldPaths       paths to fields being indexed
      * @param memoryRecycler   memory recycler implementation
      */
+    @Impure
     public HollowUniqueKeyIndex(HollowDataAccess hollowDataAccess, ArraySegmentRecycler memoryRecycler, String type, String... fieldPaths) {
         this(hollowDataAccess, PrimaryKey.create(hollowDataAccess, type, fieldPaths), memoryRecycler);
     }
@@ -141,6 +147,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param primaryKey       primary key definition. This does not have to match the primary key defined in the type.
      * @param memoryRecycler   memory recycler implementation
      */
+    @Impure
     public HollowUniqueKeyIndex(HollowDataAccess hollowDataAccess, PrimaryKey primaryKey, ArraySegmentRecycler memoryRecycler) {
         this(hollowDataAccess, primaryKey, memoryRecycler, null);
     }
@@ -153,6 +160,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param memoryRecycler          the memory recycler
      * @param specificOrdinalsToIndex the bit set
      */
+    @Impure
     public HollowUniqueKeyIndex(HollowDataAccess hollowDataAccess, PrimaryKey primaryKey, ArraySegmentRecycler memoryRecycler, BitSet specificOrdinalsToIndex) {
         requireNonNull(primaryKey, "Hollow Primary Key Index creation failed because primaryKey was null");
         requireNonNull(hollowDataAccess, "Hollow Primary Key Index creation for type [" + primaryKey.getType()
@@ -215,6 +223,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * In order to prevent memory leaks, if this method is called and the index is no longer needed, call detachFromDeltaUpdates() before
      * discarding the index.
      */
+    @Impure
     public void listenForDeltaUpdates() {
         if (specificOrdinalsToIndex != null)
             throw new IllegalStateException("Cannot listen for delta updates when indexing only specified ordinals!");
@@ -230,20 +239,24 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * <p>
      * Call this method before discarding indexes which are currently listening for delta updates.
      */
+    @Impure
     public void detachFromDeltaUpdates() {
         //We won't throw here. Just silently fail since it's unlikely this class was ever successfully added as a listener.
         if (objectTypeDataAccess instanceof HollowObjectTypeReadState)
             ((HollowObjectTypeReadState) objectTypeDataAccess).removeListener(this);
     }
 
+    @Pure
     public HollowObjectTypeDataAccess getObjectTypeDataAccess() {
         return objectTypeDataAccess;
     }
 
+    @Pure
     public PrimaryKey getPrimaryKey() {
         return primaryKey;
     }
 
+    @Impure
     public List<FieldType> getFieldTypes() {
         return stream(fields).map(HollowHashIndexField::getFieldType).collect(toList());
     }
@@ -256,6 +269,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param key the field key
      * @return the matching ordinal for the key, otherwise -1 if the key is not present
      */
+    @Impure
     public int getMatchingOrdinal(Object key) {
         if (isProvidedKeyCountNotEqualToIndexedFieldsCount(1))
             return ORDINAL_NONE;
@@ -272,6 +286,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param key1 the second field key
      * @return the matching ordinal for the two keys, otherwise -1 if the key is not present
      */
+    @Impure
     public int getMatchingOrdinal(Object key0, Object key1) {
         if (isProvidedKeyCountNotEqualToIndexedFieldsCount(2))
             return ORDINAL_NONE;
@@ -289,6 +304,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param key2 the third field key
      * @return the matching ordinal for the three keys, otherwise -1 if the key is not present
      */
+    @Impure
     public int getMatchingOrdinal(Object key0, Object key1, Object key2) {
         if (isProvidedKeyCountNotEqualToIndexedFieldsCount(3))
             return ORDINAL_NONE;
@@ -305,6 +321,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param key2 key for field 2
      * @return ordinal or {@link com.netflix.hollow.core.HollowConstants#ORDINAL_NONE}
      */
+    @Impure
     private int getMatchingOrdinalImpl(
             Object key0,
             Object key1,
@@ -350,6 +367,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param keys the field keys
      * @return the matching ordinal for the keys, otherwise -1 if the key is not present
      */
+    @Impure
     public int getMatchingOrdinal(Object... keys) {
         if (isProvidedKeyCountNotEqualToIndexedFieldsCount(keys.length))
             return ORDINAL_NONE;
@@ -378,15 +396,18 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         return ordinal;
     }
 
+    @Pure
     private boolean isProvidedKeyCountNotEqualToIndexedFieldsCount(int keyCount) {
         // mismatched number of fields or the table is empty
         return this.fields.length != keyCount || this.hashTableVolatile.bitsPerElement == 0;
     }
 
+    @Impure
     private int readOrdinal(PrimaryKeyIndexHashTable hashTable, int bucket) {
         return (int) hashTable.hashTable.getElementValue((long) hashTable.bitsPerElement * (long) bucket, hashTable.bitsPerElement) - 1;
     }
 
+    @Impure
     @SuppressWarnings("UnnecessaryUnboxing")
     private static int generateKeyHashCode(Object key, FieldType fieldType) {
         switch (fieldType) {
@@ -411,6 +432,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         throw new IllegalArgumentException("I don't know how to hash a " + fieldType);
     }
 
+    @Impure
     private void setHashTable(PrimaryKeyIndexHashTable hashTable) {
         this.hashTableVolatile = hashTable;
     }
@@ -418,10 +440,12 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
     /**
      * @return whether this index contains duplicate records (two or more records mapping to a single primary key).
      */
+    @Impure
     public boolean containsDuplicates() {
         return !getDuplicateKeys().isEmpty();
     }
 
+    @Impure
     public synchronized Collection<Object[]> getDuplicateKeys() {
         PrimaryKeyIndexHashTable hashTable = hashTableVolatile;
         if (hashTable.bitsPerElement == 0)
@@ -448,14 +472,17 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         return duplicateKeys;
     }
 
+    @SideEffectFree
     @Override
     public void beginUpdate() {
     }
 
+    @SideEffectFree
     @Override
     public void addedOrdinal(int ordinal) {
     }
 
+    @SideEffectFree
     @Override
     public void removedOrdinal(int ordinal) {
     }
@@ -463,6 +490,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
     private static final boolean ALLOW_DELTA_UPDATE =
             Boolean.getBoolean("com.netflix.hollow.core.index.HollowUniqueKeyIndex.allowDeltaUpdate");
 
+    @Impure
     @Override
     public synchronized void endUpdate() {
         HollowObjectTypeReadState typeState = (HollowObjectTypeReadState) this.objectTypeDataAccess.getTypeState();
@@ -504,12 +532,14 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         }
     }
 
+    @Impure
     public void destroy() {
         PrimaryKeyIndexHashTable hashTable = hashTableVolatile;
         if (hashTable != null)
             hashTable.hashTable.destroy(memoryRecycler);
     }
 
+    @Impure
     private synchronized void reindex() {
         PrimaryKeyIndexHashTable hashTable = hashTableVolatile;
         // Could be null on first reindex
@@ -553,6 +583,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         memoryRecycler.swap();
     }
 
+    @Impure
     private void deltaUpdate(int hashTableSize, int bitsPerElement) {
         // For a delta update hashTableVolatile cannot be null
         PrimaryKeyIndexHashTable hashTable = hashTableVolatile;
@@ -623,6 +654,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         memoryRecycler.swap();
     }
 
+    @Impure
     private int findOrdinalBucket(int bitsPerElement, FixedLengthElementArray hashedArray, int hashCode, int hashMask, int prevOrdinal) {
         int startBucket = hashCode & hashMask;
         int bucket = startBucket;
@@ -644,6 +676,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         }
     }
 
+    @Pure
     private boolean bucketInRange(int fromBucket, int toBucket, int testBucket) {
         if (toBucket > fromBucket) {
             return testBucket > fromBucket && testBucket <= toBucket;
@@ -652,6 +685,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         }
     }
 
+    @Impure
     private int generateRecordHash(int ordinal) {
         int hashCode = 0;
         for (int i = 0; i < fields.length; i++) {
@@ -660,6 +694,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         return hashCode;
     }
 
+    @Impure
     private int generateFieldHash(int ordinal, int fieldIdx) {
         //It is super important that all references to data accessors originated
         //from a HollowAPI to maintain support for object longevity. Do not get an accessor
@@ -685,6 +720,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         }
     }
 
+    @Impure
     public Object[] getRecordKey(int ordinal) {
         Object[] results = new Object[fields.length];
 
@@ -703,6 +739,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @return the ordinal of the second-to-last element. This ordinal can be used with the last path element
      * to retrieve the final ordinal
      */
+    @Impure
     private int getOrdinalForFieldPath(HollowHashIndexField field, int ordinal) {
         //It is super important that all references to data accessors originated
         //from a HollowAPI to maintain support for object longevity. Do not get an accessor
@@ -722,6 +759,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param keys    keys to match against
      * @return true if object's keys matches the specified keys
      */
+    @Impure
     private boolean keysAllMatch(int ordinal, Object... keys) {
         for (int i = 0; i < keys.length; i++) {
             if (!keyMatches(keys[i], ordinal, i))
@@ -739,6 +777,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
      * @param fieldIdx      index of field to match against
      * @return true if the object's field matches the specified key
      */
+    @Impure
     private boolean keyMatches(Object key, int recordOrdinal, int fieldIdx) {
         //It is super important that all references to data accessors originated
         //from a HollowAPI to maintain support for object longevity. Do not get an accessor
@@ -756,6 +795,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         return HollowPrimaryKeyValueDeriver.keyMatches(key, field.getFieldType(), lastPathPosition, lastElementOrdinal, typeDataAccess);
     }
 
+    @Impure
     private boolean recordsHaveEqualKeys(int ordinal1, int ordinal2) {
         for (int fieldIdx = 0; fieldIdx < fields.length; fieldIdx++) {
             if (!fieldsAreEqual(ordinal1, ordinal2, fieldIdx))
@@ -764,6 +804,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
         return true;
     }
 
+    @Impure
     private boolean fieldsAreEqual(int ordinal1, int ordinal2, int fieldIdx) {
         //It is super important that all references to data accessors originated
         //from a HollowAPI to maintain support for object longevity. Do not get an accessor
@@ -790,6 +831,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
                 lastPathElement.getObjectTypeDataAccess(), ordinal2, lastPathElement.getSegmentFieldPosition());
     }
 
+    @Impure
     private boolean shouldPerformDeltaUpdate() {
         HollowObjectTypeReadState typeState = (HollowObjectTypeReadState) this.objectTypeDataAccess.getTypeState();
         //This doesn't affect compatibility with object longevity since this only gets invoked
@@ -813,6 +855,7 @@ public class HollowUniqueKeyIndex implements HollowTypeStateListener, TestableUn
     }
 
     private static class OrdinalNotFoundException extends IllegalStateException {
+        @SideEffectFree
         public OrdinalNotFoundException(String message) {
             super(message);
         }

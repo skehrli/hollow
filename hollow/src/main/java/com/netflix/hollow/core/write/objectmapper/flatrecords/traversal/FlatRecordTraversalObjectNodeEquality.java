@@ -1,5 +1,6 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,6 +9,7 @@ import java.util.Map;
 public class FlatRecordTraversalObjectNodeEquality {
     private static final Map<String, HollowObjectSchema> commonSchemaCache = new HashMap<>();
 
+    @Impure
     public static boolean equals(FlatRecordTraversalObjectNode left, FlatRecordTraversalObjectNode right) {
         if (left == null && right == null) {
             return true;
@@ -23,6 +25,7 @@ public class FlatRecordTraversalObjectNodeEquality {
         return compare(left, right);
     }
 
+    @Impure
     private static boolean compare(FlatRecordTraversalNode left, FlatRecordTraversalNode right) {
         if(left == null && right == null) {
             return true;
@@ -77,6 +80,7 @@ public class FlatRecordTraversalObjectNodeEquality {
 
 
 
+    @Impure
     private static void extractCommonObjectSchema(FlatRecordTraversalNode left, FlatRecordTraversalNode right) {
         if (left == null || right == null) {
             return ;

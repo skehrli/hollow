@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.read.engine.object;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.copyRecord;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.varLengthSize;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.writeNullField;
@@ -20,16 +22,20 @@ public class HollowObjectTypeDataElementsJoiner extends HollowTypeDataElementsJo
 
     private HollowObjectSchema schema;
 
+    @SideEffectFree
+    @Impure
     public HollowObjectTypeDataElementsJoiner(HollowObjectTypeDataElements[] from) {
         super(from);
         this.schema = from[0].schema;
     }
 
+    @Impure
     @Override
     public void initToElements() {
         this.to = new HollowObjectTypeDataElements(schema, from[0].memoryMode, from[0].memoryRecycler);
     }
 
+    @Impure
     @Override
     public void populateStats() {
         long[] varLengthSizes = new long[to.schema.numFields()];
@@ -74,6 +80,7 @@ public class HollowObjectTypeDataElementsJoiner extends HollowTypeDataElementsJo
         //  to.unfilteredFieldIsIncluded
     }
 
+    @Impure
     @Override
     public void copyRecords() {
         long[] currentWriteVarLengthDataPointers = new long[from[0].schema.numFields()];
@@ -94,6 +101,7 @@ public class HollowObjectTypeDataElementsJoiner extends HollowTypeDataElementsJo
 
     }
 
+    @Impure
     private void writeNullRecord(HollowObjectTypeDataElements to, int toOrdinal, long[] currentWriteVarLengthDataPointers) {
         for(int fieldIndex=0;fieldIndex<to.schema.numFields();fieldIndex++) {
             long currentWriteFixedLengthStartBit = ((long)toOrdinal * to.bitsPerRecord) + to.bitOffsetPerField[fieldIndex];

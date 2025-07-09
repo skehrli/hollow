@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.index.key;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.HollowDataset;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ public class PrimaryKeyValueHasher {
      * @param key The primary key spec
      * @param dataset The dataset to retrieve data from
      */
+    @Impure
     public PrimaryKeyValueHasher(PrimaryKey key, HollowDataset dataset) {
         this.fieldTypes = new FieldType[key.numFields()];
         
@@ -41,10 +44,14 @@ public class PrimaryKeyValueHasher {
         }
     }
     
+    @Pure
+    @Impure
     public int hash(Object key) {
         return hashElement(key, 0);
     }
     
+    @Pure
+    @Impure
     public int hash(Object... keys) {
         int hash = 0;
         
@@ -56,6 +63,7 @@ public class PrimaryKeyValueHasher {
         return hash;
     }
     
+    @Pure
     public int hashElement(Object key, int fieldTypeIdx) {
         switch(fieldTypes[fieldTypeIdx]) {
         case BOOLEAN:

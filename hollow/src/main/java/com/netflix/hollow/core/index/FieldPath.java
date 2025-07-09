@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
 import static com.netflix.hollow.core.schema.HollowSchema.SchemaType;
 
@@ -66,6 +68,7 @@ class FieldPath {
      * @param type             parent type of the field path
      * @param fieldPath        "." separated fields
      */
+    @Impure
     FieldPath(HollowDataAccess hollowDataAccess, String type, String fieldPath) {
         this(hollowDataAccess, type, fieldPath, true);
     }
@@ -79,6 +82,7 @@ class FieldPath {
      * @param fieldPath        "." separated fields
      * @param autoExpand       if the field path should be auto-expand collections and references with one field.
      */
+    @Impure
     FieldPath(HollowDataAccess hollowDataAccess, String type, String fieldPath, boolean autoExpand) {
         this.fieldPath = fieldPath;
         this.hollowDataAccess = hollowDataAccess;
@@ -87,6 +91,7 @@ class FieldPath {
         initialize();
     }
 
+    @Impure
     private void initialize() {
         FieldPaths.FieldPath<FieldPaths.FieldSegment> path =
                 FieldPaths.createFieldPathForPrefixIndex(hollowDataAccess, type, fieldPath, autoExpand);
@@ -122,10 +127,12 @@ class FieldPath {
         this.lastRefTypeInPath = lastRefType;
     }
 
+    @Pure
     String getLastRefTypeInPath() {
         return lastRefTypeInPath;
     }
 
+    @Pure
     FieldType getLastFieldType() {
         return fieldTypes[this.fields.length - 1];
     }
@@ -136,6 +143,7 @@ class FieldPath {
      * @param ordinal ordinal record for the given type in field path
      * @return Array of values found at the field path for the given ordinal record in the type.
      */
+    @Impure
     Object[] findValues(int ordinal) {
         return getAllValues(ordinal, type, 0);
     }
@@ -146,10 +154,12 @@ class FieldPath {
      * @param ordinal the ordinal used to find a value
      * @return A value found at the field path for the given ordinal record in the type.
      */
+    @Impure
     Object findValue(int ordinal) {
         return getValue(ordinal, type, 0);
     }
 
+    @Impure
     private Object getValue(int ordinal, String type, int fieldIndex) {
         Object value = null;
         HollowTypeDataAccess typeDataAccess = hollowDataAccess.getTypeDataAccess(type);
@@ -206,6 +216,7 @@ class FieldPath {
     }
 
 
+    @Impure
     private Object[] getAllValues(int ordinal, String type, int fieldIndex) {
         Object[] values;
         HollowTypeDataAccess typeDataAccess = hollowDataAccess.getTypeDataAccess(type);
@@ -270,6 +281,7 @@ class FieldPath {
         return values;
     }
 
+    @Impure
     private Object readFromObject(HollowObjectTypeDataAccess objectTypeDataAccess, int ordinal, FieldType fieldType, int fieldPosition) {
         Object value;
         switch (fieldType) {

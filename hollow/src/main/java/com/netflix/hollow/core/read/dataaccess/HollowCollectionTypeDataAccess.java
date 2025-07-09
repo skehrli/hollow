@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.dataaccess;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowCollectionTypeReadState;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 import com.netflix.hollow.core.schema.HollowCollectionSchema;
@@ -35,14 +36,17 @@ public interface HollowCollectionTypeDataAccess extends HollowTypeDataAccess {
      * @param ordinal the ordinal
      * @return the number of elements contained in the set at the specified ordinal.
      */
+    @Impure
     int size(int ordinal);
     
     /**
      * @param ordinal the ordinal
      * @return an iterator over all elements in the collection.
      */
+    @Impure
     HollowOrdinalIterator ordinalIterator(int ordinal);
 
+    @Impure
     HollowCollectionSchema getSchema();
 
 }

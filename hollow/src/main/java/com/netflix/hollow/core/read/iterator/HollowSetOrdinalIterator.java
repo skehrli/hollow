@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.iterator;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.memory.encoding.HashCodes;
@@ -29,12 +31,14 @@ public class HollowSetOrdinalIterator implements HollowOrdinalIterator {
     private final int numBuckets;
     private int currentBucket = -1;
 
+    @Impure
     public HollowSetOrdinalIterator(int setOrdinal, HollowSetTypeDataAccess dataAccess) {
         this.setOrdinal = setOrdinal;
         this.dataAccess = dataAccess;
         this.numBuckets = HashCodes.hashTableSize(dataAccess.size(setOrdinal));
     }
 
+    @Impure
     @Override
     public int next() {
         int bucketValue;
@@ -54,6 +58,7 @@ public class HollowSetOrdinalIterator implements HollowOrdinalIterator {
     /**
      * @return the bucket position the last ordinal was retrieved from via the call to {@link #next()}.
      */
+    @Pure
     public int getCurrentBucket() {
         return currentBucket;
     }

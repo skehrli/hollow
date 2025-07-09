@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.type.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.objects.delegate.HollowObjectAbstractDelegate;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -25,30 +27,36 @@ public class LongDelegateLookupImpl extends HollowObjectAbstractDelegate impleme
 
     private final LongTypeAPI typeAPI;
 
+    @Impure
     public LongDelegateLookupImpl(LongTypeAPI typeAPI) {
         this.typeAPI = typeAPI;
     }
 
+    @Impure
     @Override
     public long getValue(int ordinal) {
         return typeAPI.getValue(ordinal);
     }
 
+    @Impure
     @Override
     public Long getValueBoxed(int ordinal) {
         return typeAPI.getValueBoxed(ordinal);
     }
 
+    @Pure
     @Override
     public LongTypeAPI getTypeAPI() {
         return typeAPI;
     }
 
+    @Impure
     @Override
     public HollowObjectSchema getSchema() {
         return typeAPI.getTypeDataAccess().getSchema();
     }
 
+    @Impure
     @Override
     public HollowObjectTypeDataAccess getTypeDataAccess() {
         return typeAPI.getTypeDataAccess();

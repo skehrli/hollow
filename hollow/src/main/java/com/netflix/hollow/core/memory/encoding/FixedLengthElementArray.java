@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory.encoding;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.FixedLengthData;
 import com.netflix.hollow.core.memory.HollowUnsafeHandle;
 import com.netflix.hollow.core.memory.SegmentedLongArray;
@@ -64,6 +66,7 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
     private final int byteBitmask;
     private final long sizeBits;
 
+    @Impure
     public FixedLengthElementArray(ArraySegmentRecycler memoryRecycler, long numBits) {
         super(memoryRecycler, ((numBits - 1) >>> 6) + 1);
         this.log2OfSegmentSizeInBytes = log2OfSegmentSize + 3;
@@ -71,10 +74,12 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
         this.sizeBits = numBits;
     }
 
+    @Pure
     public long approxHeapFootprintInBytes() {
         return sizeBits / 8;
     }
 
+    @Impure
     @Override
     public void clearElementValue(long index, int bitsPerElement) {
         long whichLong = index >>> 6;
@@ -90,6 +95,7 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
             set(whichLong + 1, get(whichLong + 1) & ~(mask >>> bitsRemaining));
     }
 
+    @Impure
     @Override
     public void setElementValue(long index, int bitsPerElement, long value) {
         long whichLong = index >>> 6;
@@ -103,11 +109,13 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
             set(whichLong + 1, get(whichLong + 1) | (value >>> bitsRemaining));
     }
 
+    @Impure
     @Override
     public long getElementValue(long index, int bitsPerElement) {
         return getElementValue(index, bitsPerElement, ((1L << bitsPerElement) - 1));
     }
 
+    @Impure
     @Override
     public long getElementValue(long index, int bitsPerElement, long mask) {
         long whichByte = index >>> 3;
@@ -123,12 +131,16 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
         return l & mask;
     }
 
+    @Pure
+    @Impure
     @Override
     public long getLargeElementValue(long index, int bitsPerElement) {
         long mask = bitsPerElement == 64 ? -1 : ((1L << bitsPerElement) - 1);
         return getLargeElementValue(index, bitsPerElement, mask);
     }
 
+    @Pure
+    @Impure
     @Override
     public long getLargeElementValue(long index, int bitsPerElement, long mask) {
         long whichLong = index >>> 6;
@@ -146,6 +158,7 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
         return l & mask;
     }
 
+    @Impure
     @Override
     public void copyBits(FixedLengthData copyFrom, long sourceStartBit, long destStartBit, long numBits) {
         if(numBits == 0)
@@ -179,6 +192,7 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
         }
     }
 
+    @Impure
     @Override
     public void incrementMany(long startBit, long increment, long bitsBetweenIncrements, int numIncrements) {
         long endBit = startBit + (bitsBetweenIncrements * numIncrements);
@@ -187,6 +201,7 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
         }
     }
 
+    @Impure
     public void increment(long index, long increment) {
         long whichByte = index >>> 3;
         int whichBit = (int) (index & 0x07);
@@ -208,6 +223,7 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
         }
     }
 
+    @Impure
     public static FixedLengthElementArray newFrom(HollowBlobInput in, ArraySegmentRecycler memoryRecycler)
             throws IOException {
 
@@ -215,6 +231,7 @@ public class FixedLengthElementArray extends SegmentedLongArray implements Fixed
         return newFrom(in, memoryRecycler, numLongs);
     }
 
+    @Impure
     public static FixedLengthElementArray newFrom(HollowBlobInput in, ArraySegmentRecycler memoryRecycler, long numLongs)
             throws IOException {
 

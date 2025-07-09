@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowListSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.write.objectmapper.flatrecords.FlatRecordOrdinalReader;
@@ -15,6 +17,7 @@ public class FlatRecordTraversalListNode extends AbstractList<FlatRecordTraversa
 
   private Map<String, HollowObjectSchema> commonSchemaMap;
 
+  @Impure
   public FlatRecordTraversalListNode(FlatRecordOrdinalReader reader, HollowListSchema schema, int ordinal) {
     this.reader = reader;
     this.ordinal = ordinal;
@@ -25,37 +28,45 @@ public class FlatRecordTraversalListNode extends AbstractList<FlatRecordTraversa
     reader.readListElementsInto(ordinal, elementOrdinals);
   }
 
+  @Pure
   @Override
   public HollowListSchema getSchema() {
     return schema;
   }
 
+  @Pure
   @Override
   public int getOrdinal() {
     return ordinal;
   }
 
+  @Impure
   @Override
   public void setCommonSchema(Map<String, HollowObjectSchema> commonSchema) {
     this.commonSchemaMap = commonSchema;
   }
 
+  @Pure
   public FlatRecordTraversalObjectNode getObject(int index) {
     return (FlatRecordTraversalObjectNode) get(index);
   }
 
+  @Pure
   public FlatRecordTraversalListNode getList(int index) {
     return (FlatRecordTraversalListNode) get(index);
   }
 
+  @Pure
   public FlatRecordTraversalSetNode getSet(int index) {
     return (FlatRecordTraversalSetNode) get(index);
   }
 
+  @Pure
   public FlatRecordTraversalMapNode getMap(int index) {
     return (FlatRecordTraversalMapNode) get(index);
   }
 
+  @Impure
   @Override
   public FlatRecordTraversalNode get(int index) {
     if (index >= elementOrdinals.length) {
@@ -68,11 +79,13 @@ public class FlatRecordTraversalListNode extends AbstractList<FlatRecordTraversa
     return createNode(reader, elementOrdinal);
   }
 
+  @Pure
   @Override
   public int size() {
     return elementOrdinals.length;
   }
 
+  @Impure
   @Override
   public int hashCode() {
     int hashCode = 1;

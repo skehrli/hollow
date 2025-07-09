@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.util.stream.Collectors.joining;
 
 import com.netflix.hollow.core.index.HollowHashIndexField.FieldPathSegment;
@@ -46,6 +49,7 @@ public class HollowPreindexer {
     private HollowHashIndexField selectFieldSpec;
     private HollowIndexerValueTraverser traverser;
     
+    @SideEffectFree
     public HollowPreindexer(HollowDataAccess stateEngine, String type, String selectField, String... matchFields) {
         this.stateEngine = stateEngine;
         this.type = type;
@@ -53,6 +57,7 @@ public class HollowPreindexer {
         this.matchFields = matchFields;
     }
 
+    @Impure
     public void buildFieldSpecifications() {
         Map<String, Integer> baseFieldToIndexMap = new HashMap<>();
 
@@ -76,6 +81,7 @@ public class HollowPreindexer {
         traverser = new HollowIndexerValueTraverser(stateEngine, type, baseFields);
     }
 
+    @Impure
     private HollowHashIndexField getHollowHashIndexField(HollowTypeDataAccess originalDataAccess, String selectField,
             Map<String, Integer> baseFieldToIndexMap, boolean truncate) {
         FieldPaths.FieldPath<FieldPaths.FieldSegment> path = FieldPaths.createFieldPathForHashIndex(
@@ -136,22 +142,27 @@ public class HollowPreindexer {
                 baseTypeState, fieldType);
     }
 
+    @Pure
     public HollowTypeDataAccess getHollowTypeDataAccess() {
         return typeState;
     }
 
+    @Pure
     public HollowHashIndexField[] getMatchFieldSpecs() {
         return matchFieldSpecs;
     }
 
+    @Pure
     public int getNumMatchTraverserFields() {
         return numMatchTraverserFields;
     }
 
+    @Pure
     public HollowHashIndexField getSelectFieldSpec() {
         return selectFieldSpec;
     }
 
+    @Pure
     public HollowIndexerValueTraverser getTraverser() {
         return traverser;
     }

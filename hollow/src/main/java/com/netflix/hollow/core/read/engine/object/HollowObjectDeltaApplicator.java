@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine.object;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.writeNullField;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.writeNullFixedLengthField;
 import static com.netflix.hollow.core.read.engine.object.HollowObjectTypeDataElements.writeNullVarLengthField;
@@ -52,12 +55,14 @@ class HollowObjectDeltaApplicator {
 
     int numMergeFields = 0;
 
+    @SideEffectFree
     public HollowObjectDeltaApplicator(HollowObjectTypeDataElements from, HollowObjectTypeDataElements delta, HollowObjectTypeDataElements target) {
         this.from = from;
         this.delta = delta;
         this.target = target;
     }
 
+    @Impure
     void applyDelta() {
         removalsReader = from.encodedRemovals == null ? GapEncodedVariableLengthIntegerReader.EMPTY_READER : from.encodedRemovals;
         additionsReader = delta.encodedAdditions;
@@ -104,6 +109,7 @@ class HollowObjectDeltaApplicator {
         removalsReader.destroy();
     }
 
+    @Pure
     private boolean canDoFastDelta() {
         for(int i=0;i<target.bitsPerField.length;i++) {
             if(target.bitsPerField[i] != from.bitsPerField[i])
@@ -112,6 +118,7 @@ class HollowObjectDeltaApplicator {
         return true;
     }
 
+    @Impure
     private void fastDelta() {
         int i = 0;
         int bulkCopyEndOrdinal = Math.min(from.maxOrdinal, target.maxOrdinal);
@@ -133,6 +140,7 @@ class HollowObjectDeltaApplicator {
         }
     }
 
+    @Impure
     private void fastCopyRecords(int recordsToCopy) {
         long fixedLengthBitsToCopy = (long)from.bitsPerRecord * recordsToCopy;
 
@@ -158,12 +166,14 @@ class HollowObjectDeltaApplicator {
         currentWriteFixedLengthStartBit += fixedLengthBitsToCopy;
     }
 
+    @Impure
     private void slowDelta() {
         for(int i=0;i<=target.maxOrdinal;i++) {
             mergeOrdinal(i);
         }
     }
 
+    @Impure
     private void mergeOrdinal(int i) {
         boolean addFromDelta = additionsReader.nextElement() == i;
         boolean removeData = removalsReader.nextElement() == i;
@@ -195,6 +205,7 @@ class HollowObjectDeltaApplicator {
             removalsReader.advance();
     }
 
+    @Impure
     private void addFromDelta(boolean removeData, int fieldIndex, int deltaFieldIndex) {
         if(deltaFieldIndex == -1) {
             writeNullField(target, fieldIndex, currentWriteFixedLengthStartBit, currentWriteVarLengthDataPointers);
@@ -211,6 +222,7 @@ class HollowObjectDeltaApplicator {
         }
     }
 
+    @Impure
     private void copyRecordField(int fieldIndex, int fromFieldIndex, HollowObjectTypeDataElements copyFromData, long currentReadFixedLengthStartBit, long currentWriteFixedLengthStartBit, long[] currentReadVarLengthDataPointers, long[] currentWriteVarLengthDataPointers, boolean removeData) {
         long readValue = copyFromData.bitsPerField[fromFieldIndex] > 56 ?
                 copyFromData.fixedLengthData.getLargeElementValue(currentReadFixedLengthStartBit, copyFromData.bitsPerField[fromFieldIndex])

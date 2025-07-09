@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
@@ -36,6 +38,7 @@ public class HollowReadFieldUtils {
      * @param fieldPosition the field position
      * @return the hash code
      */
+    @Impure
     public static int fieldHashCode(HollowObjectTypeDataAccess typeAccess, int ordinal, int fieldPosition) {
         HollowObjectSchema schema = typeAccess.getSchema();
 
@@ -64,6 +67,7 @@ public class HollowReadFieldUtils {
         throw new IllegalStateException("I don't know how to hash a " + schema.getFieldType(fieldPosition));
     }
 
+    @Impure
     public static int hashObject(Object value) {
         if (value == null) {
             return 0;
@@ -99,6 +103,7 @@ public class HollowReadFieldUtils {
      *
      * @return if the two OBJECT field records are exactly equal
      */
+    @Impure
     public static boolean fieldsAreEqual(HollowObjectTypeDataAccess typeAccess1, int ordinal1, int fieldPosition1, HollowObjectTypeDataAccess typeAccess2, int ordinal2, int fieldPosition2) {
         HollowObjectSchema schema1 = typeAccess1.getSchema();
 
@@ -145,6 +150,7 @@ public class HollowReadFieldUtils {
      * @param fieldPosition the field position
      * @return a displayable String for a field from an OBJECT record.
      */
+    @Impure
     public static String displayString(HollowObjectTypeDataAccess typeAccess, int ordinal, int fieldPosition) {
         HollowObjectSchema schema = typeAccess.getSchema();
 
@@ -178,6 +184,7 @@ public class HollowReadFieldUtils {
      * @param fieldPosition the field position
      * @return an appropriate Object representing a Hollow OBJECT record field's value
      */
+    @Impure
     public static Object fieldValueObject(HollowObjectTypeDataAccess typeAccess, int ordinal, int fieldPosition) {
         HollowObjectSchema schema = typeAccess.getSchema();
 
@@ -222,6 +229,7 @@ public class HollowReadFieldUtils {
      * @param testObject the object to test
      * @return whether the provided Object matches a Hollow OBJECT record's value.
      */
+    @Impure
     public static boolean fieldValueEquals(HollowObjectTypeDataAccess typeAccess, int ordinal, int fieldPosition, Object testObject) {
         HollowObjectSchema schema = typeAccess.getSchema();
 
@@ -271,6 +279,7 @@ public class HollowReadFieldUtils {
      * @param ordinal2 the second object ordinal
      * @return compareTo result for the two field values at the specified field position
      */
+    @Impure
     public static int compareFieldValues(HollowObjectTypeDataAccess typeAccess, int fieldPosition, int ordinal1, int ordinal2) {
         HollowObjectSchema schema = typeAccess.getSchema();
 
@@ -313,6 +322,7 @@ public class HollowReadFieldUtils {
      * @param data the byte array
      * @return The hash code for a byte array which would be returned from {@link #fieldHashCode(HollowObjectTypeDataAccess, int, int)}
      */
+    @Impure
     public static int byteArrayHashCode(byte[] data) {
         return HashCodes.hashCode(data);
     }
@@ -321,6 +331,7 @@ public class HollowReadFieldUtils {
      * @param str the string value
      * @return The hash code for a String which would be returned from {@link #fieldHashCode(HollowObjectTypeDataAccess, int, int)}
      */
+    @Impure
     public static int stringHashCode(String str) {
         return HashCodes.hashCode(str);
     }
@@ -329,6 +340,7 @@ public class HollowReadFieldUtils {
      * @param bool the boolean value
      * @return The hash code for a boolean which would be returned from {@link #fieldHashCode(HollowObjectTypeDataAccess, int, int)}
      */
+    @Pure
     public static int booleanHashCode(Boolean bool) {
         return bool == null ? -1 : bool ? 1 : 0;
     }
@@ -337,6 +349,7 @@ public class HollowReadFieldUtils {
      * @param l the long value
      * @return The hash code for a long which would be returned from {@link #fieldHashCode(HollowObjectTypeDataAccess, int, int)}
      */
+    @Pure
     public static int longHashCode(long l) {
         return (int)l ^ (int)(l >> 32);
     }
@@ -345,6 +358,7 @@ public class HollowReadFieldUtils {
      * @param i the int value
      * @return The hash code for an int which would be returned from {@link #fieldHashCode(HollowObjectTypeDataAccess, int, int)}
      */
+    @Pure
     public static int intHashCode(int i) {
         return i;
     }
@@ -353,6 +367,7 @@ public class HollowReadFieldUtils {
      * @param f the float value
      * @return The hash code for a float which would be returned from {@link #fieldHashCode(HollowObjectTypeDataAccess, int, int)}
      */
+    @Pure
     public static int floatHashCode(float f) {
         return Float.floatToIntBits(f);
     }
@@ -361,6 +376,8 @@ public class HollowReadFieldUtils {
      * @param d the double value
      * @return The hash code for a double which would be returned from {@link #fieldHashCode(HollowObjectTypeDataAccess, int, int)}
      */
+    @Pure
+    @Impure
     public static int doubleHashCode(double d) {
         long bits = Double.doubleToLongBits(d);
         return longHashCode(bits);

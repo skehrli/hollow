@@ -16,11 +16,15 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
 import com.netflix.hollow.core.read.engine.PopulatedOrdinalListener;
 
 public abstract class AllHollowRecordCollection<T> extends HollowRecordCollection<T> {
 
+    @SideEffectFree
+    @Impure
     public AllHollowRecordCollection(HollowTypeReadState typeState) {
         super(typeState.getListener(PopulatedOrdinalListener.class).getPopulatedOrdinals());
     }

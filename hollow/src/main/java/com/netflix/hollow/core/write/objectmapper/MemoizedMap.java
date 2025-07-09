@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,18 +31,22 @@ public class MemoizedMap<K, V> extends HashMap<K, V> {
 
     private static final long serialVersionUID = -7952842518944521839L;
 
+    @Impure
     public MemoizedMap() {
         super();
     }
 
+    @Impure
     public MemoizedMap(int initialCapacity) {
         super(initialCapacity);
     }
     
+    @Impure
     public MemoizedMap(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
     }
 
+    @Impure
     public MemoizedMap(Map<? extends K, ? extends V> m) {
         super(m);
     }

@@ -1,5 +1,8 @@
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.engine.list.HollowListTypeReadState;
 import com.netflix.hollow.core.read.engine.list.HollowListTypeReshardingStrategy;
 import com.netflix.hollow.core.read.engine.map.HollowMapTypeReadState;
@@ -16,10 +19,15 @@ public abstract class HollowTypeReshardingStrategy {
     private final static HollowTypeReshardingStrategy SET_RESHARDING_STRATEGY = new HollowSetTypeReshardingStrategy();
     private final static HollowTypeReshardingStrategy MAP_RESHARDING_STRATEGY = new HollowMapTypeReshardingStrategy();
 
+    @SideEffectFree
+    @Impure
     public abstract HollowTypeDataElementsSplitter createDataElementsSplitter(HollowTypeDataElements from, int shardingFactor);
 
+    @SideEffectFree
+    @Impure
     public abstract HollowTypeDataElementsJoiner createDataElementsJoiner(HollowTypeDataElements[] from);
 
+    @Pure
     public static HollowTypeReshardingStrategy getInstance(HollowTypeReadState typeState) {
         if (typeState instanceof HollowObjectTypeReadState) {
             return OBJECT_RESHARDING_STRATEGY;
@@ -42,6 +50,7 @@ public abstract class HollowTypeReshardingStrategy {
      * @param prevNumShards The current number of shards in typeState
      * @param newNumShards The desired number of shards for typeState
      */
+    @Impure
     public void reshard(HollowTypeReadState typeState, int prevNumShards, int newNumShards) {
         int shardingFactor = shardingFactor(prevNumShards, newNumShards);
         HollowTypeDataElements[] newDataElements;
@@ -119,6 +128,7 @@ public abstract class HollowTypeReshardingStrategy {
     /**
      * Given old and new numShards, this method returns the shard resizing multiplier.
      */
+    @Pure
     public static int shardingFactor(int oldNumShards, int newNumShards) {
         if (newNumShards <= 0 || oldNumShards <= 0 || newNumShards == oldNumShards) {
             throw new IllegalStateException("Invalid shard resizing, oldNumShards=" + oldNumShards + ", newNumShards=" + newNumShards);
@@ -134,6 +144,7 @@ public abstract class HollowTypeReshardingStrategy {
         return dividend / divisor;
     }
 
+    @Impure
     private void copyShardDataElements(ShardsHolder from, HollowTypeDataElements[] newDataElements, int[] shardOrdinalShifts) {
         for (int i=0; i<from.getShards().length; i++) {
             newDataElements[i] = from.getShards()[i].getDataElements();
@@ -141,6 +152,7 @@ public abstract class HollowTypeReshardingStrategy {
         }
     }
 
+    @Impure
     private HollowTypeDataElements[] joinCandidates(HollowTypeReadState typeState, int indexIntoShards, int shardingFactor) {
         HollowTypeReadStateShard[] shards = typeState.getShardsVolatile().getShards();
         HollowTypeDataElements[] result = typeState.createTypeDataElements(shardingFactor);
@@ -151,6 +163,7 @@ public abstract class HollowTypeReshardingStrategy {
         return result;
     }
 
+    @Impure
     public HollowTypeReadStateShard[] joinDataElementsForOneShard(HollowTypeReadState typeState, int currentIndex, int shardingFactor) {
         ShardsHolder shardsHolder = typeState.getShardsVolatile();
         int newNumShards = shardsHolder.getShards().length / shardingFactor;
@@ -168,6 +181,7 @@ public abstract class HollowTypeReshardingStrategy {
         return newShards;
     }
 
+    @Impure
     public HollowTypeReadStateShard[] expandWithOriginalDataElements(ShardsHolder shardsHolder, int shardingFactor) {
         int prevNumShards = shardsHolder.getShards().length;
         int newNumShards = prevNumShards * shardingFactor;
@@ -181,6 +195,7 @@ public abstract class HollowTypeReshardingStrategy {
         return newShards;
     }
 
+    @Impure
     public HollowTypeReadStateShard[] splitDataElementsForOneShard(HollowTypeReadState typeState, int currentIndex, int prevNumShards, int shardingFactor) {
         ShardsHolder shardsHolder = typeState.getShardsVolatile();
         int newNumShards = shardsHolder.getShards().length;

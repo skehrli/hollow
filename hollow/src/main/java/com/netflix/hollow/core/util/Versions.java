@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.HollowConstants.VERSION_LATEST;
 import static com.netflix.hollow.core.HollowConstants.VERSION_NONE;
 
@@ -25,8 +26,10 @@ public final class Versions {
     static final String PRETTY_VERSION_NONE = "none";
     static final String PRETTY_VERSION_LATEST = "latest";
 
+    @SideEffectFree
     private Versions() {}
 
+    @SideEffectFree
     public static String prettyVersion(long version) {
         if (version == VERSION_NONE) {
             return PRETTY_VERSION_NONE;

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.schema;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.schema.HollowObjectSchema.FieldType;
 import java.io.IOException;
 import java.io.Reader;
@@ -41,6 +42,7 @@ public class HollowSchemaParser {
      * @return the list of schema
      * @throws IOException if the schema cannot be parsed
      */
+    @Impure
     public static List<HollowSchema> parseCollectionOfSchemas(Reader reader) throws IOException {
         StreamTokenizer tokenizer = new StreamTokenizer(reader);
         configureTokenizer(tokenizer);
@@ -62,6 +64,7 @@ public class HollowSchemaParser {
      * @return the list of schema
      * @throws IOException if the schema cannot be parsed
      */
+    @Impure
     public static List<HollowSchema> parseCollectionOfSchemas(String schemas) throws IOException {
         return parseCollectionOfSchemas(new StringReader(schemas));
     }
@@ -73,12 +76,14 @@ public class HollowSchemaParser {
      * @return the schema
      * @throws IOException if the schema cannot be parsed
      */
+    @Impure
     public static HollowSchema parseSchema(String schema) throws IOException {
         StreamTokenizer tokenizer = new StreamTokenizer(new StringReader(schema));
         configureTokenizer(tokenizer);
         return parseSchema(tokenizer);
     }
 
+    @Impure
     private static HollowSchema parseSchema(StreamTokenizer tokenizer) throws IOException {
         int tok = tokenizer.nextToken();
         while(tok != StreamTokenizer.TT_WORD) {
@@ -105,6 +110,7 @@ public class HollowSchemaParser {
         return parseObjectSchema(typeName, tokenizer);
     }
 
+    @Impure
     private static HollowObjectSchema parseObjectSchema(String typeName, StreamTokenizer tokenizer) throws IOException {
         String keyFieldPaths[] = parsePrimaryKey(tokenizer);
         if (tokenizer.ttype != '{') {
@@ -159,6 +165,7 @@ public class HollowSchemaParser {
         return schema;
     }
 
+    @Impure
     private static HollowListSchema parseListSchema(String typeName, StreamTokenizer tokenizer) throws IOException {
         int tok = tokenizer.nextToken();
 
@@ -183,6 +190,7 @@ public class HollowSchemaParser {
         return new HollowListSchema(typeName, elementType);
     }
 
+    @Impure
     private static HollowSetSchema parseSetSchema(String typeName, StreamTokenizer tokenizer) throws IOException {
         int tok = tokenizer.nextToken();
 
@@ -209,6 +217,7 @@ public class HollowSchemaParser {
         return new HollowSetSchema(typeName, elementType, hashKeyPaths);
     }
 
+    @Impure
     private static HollowMapSchema parseMapSchema(String typeName, StreamTokenizer tokenizer) throws IOException {
         int tok = tokenizer.nextToken();
 
@@ -246,14 +255,17 @@ public class HollowSchemaParser {
         return new HollowMapSchema(typeName, keyType, valueType, hashKeyPaths);
     }
 
+    @Impure
     private static String[] parseHashKey(StreamTokenizer tokenizer) throws IOException {
         return parseKeyFieldPaths(tokenizer, "HashKey");
     }
 
+    @Impure
     private static String[] parsePrimaryKey(StreamTokenizer tokenizer) throws IOException {
         return parseKeyFieldPaths(tokenizer, "PrimaryKey");
     }
 
+    @Impure
     private static String[] parseKeyFieldPaths(StreamTokenizer tokenizer, String annotationName) throws IOException {
         if(tokenizer.ttype != '@')
             return new String[0];
@@ -291,6 +303,7 @@ public class HollowSchemaParser {
     }
 
 
+    @Impure
     private static void configureTokenizer(StreamTokenizer tokenizer) {
         tokenizer.wordChars('_', '_');
         tokenizer.slashSlashComments(true);

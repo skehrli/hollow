@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine.object;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.api.sampling.DisabledSamplingDirector;
@@ -54,26 +57,32 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
 
     volatile HollowObjectTypeShardsHolder shardsVolatile;
 
+    @Pure
     @Override
     public HollowObjectTypeShardsHolder getShardsVolatile() {
         return shardsVolatile;
     }
 
+    @Impure
     @Override
     public void updateShardsVolatile(HollowTypeReadStateShard[] shards) {
         this.shardsVolatile = new HollowObjectTypeShardsHolder(shards);
     }
 
+    @Pure
     @Override
     public HollowTypeDataElements[] createTypeDataElements(int len) {
         return new HollowObjectTypeDataElements[len];
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public HollowTypeReadStateShard createTypeReadStateShard(HollowSchema schema, HollowTypeDataElements dataElements, int shardOrdinalShift) {
         return new HollowObjectTypeReadStateShard((HollowObjectSchema) schema, (HollowObjectTypeDataElements) dataElements, shardOrdinalShift);
     }
 
+    @Impure
     public HollowObjectTypeReadState(HollowReadStateEngine fileEngine, MemoryMode memoryMode, HollowObjectSchema schema, HollowObjectSchema unfilteredSchema) {
         super(fileEngine, memoryMode, schema);
         this.sampler = new HollowObjectSampler(schema, DisabledSamplingDirector.INSTANCE);
@@ -81,6 +90,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         this.shardsVolatile = null;
     }
 
+    @Impure
     public HollowObjectTypeReadState(HollowObjectSchema schema, HollowObjectTypeDataElements dataElements) {
         super(null, MemoryMode.ON_HEAP, schema);
         this.sampler = new HollowObjectSampler(schema, DisabledSamplingDirector.INSTANCE);
@@ -91,16 +101,19 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         this.maxOrdinal = dataElements.maxOrdinal;
     }
 
+    @Pure
     @Override
     public HollowObjectSchema getSchema() {
         return (HollowObjectSchema)schema;
     }
 
+    @Pure
     @Override
     public int maxOrdinal() {
         return maxOrdinal;
     }
 
+    @Impure
     @Override
     public void readSnapshot(HollowBlobInput in, ArraySegmentRecycler memoryRecycler, int numShards) throws IOException {
         if(numShards > 1)
@@ -121,6 +134,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         SnapshotPopulatedOrdinalsReader.readOrdinals(in, stateListeners);
     }
 
+    @Impure
     @Override
     public void applyDelta(HollowBlobInput in, HollowSchema deltaSchema, ArraySegmentRecycler memoryRecycler, int deltaNumShards) throws IOException {
         if(shardsVolatile.shards.length > 1)
@@ -168,20 +182,24 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
             maxOrdinal = shardsVolatile.shards[0].dataElements.maxOrdinal;
     }
 
+    @Impure
     public static void discardSnapshot(HollowBlobInput in, HollowObjectSchema schema, int numShards) throws IOException {
         discardType(in, schema, numShards, false);
     }
 
+    @Impure
     public static void discardDelta(HollowBlobInput in, HollowObjectSchema schema, int numShards) throws IOException {
         discardType(in, schema, numShards, true);
     }
 
+    @Impure
     public static void discardType(HollowBlobInput in, HollowObjectSchema schema, int numShards, boolean delta) throws IOException {
         HollowObjectTypeDataElements.discardFromInput(in, schema, numShards, delta);
         if(!delta)
             SnapshotPopulatedOrdinalsReader.discardOrdinals(in);
     }
 
+    @Impure
     @Override
     public boolean isNull(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -210,6 +228,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         }
     }
 
+    @Impure
     @Override
     public int readOrdinal(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -229,6 +248,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return (int)refOrdinal;
     }
 
+    @Impure
     @Override
     public int readInt(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -248,6 +268,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return ZigZag.decodeInt((int)value);
     }
 
+    @Impure
     @Override
     public float readFloat(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -267,6 +288,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return Float.intBitsToFloat(value);
     }
 
+    @Impure
     @Override
     public double readDouble(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -286,6 +308,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return Double.longBitsToDouble(value);
     }
 
+    @Impure
     @Override
     public long readLong(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -305,6 +328,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return ZigZag.decodeLong(value);
     }
 
+    @Impure
     @Override
     public Boolean readBoolean(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -324,6 +348,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return value == 1 ? Boolean.TRUE : Boolean.FALSE;
     }
 
+    @Impure
     @Override
     public byte[] readBytes(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -355,6 +380,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return result;
     }
 
+    @Impure
     @Override
     public String readString(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -386,6 +412,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return result;
     }
 
+    @Impure
     @Override
     public boolean isStringFieldEqual(int ordinal, int fieldIndex, String testValue) {
         sampler.recordFieldAccess(fieldIndex);
@@ -417,6 +444,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return result;
     }
 
+    @Impure
     @Override
     public int findVarLengthFieldHashCode(int ordinal, int fieldIndex) {
         sampler.recordFieldAccess(fieldIndex);
@@ -448,6 +476,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return hashCode;
     }
 
+    @Impure
     private boolean readWasUnsafe(HollowObjectTypeShardsHolder shardsHolder, int ordinal, HollowObjectTypeReadStateShard shard) {
         // Use a load (acquire) fence to constrain the compiler reordering prior plain loads so
         // that they cannot "float down" below the volatile load of shardsVolatile.
@@ -491,6 +520,8 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
      * @param fieldName the field name
      * @return the number of bits required for the field
      */
+    @Pure
+    @Impure
     public int bitsRequiredForField(String fieldName) {
         final HollowObjectTypeReadStateShard[] shards = this.shardsVolatile.shards;
         int maxBitsRequiredForField = shards[0].bitsRequiredForField(fieldName);
@@ -504,11 +535,13 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return maxBitsRequiredForField;
     }
     
+    @Pure
     @Override
     public HollowSampler getSampler() {
         return sampler;
     }
 
+    @Impure
     @Override
     protected void invalidate() {
         stateListeners = EMPTY_LISTENERS;
@@ -521,21 +554,25 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         this.shardsVolatile = new HollowObjectTypeShardsHolder(newShards);
     }
 
+    @Impure
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
         sampler.setSamplingDirector(director);
     }
 
+    @Impure
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
         sampler.setFieldSpecificSamplingDirector(fieldSpec, director);
     }
 
+    @Impure
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
         sampler.setUpdateThread(t);
     }
 
+    @Impure
     HollowObjectTypeDataElements[] currentDataElements() {
         final HollowObjectTypeReadStateShard[] shards = this.shardsVolatile.shards;
         HollowObjectTypeDataElements[] elements = new HollowObjectTypeDataElements[shards.length];
@@ -545,6 +582,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         return elements;
     }
 
+    @Impure
     @Override
     protected void applyToChecksum(HollowChecksum checksum, HollowSchema withSchema) {
         final HollowObjectTypeShardsHolder shardsHolder = this.shardsVolatile;
@@ -559,6 +597,8 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
         }
     }
 
+	@Pure
+	@Impure
 	@Override
 	public long getApproximateHeapFootprintInBytes() {
         final HollowObjectTypeReadStateShard[] shards = this.shardsVolatile.shards;
@@ -570,6 +610,8 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
 	    return totalApproximateHeapFootprintInBytes;
 	}
 	
+	@Pure
+	@Impure
 	@Override
 	public long getApproximateHoleCostInBytes() {
         final HollowObjectTypeReadStateShard[] shards = this.shardsVolatile.shards;
@@ -583,6 +625,7 @@ public class HollowObjectTypeReadState extends HollowTypeReadState implements Ho
 	    return totalApproximateHoleCostInBytes;
 	}
 
+    @Pure
     @Override
     public int numShards() {
         return this.shardsVolatile.shards.length;

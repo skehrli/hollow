@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.util.stream.Collectors.joining;
 
 import com.netflix.hollow.core.HollowDataset;
@@ -49,6 +52,7 @@ public final class FieldPaths {
      * @return the field path
      * @throws IllegalArgumentException if the symbolic field path is ill-formed and cannot be bound
      */
+    @Impure
     public static FieldPath<ObjectFieldSegment> createFieldPathForPrimaryKey(
             HollowDataset dataset, String type, String path) {
         boolean autoExpand = !path.endsWith("!");
@@ -74,6 +78,7 @@ public final class FieldPaths {
      * @return the field path
      * @throws IllegalArgumentException if the symbolic field path is ill-formed and cannot be bound
      */
+    @Impure
     public static FieldPath<FieldSegment> createFieldPathForHashIndex(HollowDataset dataset, String type, String path) {
         return createFieldPath(dataset, type, path, false, false, true);
     }
@@ -91,6 +96,7 @@ public final class FieldPaths {
      * @return the field path
      * @throws IllegalArgumentException if the symbolic field path is ill-formed and cannot be bound
      */
+    @Impure
     public static FieldPath<FieldSegment> createFieldPathForPrefixIndex(
             HollowDataset dataset, String type, String path, boolean autoExpand) {
         // If autoExpand is false then requireFullPath must be true
@@ -113,6 +119,7 @@ public final class FieldPaths {
      * @return the field path
      * @throws IllegalArgumentException if the symbolic field path is ill-formed and cannot be bound
      */
+    @Impure
     static FieldPath<FieldSegment> createFieldPath(
             HollowDataset dataset, String type, String path,
             boolean autoExpand, boolean requireFullPath, boolean traverseSequences) {
@@ -253,18 +260,21 @@ public final class FieldPaths {
         final HollowSchema enclosingSchema;
         final int segmentIndex;
 
+        @Impure
         FieldPathException(
                 ErrorKind error, HollowDataset dataset, String rootType, String[] segments,
                 List<FieldSegment> fieldSegments) {
             this(error, dataset, rootType, segments, fieldSegments, null, segments.length);
         }
 
+        @Impure
         FieldPathException(
                 ErrorKind error, HollowDataset dataset, String rootType, String[] segments,
                 List<FieldSegment> fieldSegments, HollowSchema enclosingSchema) {
             this(error, dataset, rootType, segments, fieldSegments, enclosingSchema, segments.length);
         }
 
+        @Impure
         FieldPathException(
                 ErrorKind error, HollowDataset dataset, String rootType, String[] segments,
                 List<FieldSegment> fieldSegments, HollowSchema enclosingSchema, int segmentIndex) {
@@ -278,6 +288,7 @@ public final class FieldPaths {
             this.segmentIndex = segmentIndex;
         }
 
+        @Impure
         static String message(
                 ErrorKind error, HollowDataset dataset, String rootType, String[] segments,
                 List<FieldSegment> fieldSegments, HollowSchema enclosingSchema, int segmentIndex) {
@@ -339,20 +350,24 @@ public final class FieldPaths {
             }
         }
 
+        @Pure
         static String getLastTypeName(String rootType, List<FieldSegment> fieldSegments) {
             return fieldSegments.isEmpty()
                     ? rootType
                     : fieldSegments.get(fieldSegments.size() - 1).typeName;
         }
 
+        @Impure
         static String toPathString(List<FieldSegment> segments) {
             return segments.stream().map(FieldSegment::getName).collect(joining("."));
         }
 
+        @Impure
         static String toPathString(String[] segments) {
             return toPathString(segments, segments.length);
         }
 
+        @Impure
         static String toPathString(String[] segments, int l) {
             return Arrays.stream(segments).limit(l).collect(joining("."));
         }
@@ -368,6 +383,7 @@ public final class FieldPaths {
         final List<T> segments;
         final boolean noAutoExpand;
 
+        @Impure
         FieldPath(String rootType, List<T> segments, boolean noAutoExpand) {
             this.rootType = rootType;
             this.segments = Collections.unmodifiableList(segments);
@@ -379,6 +395,7 @@ public final class FieldPaths {
          *
          * @return the root type
          */
+        @Pure
         public String getRootType() {
             return rootType;
         }
@@ -388,6 +405,7 @@ public final class FieldPaths {
          *
          * @return the field segments.  The returned list is unmodifiable.
          */
+        @Pure
         public List<T> getSegments() {
             return segments;
         }
@@ -397,12 +415,14 @@ public final class FieldPaths {
          *
          * @return the field path in nominal form
          */
+        @Impure
         public String toString() {
             String path = segments.stream().map(FieldPaths.FieldSegment::getName)
                     .collect(joining("."));
             return noAutoExpand ? path + "!" : path;
         }
 
+        @Pure
         @Override public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -416,6 +436,7 @@ public final class FieldPaths {
                     segments.equals(fieldPath.segments);
         }
 
+        @Pure
         @Override public int hashCode() {
             return Objects.hash(rootType, segments, noAutoExpand);
         }
@@ -429,6 +450,7 @@ public final class FieldPaths {
         final String name;
         final String typeName;
 
+        @SideEffectFree
         FieldSegment(HollowSchema enclosingSchema, String name, String typeName) {
             this.name = name;
             this.typeName = typeName;
@@ -440,6 +462,7 @@ public final class FieldPaths {
          *
          * @return the enclosing schema
          */
+        @Impure
         public HollowSchema getEnclosingSchema() {
             return enclosingSchema;
         }
@@ -449,6 +472,7 @@ public final class FieldPaths {
          *
          * @return the segment name
          */
+        @Pure
         public String getName() {
             return name;
         }
@@ -458,10 +482,12 @@ public final class FieldPaths {
          *
          * @return the schema type name.
          */
+        @Pure
         public String getTypeName() {
             return typeName;
         }
 
+        @Pure
         @Override public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -475,6 +501,7 @@ public final class FieldPaths {
                     Objects.equals(typeName, that.typeName);
         }
 
+        @Pure
         @Override public int hashCode() {
             return Objects.hash(enclosingSchema, name, typeName);
         }
@@ -487,6 +514,8 @@ public final class FieldPaths {
         final int index;
         final HollowObjectSchema.FieldType type;
 
+        @SideEffectFree
+        @Impure
         ObjectFieldSegment(
                 HollowObjectSchema enclosingSchema, String name, String typeName,
                 int index) {
@@ -498,6 +527,7 @@ public final class FieldPaths {
         /**
          * {@inheritDoc}
          */
+        @Impure
         public HollowObjectSchema getEnclosingSchema() {
             return (HollowObjectSchema) super.getEnclosingSchema();
         }
@@ -507,6 +537,7 @@ public final class FieldPaths {
          *
          * @return the field index
          */
+        @Pure
         public int getIndex() {
             return index;
         }
@@ -516,10 +547,12 @@ public final class FieldPaths {
          *
          * @return the field type
          */
+        @Pure
         public HollowObjectSchema.FieldType getType() {
             return type;
         }
 
+        @Pure
         @Override public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -535,6 +568,7 @@ public final class FieldPaths {
                     type == that.type;
         }
 
+        @Pure
         @Override public int hashCode() {
             return Objects.hash(super.hashCode(), index, type);
         }

@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.HashCodes;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.memory.pool.WastefulRecycler;
@@ -63,6 +65,7 @@ public class ByteArrayOrdinalMap {
      * Creates a byte array ordinal map with a an initial capacity of 256 elements,
      * and a load factor of 70%.
      */
+    @Impure
     public ByteArrayOrdinalMap() {
         this(256);
     }
@@ -71,6 +74,7 @@ public class ByteArrayOrdinalMap {
      * Creates a byte array ordinal map with an initial capacity of a given size
      * rounded up to the nearest power of two, and a load factor of 70%.
      */
+    @Impure
     public ByteArrayOrdinalMap(int size) {
         size = bucketSize(size);
 
@@ -81,6 +85,7 @@ public class ByteArrayOrdinalMap {
         this.size = 0;
     }
 
+    @Pure
     private static int bucketSize(int x) {
         // See Hackers Delight Fig. 3-3
         x = x - 1;
@@ -92,6 +97,7 @@ public class ByteArrayOrdinalMap {
         return (x < 256) ? 256 : (x >= 1 << 30) ? 1 << 30 : x + 1;
     }
 
+    @Impure
     public int getOrAssignOrdinal(ByteDataArray serializedRepresentation) {
         return getOrAssignOrdinal(serializedRepresentation, -1);
     }
@@ -109,6 +115,7 @@ public class ByteArrayOrdinalMap {
      * another sequence of bytes and the given sequence of bytes has not previously been added
      * @return the assigned ordinal
      */
+    @Impure
     public int getOrAssignOrdinal(ByteDataArray serializedRepresentation, int preferredOrdinal) {
         int hash = HashCodes.hashCode(serializedRepresentation);
 
@@ -117,6 +124,7 @@ public class ByteArrayOrdinalMap {
     }
 
     /// acquire the lock before writing.
+    @Impure
     private synchronized int assignOrdinal(ByteDataArray serializedRepresentation, int hash, int preferredOrdinal) {
         if (preferredOrdinal < -1 || preferredOrdinal > ORDINAL_MASK) {
             throw new IllegalArgumentException(String.format(
@@ -183,6 +191,7 @@ public class ByteArrayOrdinalMap {
      * If the preferredOrdinal has not already been used, mark it and use it.  Otherwise,
      * delegate to the FreeOrdinalTracker.
      */
+    @Impure
     private int findFreeOrdinal(int preferredOrdinal) {
         if (preferredOrdinal != -1 && unusedPreviousOrdinals.get(preferredOrdinal)) {
             unusedPreviousOrdinals.clear(preferredOrdinal);
@@ -201,6 +210,7 @@ public class ByteArrayOrdinalMap {
      * @param serializedRepresentation the serialized representation
      * @param ordinal the ordinal
      */
+    @Impure
     public void put(ByteDataArray serializedRepresentation, int ordinal) {
         if (ordinal < 0 || ordinal > ORDINAL_MASK) {
             throw new IllegalArgumentException(String.format(
@@ -241,6 +251,7 @@ public class ByteArrayOrdinalMap {
         pao.set(bucket, key);
     }
 
+    @Impure
     public void recalculateFreeOrdinals() {
         BitSet populatedOrdinals = new BitSet();
         AtomicLongArray pao = pointersAndOrdinals;
@@ -256,12 +267,14 @@ public class ByteArrayOrdinalMap {
         recalculateFreeOrdinals(populatedOrdinals);
     }
 
+    @Impure
     public void reservePreviouslyPopulatedOrdinals(BitSet populatedOrdinals) {
         unusedPreviousOrdinals = BitSet.valueOf(populatedOrdinals.toLongArray());
 
         recalculateFreeOrdinals(populatedOrdinals);
     }
 
+    @Impure
     private void recalculateFreeOrdinals(BitSet populatedOrdinals) {
         freeOrdinalTracker.reset();
 
@@ -276,6 +289,7 @@ public class ByteArrayOrdinalMap {
         freeOrdinalTracker.setNextEmptyOrdinal(length);
     }
 
+    @Pure
     public BitSet getUnusedPreviousOrdinals() {
         return unusedPreviousOrdinals;
     }
@@ -288,10 +302,12 @@ public class ByteArrayOrdinalMap {
      * @param serializedRepresentation the serialized representation
      * @return The ordinal for this serialized representation, or -1.
      */
+    @Impure
     public int get(ByteDataArray serializedRepresentation) {
         return get(serializedRepresentation, HashCodes.hashCode(serializedRepresentation));
     }
 
+    @Impure
     private int get(ByteDataArray serializedRepresentation, int hash) {
         AtomicLongArray pao = pointersAndOrdinals;
 
@@ -321,6 +337,7 @@ public class ByteArrayOrdinalMap {
      * Create an array mapping the ordinals to pointers, so that they can be easily looked up
      * when writing to blob streams.
      */
+    @Impure
     public void prepareForWrite() {
         int maxOrdinal = 0;
         AtomicLongArray pao = pointersAndOrdinals;
@@ -358,6 +375,7 @@ public class ByteArrayOrdinalMap {
      *
      * @param usedOrdinals a bit set representing the ordinals which are currently referenced by any image.
      */
+    @Impure
     public void compact(ThreadSafeBitSet usedOrdinals, int numShards, boolean focusHoleFillInFewestShards) {
         long[] populatedReverseKeys = new long[size];
 
@@ -417,23 +435,29 @@ public class ByteArrayOrdinalMap {
         unusedPreviousOrdinals = null;
     }
 
+    @Impure
     public long getPointerForData(int ordinal) {
         long pointer = pointersByOrdinal[ordinal] & POINTER_MASK;
         return pointer + VarInt.nextVLongSize(byteData.getUnderlyingArray(), pointer);
     }
 
+    @Pure
     public boolean isReadyForWriting() {
         return pointersByOrdinal != null;
     }
 
+    @Pure
     public boolean isReadyForAddingObjects() {
         return pointersByOrdinal == null;
     }
 
+    @Pure
+    @Impure
     public long getDataSize() {
         return byteData.length();
     }
 
+    @Impure
     public int maxOrdinal() {
         int maxOrdinal = -1;
         AtomicLongArray pao = pointersAndOrdinals;
@@ -454,6 +478,7 @@ public class ByteArrayOrdinalMap {
      * Compare the byte sequence contained in the supplied ByteDataBuffer with the
      * sequence contained in the map pointed to by the specified key, byte by byte.
      */
+    @Impure
     private boolean compare(ByteDataArray serializedRepresentation, long key) {
         long position = key & POINTER_MASK;
 
@@ -483,6 +508,7 @@ public class ByteArrayOrdinalMap {
      *
      * @param size the size to increase to, rounded up to the nearest power of two.
      */
+    @Impure
     public void resize(int size) {
         size = bucketSize(size);
 
@@ -494,6 +520,7 @@ public class ByteArrayOrdinalMap {
     /**
      * Grow the key array.  All of the values in the current array must be re-hashed and added to the new array.
      */
+    @Impure
     private void growKeyArray() {
         int newSize = pointersAndOrdinals.length() << 1;
         if (newSize < 0) {
@@ -505,6 +532,7 @@ public class ByteArrayOrdinalMap {
         growKeyArray(newSize);
     }
 
+    @Impure
     private void growKeyArray(int newSize) {
         AtomicLongArray pao = pointersAndOrdinals;
         assert (newSize & (newSize - 1)) == 0; // power of 2
@@ -538,10 +566,12 @@ public class ByteArrayOrdinalMap {
      * Hash all of the existing values specified by the keys in the supplied long array
      * into the supplied AtomicLongArray.
      */
+    @Impure
     private void populateNewHashArray(AtomicLongArray newKeys, long[] valuesToAdd) {
         populateNewHashArray(newKeys, valuesToAdd, valuesToAdd.length);
     }
 
+    @Impure
     private void populateNewHashArray(AtomicLongArray newKeys, long[] valuesToAdd, int length) {
         assert length <= valuesToAdd.length;
 
@@ -565,6 +595,7 @@ public class ByteArrayOrdinalMap {
     /**
      * Get the hash code for the byte array pointed to by the specified key.
      */
+    @Impure
     private int rehashPreviouslyAddedData(long key) {
         long position = key & POINTER_MASK;
 
@@ -577,6 +608,7 @@ public class ByteArrayOrdinalMap {
     /**
      * Create an AtomicLongArray of the specified size, each value in the array will be EMPTY_BUCKET_VALUE
      */
+    @Impure
     private AtomicLongArray emptyKeyArray(int size) {
         AtomicLongArray arr = new AtomicLongArray(size);
         // Volatile store not required, could use plain store
@@ -587,22 +619,27 @@ public class ByteArrayOrdinalMap {
         return arr;
     }
 
+    @Pure
     public ByteDataArray getByteData() {
         return byteData;
     }
 
+    @Pure
     public AtomicLongArray getPointersAndOrdinals() {
         return pointersAndOrdinals;
     }
 
+    @Pure
     public static boolean isPointerAndOrdinalEmpty(long pointerAndOrdinal) {
         return pointerAndOrdinal == EMPTY_BUCKET_VALUE;
     }
 
+    @Pure
     public static long getPointer(long pointerAndOrdinal) {
         return pointerAndOrdinal & POINTER_MASK;
     }
 
+    @Pure
     public static int getOrdinal(long pointerAndOrdinal) {
         return (int) (pointerAndOrdinal >>> BITS_PER_POINTER);
     }

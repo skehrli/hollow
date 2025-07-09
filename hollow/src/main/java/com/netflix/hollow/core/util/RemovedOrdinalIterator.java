@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.read.engine.HollowReadStateEngine;
@@ -31,18 +33,25 @@ public class RemovedOrdinalIterator {
     private final int previousOrdinalsLength;
     private int ordinal = ORDINAL_NONE;
 
+    @SideEffectFree
+    @Impure
     public RemovedOrdinalIterator(PopulatedOrdinalListener listener) {
         this(listener.getPreviousOrdinals(), listener.getPopulatedOrdinals());
     }
 
+    @SideEffectFree
+    @Impure
     public RemovedOrdinalIterator(BitSet previousOrdinals, BitSet populatedOrdinals) {
         this(previousOrdinals, populatedOrdinals, false);
     }
 
+    @SideEffectFree
+    @Impure
     public RemovedOrdinalIterator(PopulatedOrdinalListener listener, boolean flip) {
         this(listener.getPreviousOrdinals(), listener.getPopulatedOrdinals(), flip);
     }
 
+    @SideEffectFree
     public RemovedOrdinalIterator(BitSet previousOrdinals, BitSet populatedOrdinals, boolean flip) {
         if (!flip) {
             this.previousOrdinals = previousOrdinals;
@@ -55,6 +64,7 @@ public class RemovedOrdinalIterator {
         }
     }
 
+    @Impure
     public int next() {
         while(ordinal < previousOrdinalsLength) {
             ordinal = populatedOrdinals.nextClearBit(ordinal + 1);
@@ -65,10 +75,12 @@ public class RemovedOrdinalIterator {
         return ORDINAL_NONE;
     }
 
+    @Impure
     public void reset() {
         ordinal = ORDINAL_NONE;
     }
 
+    @Impure
     public int countTotal() {
         int bookmark = ordinal;
 

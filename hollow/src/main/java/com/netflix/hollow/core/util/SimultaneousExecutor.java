@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.checker.mustcall.qual.Owning;
 import static com.netflix.hollow.core.util.Threads.daemonThread;
 
 import java.util.concurrent.Callable;
@@ -47,6 +49,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * Equivalent to constructing a {@code SimultaneousExecutor} with {@code 1.0d}
      * threads per CPU.
      */
+    @Impure
     public SimultaneousExecutor(Class<?> context, String description) {
         this(1.0d, context, description);
     }
@@ -58,6 +61,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      *
      * @deprecated use {@link #SimultaneousExecutor(Class, String)}
      */
+    @Impure
     @Deprecated
     public SimultaneousExecutor() {
         this(1.0d, SimultaneousExecutor.class, DEFAULT_THREAD_NAME);
@@ -70,6 +74,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * @param threadsPerCpu calculated as {@code processors * threadsPerCpu} then used as {@code corePoolSize} and {@code maximumPoolSize}
      * @param context used to name created threads
      */
+    @Impure
     public SimultaneousExecutor(double threadsPerCpu, Class<?> context) {
         this(threadsPerCpu, context, DEFAULT_THREAD_NAME);
     }
@@ -82,6 +87,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      *
      * @deprecated use {@link #SimultaneousExecutor(double, Class)}
      */
+    @Impure
     @Deprecated
     public SimultaneousExecutor(double threadsPerCpu) {
         this(threadsPerCpu, SimultaneousExecutor.class, DEFAULT_THREAD_NAME);
@@ -95,6 +101,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * @param context combined with {@code description} to name created threads
      * @param description brief description used to name created threads; combined with {@code context}
      */
+    @Impure
     public SimultaneousExecutor(double threadsPerCpu, Class<?> context, String description) {
         this((int) ((double) Runtime.getRuntime().availableProcessors() * threadsPerCpu), context, description);
     }
@@ -108,6 +115,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      *
      * @deprecated use {@link #SimultaneousExecutor(double, Class, String)}
      */
+    @Impure
     @Deprecated
     public SimultaneousExecutor(double threadsPerCpu, String description) {
         this((int) ((double) Runtime.getRuntime().availableProcessors() * threadsPerCpu), SimultaneousExecutor.class, description);
@@ -120,6 +128,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * @param numThreads used as {@code corePoolSize} and {@code maximumPoolSize}
      * @param context used to name created threads
      */
+    @Impure
     public SimultaneousExecutor(int numThreads, Class<?> context) {
         this(numThreads, context, DEFAULT_THREAD_NAME);
     }
@@ -131,6 +140,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      *
      * @deprecated use {@link #SimultaneousExecutor(int, Class)}
      */
+    @Impure
     @Deprecated
     public SimultaneousExecutor(int numThreads) {
         this(numThreads, SimultaneousExecutor.class, DEFAULT_THREAD_NAME);
@@ -144,6 +154,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * @param context combined with {@code description} to name created threads
      * @param description brief description used to name created threads; combined with {@code context}
      */
+    @Impure
     public SimultaneousExecutor(int numThreads, Class<?> context, String description) {
         this(numThreads, context, description, Thread.NORM_PRIORITY);
     }
@@ -158,6 +169,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * @param description brief description used to name created threads; combined with {@code context}
      * @param threadPriority the priority set to each thread
      */
+    @Impure
     public SimultaneousExecutor(double threadsPerCpu, Class<?> context, String description, int threadPriority) {
         this((int) ((double) Runtime.getRuntime().availableProcessors() * threadsPerCpu), context, description, threadPriority);
     }
@@ -171,10 +183,12 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * @param description brief description used to name created threads; combined with {@code context}
      * @param threadPriority the priority set to each thread
      */
+    @Impure
     public SimultaneousExecutor(int numThreads, Class<?> context, String description, int threadPriority) {
         this(numThreads, r -> daemonThread(r, context, description, threadPriority));
     }
 
+    @Impure
     protected SimultaneousExecutor(int numThreads, ThreadFactory threadFactory) {
         super(numThreads, numThreads, 100, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), threadFactory);
     }
@@ -188,11 +202,13 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      *
      * @deprecated use {@link #SimultaneousExecutor(int, Class, String)}
      */
+    @Impure
     @Deprecated
     public SimultaneousExecutor(int numThreads, final String description) {
         this(numThreads, SimultaneousExecutor.class, description);
     }
 
+    @Impure
     @Override
     public void execute(Runnable command) {
         if(command instanceof RunnableFuture) {
@@ -207,6 +223,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      *
      * After this call completes, the thread pool will be shut down.
      */
+    @Impure
     public void awaitUninterruptibly() {
         shutdown();
         while (!isTerminated()) {
@@ -216,13 +233,15 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
         }
     }
 
+    @Impure
     @Override
-    protected final <T> RunnableFuture<T> newTaskFor(final Runnable runnable, final T value) {
+    protected final <T> RunnableFuture<T> newTaskFor(final Runnable runnable, final @Owning T value) {
         final RunnableFuture<T> task = super.newTaskFor(runnable, value);
         futures.add(task);
         return task;
     }
 
+    @Impure
     @Override
     protected final <T> RunnableFuture<T> newTaskFor(final Callable<T> callable) {
         final RunnableFuture<T> task = super.newTaskFor(callable);
@@ -241,6 +260,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * @throws InterruptedException if the current thread was interrupted
      * while waiting
      */
+    @Impure
     public void awaitSuccessfulCompletion() throws InterruptedException, ExecutionException {
         awaitUninterruptibly();
         for (final Future<?> f : futures) {
@@ -263,6 +283,7 @@ public class SimultaneousExecutor extends ThreadPoolExecutor {
      * @throws InterruptedException if the current thread was interrupted
      * while waiting
      */
+    @Impure
     public void awaitSuccessfulCompletionOfCurrentTasks() throws InterruptedException, ExecutionException {
         Future<?> f;
         while ((f = futures.poll()) != null) {

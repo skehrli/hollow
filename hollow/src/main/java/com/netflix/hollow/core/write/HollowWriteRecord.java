@@ -16,12 +16,15 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.ByteDataArray;
 
 public interface HollowWriteRecord {
 
+    @Impure
     public void writeDataTo(ByteDataArray buf);
 
+    @Impure
     public void reset();
 
 }

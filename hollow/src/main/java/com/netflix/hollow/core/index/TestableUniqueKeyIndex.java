@@ -1,5 +1,6 @@
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.Collection;
 
 /**
@@ -12,15 +13,22 @@ import java.util.Collection;
 @SuppressWarnings({"DeprecatedIsStillUsed", "override"})
 @Deprecated
 interface TestableUniqueKeyIndex {
+    @Impure
     void listenForDeltaUpdates();
 
+    @Impure
     int getMatchingOrdinal(Object key);
+    @Impure
     int getMatchingOrdinal(Object key1, Object key2);
+    @Impure
     int getMatchingOrdinal(Object key1, Object key2, Object key3);
 
+    @Impure
     Object[] getRecordKey(int ordinal);
 
+    @Impure
     boolean containsDuplicates();
 
+    @Impure
     Collection<Object[]> getDuplicateKeys();
 }

@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.memory.encoding.ZigZag;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -11,11 +13,13 @@ public class FlatRecordOrdinalReader {
   private final FlatRecord record;
   private final IntList ordinalOffsets = new IntList();
 
+  @Impure
   public FlatRecordOrdinalReader(FlatRecord record) {
     this.record = record;
     populateOrdinalOffset();
   }
 
+  @Impure
   private void populateOrdinalOffset() {
     int offset = record.dataStartByte;
     while (offset < record.dataEndByte) {
@@ -24,19 +28,25 @@ public class FlatRecordOrdinalReader {
     }
   }
 
+  @Pure
+  @Impure
   private int getOrdinalOffset(int ordinal) {
     return ordinalOffsets.get(ordinal);
   }
 
+  @Pure
+  @Impure
   public int getOrdinalCount() {
     return ordinalOffsets.size();
   }
 
+  @Impure
   public HollowSchema readSchema(int ordinal) {
     int schemaId = VarInt.readVInt(record.data, getOrdinalOffset(ordinal));
     return record.schemaIdMapper.getSchema(schemaId);
   }
 
+  @Impure
   public int readSize(int ordinal) {
     int offset = getOrdinalOffset(ordinal);
 
@@ -53,6 +63,7 @@ public class FlatRecordOrdinalReader {
     return VarInt.readVInt(record.data, offset);
   }
 
+  @Impure
   public void readListElementsInto(int ordinal, int[] elements) {
     int offset = getOrdinalOffset(ordinal);
 
@@ -73,6 +84,7 @@ public class FlatRecordOrdinalReader {
     }
   }
 
+  @Impure
   public void readSetElementsInto(int ordinal, int[] elements) {
     int offset = getOrdinalOffset(ordinal);
 
@@ -96,6 +108,7 @@ public class FlatRecordOrdinalReader {
     }
   }
 
+  @Impure
   public void readMapElementsInto(int ordinal, int[] keys, int[] values) {
     int offset = getOrdinalOffset(ordinal);
 
@@ -121,6 +134,7 @@ public class FlatRecordOrdinalReader {
     }
   }
 
+  @Impure
   public int readFieldReference(int ordinal, String field) {
     int offset = skipToField(ordinal, HollowObjectSchema.FieldType.REFERENCE, field);
     if (offset == -1) {
@@ -134,6 +148,7 @@ public class FlatRecordOrdinalReader {
     return VarInt.readVInt(record.data, offset);
   }
 
+  @Impure
   public Boolean readFieldBoolean(int ordinal, String field) {
     int offset = skipToField(ordinal, HollowObjectSchema.FieldType.BOOLEAN, field);
     if (offset == -1) {
@@ -148,6 +163,7 @@ public class FlatRecordOrdinalReader {
     return value == 1 ? Boolean.TRUE : Boolean.FALSE;
   }
 
+  @Impure
   public int readFieldInt(int ordinal, String field) {
     int offset = skipToField(ordinal, HollowObjectSchema.FieldType.INT, field);
     if (offset == -1) {
@@ -162,6 +178,7 @@ public class FlatRecordOrdinalReader {
     return ZigZag.decodeInt(value);
   }
 
+  @Impure
   public long readFieldLong(int ordinal, String field) {
     int offset = skipToField(ordinal, HollowObjectSchema.FieldType.LONG, field);
     if (offset == -1) {
@@ -176,6 +193,7 @@ public class FlatRecordOrdinalReader {
     return ZigZag.decodeLong(value);
   }
 
+  @Impure
   public float readFieldFloat(int ordinal, String field) {
     int offset = skipToField(ordinal, HollowObjectSchema.FieldType.FLOAT, field);
     if (offset == -1) {
@@ -190,6 +208,7 @@ public class FlatRecordOrdinalReader {
     return Float.intBitsToFloat(value);
   }
 
+  @Impure
   public double readFieldDouble(int ordinal, String field) {
     int offset = skipToField(ordinal, HollowObjectSchema.FieldType.DOUBLE, field);
     if (offset == -1) {
@@ -204,6 +223,7 @@ public class FlatRecordOrdinalReader {
     return Double.longBitsToDouble(value);
   }
 
+  @Impure
   public String readFieldString(int ordinal, String field) {
     int offset = skipToField(ordinal, HollowObjectSchema.FieldType.STRING, field);
     if (offset == -1) {
@@ -228,6 +248,7 @@ public class FlatRecordOrdinalReader {
     return new String(s);
   }
 
+  @Impure
   public byte[] readFieldBytes(int ordinal, String field) {
     int offset = skipToField(ordinal, HollowObjectSchema.FieldType.BYTES, field);
     if (offset == -1) {
@@ -249,6 +270,7 @@ public class FlatRecordOrdinalReader {
     return b;
   }
 
+  @Impure
   private int skipToField(int ordinal, HollowObjectSchema.FieldType fieldType, String field) {
     int offset = getOrdinalOffset(ordinal);
 
@@ -277,6 +299,7 @@ public class FlatRecordOrdinalReader {
     return offset;
   }
 
+  @Impure
   private int sizeOfOrdinal(int ordinal) {
     int offset = getOrdinalOffset(ordinal);
     int start = offset;
@@ -316,6 +339,7 @@ public class FlatRecordOrdinalReader {
     return offset - start;
   }
 
+  @Impure
   private int sizeOfFieldValue(HollowObjectSchema.FieldType fieldType, int offset) {
     switch (fieldType) {
       case INT:

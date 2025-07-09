@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.iterator;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
 
 public class HollowListOrdinalIterator implements HollowOrdinalIterator {
@@ -25,12 +26,14 @@ public class HollowListOrdinalIterator implements HollowOrdinalIterator {
     private final int size;
     private int currentElement;
 
+    @Impure
     public HollowListOrdinalIterator(int listOrdinal, HollowListTypeDataAccess dataAccess) {
         this.listOrdinal = listOrdinal;
         this.dataAccess = dataAccess;
         this.size = dataAccess.size(listOrdinal);
     }
 
+    @Impure
     @Override
     public int next() {
         if(currentElement == size)

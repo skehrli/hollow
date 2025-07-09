@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import java.io.IOException;
 
@@ -17,6 +19,7 @@ public interface VariableLengthData extends ByteData {
      * @param length the length of the data to load
      * @throws IOException if data could not be loaded
      */
+    @Impure
     void loadFrom(HollowBlobInput in, long length) throws IOException;
 
     /**
@@ -27,6 +30,7 @@ public interface VariableLengthData extends ByteData {
      * @param destPos position in destination data to begin copying to
      * @param length length of data to copy in bytes
      */
+    @Impure
     void copy(ByteData src, long srcPos, long destPos, long length);
 
     /**
@@ -38,11 +42,13 @@ public interface VariableLengthData extends ByteData {
      * @param destPos position in destination to begin copying to
      * @param length length of data to copy in bytes
      */
+    @Impure
     void orderedCopy(VariableLengthData src, long srcPos, long destPos, long length);
 
     /**
      * Data size in bytes
      * @return size in bytes
      */
+    @Pure
     long size();
 }

@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.memory.pool;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.SegmentedByteArray;
 import com.netflix.hollow.core.memory.SegmentedLongArray;
 
@@ -34,18 +35,25 @@ public interface ArraySegmentRecycler {
 
     int DEFAULT_LOG2_LONG_ARRAY_SIZE = 8;
 
+    @Impure
     public int getLog2OfByteSegmentSize();
 
+    @Impure
     public int getLog2OfLongSegmentSize();
 
+    @Impure
     public long[] getLongArray();
 
+    @Impure
     public void recycleLongArray(long[] arr);
 
+    @Impure
     public byte[] getByteArray();
 
+    @Impure
     public void recycleByteArray(byte[] arr);
 
+    @Impure
     public void swap();
 
 }

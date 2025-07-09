@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.engine.list;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.core.memory.encoding.FixedLengthElementArray;
 import com.netflix.hollow.core.memory.encoding.GapEncodedVariableLengthIntegerReader;
 
@@ -42,12 +44,14 @@ class HollowListDeltaApplicator {
     private GapEncodedVariableLengthIntegerReader removalsReader;
     private GapEncodedVariableLengthIntegerReader additionsReader;
 
+    @SideEffectFree
     HollowListDeltaApplicator(HollowListTypeDataElements from, HollowListTypeDataElements delta, HollowListTypeDataElements target) {
         this.from = from;
         this.delta = delta;
         this.target = target;
     }
 
+    @Impure
     public void applyDelta() {
         removalsReader = from.encodedRemovals == null ? GapEncodedVariableLengthIntegerReader.EMPTY_READER : from.encodedRemovals;
         additionsReader = delta.encodedAdditions;
@@ -74,12 +78,14 @@ class HollowListDeltaApplicator {
         removalsReader.destroy();
     }
 
+    @Impure
     private void slowDelta() {
         for(int i=0;i<=target.maxOrdinal;i++) {
             mergeOrdinal(i);
         }
     }
 
+    @Impure
     private void fastDelta() {
         int i = 0;
         int bulkCopyEndOrdinal = Math.min(from.maxOrdinal, target.maxOrdinal);
@@ -101,6 +107,7 @@ class HollowListDeltaApplicator {
         }
     }
 
+    @Impure
     private void fastCopyRecords(int recordsToCopy) {
         long listPointerBitsToCopy = (long)recordsToCopy * target.bitsPerListPointer;
         long eachListPointerDifference = currentWriteStartElement - currentFromStateStartElement;
@@ -121,6 +128,7 @@ class HollowListDeltaApplicator {
         currentWriteStartElement += elementsToCopy;
     }
 
+    @Impure
     private void mergeOrdinal(int i) {
         boolean addFromDelta = additionsReader.nextElement() == i;
         boolean removeData = removalsReader.nextElement() == i;
@@ -150,6 +158,7 @@ class HollowListDeltaApplicator {
         currentWriteStartBit += target.bitsPerListPointer;
     }
 
+    @Impure
     private void addFromDelta(GapEncodedVariableLengthIntegerReader additionsReader) {
         long deltaDataEndElement = delta.listPointerData.getElementValue(currentDeltaCopyStartBit, delta.bitsPerListPointer);
         for(long elementIdx=currentDeltaStartElement; elementIdx<deltaDataEndElement; elementIdx++) {

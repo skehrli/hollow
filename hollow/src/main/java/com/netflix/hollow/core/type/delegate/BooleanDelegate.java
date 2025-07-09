@@ -16,15 +16,20 @@
  */
 package com.netflix.hollow.core.type.delegate;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.objects.delegate.HollowObjectDelegate;
 import com.netflix.hollow.core.type.BooleanTypeAPI;
 
 public interface BooleanDelegate extends HollowObjectDelegate {
 
+    @Impure
     public boolean getValue(int ordinal);
 
+    @Impure
     public Boolean getValueBoxed(int ordinal);
 
+    @Pure
     @Override
     public BooleanTypeAPI getTypeAPI();
 

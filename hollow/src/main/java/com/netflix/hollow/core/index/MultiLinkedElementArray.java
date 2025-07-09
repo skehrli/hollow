@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
 import com.netflix.hollow.core.read.iterator.HollowOrdinalIterator;
 
@@ -27,17 +30,21 @@ public class MultiLinkedElementArray {
     private int nextNewPointer = 0;
     private long nextLinkedElement = 0;
 
+    @Impure
     public MultiLinkedElementArray(ArraySegmentRecycler memoryRecycler) {
         this.listPointersAndSizes = new GrowingSegmentedLongArray(memoryRecycler);
         this.linkedElements = new GrowingSegmentedLongArray(memoryRecycler);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowOrdinalIterator iterator(int listIdx) {
         if((listPointersAndSizes.get(listIdx) & Long.MIN_VALUE) != 0)
             return new PivotedElementIterator(listIdx);
         return new LinkedElementIterator(listIdx);
     }
 
+    @Impure
     public void add(int listIdx, int value) {
         long listPtr = listPointersAndSizes.get(listIdx);
 
@@ -74,14 +81,18 @@ public class MultiLinkedElementArray {
         }
     }
 
+    @Pure
     public int numLists() {
         return nextNewPointer;
     }
 
+    @Impure
     public int newList() {
         return nextNewPointer++;
     }
 
+    @Pure
+    @Impure
     public int listSize(int listIdx) {
         long listPtr = listPointersAndSizes.get(listIdx);
         if(listPtr == 0)
@@ -91,6 +102,7 @@ public class MultiLinkedElementArray {
         return (int)(listPtr & Integer.MAX_VALUE);
     }
 
+    @Impure
     public void destroy() {
         listPointersAndSizes.destroy();
         linkedElements.destroy();
@@ -102,10 +114,13 @@ public class MultiLinkedElementArray {
         private boolean lastElement;
         private boolean finished;
 
+        @SideEffectFree
+        @Impure
         private LinkedElementIterator(int listIdx) {
             this.currentElement = (int)(listPointersAndSizes.get(listIdx) >> 32);
         }
 
+        @Impure
         @Override
         public int next() {
             if(finished)
@@ -132,10 +147,12 @@ public class MultiLinkedElementArray {
         private int listIdx;
         private int currentElement;
 
+        @SideEffectFree
         private PivotedElementIterator(int listIdx) {
             this.listIdx = listIdx;
         }
 
+        @Impure
         @Override
         public int next() {
             if(currentElement > 1)

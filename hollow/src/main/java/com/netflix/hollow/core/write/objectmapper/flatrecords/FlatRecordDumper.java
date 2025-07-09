@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write.objectmapper.flatrecords;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.VarInt;
 import com.netflix.hollow.core.memory.encoding.ZigZag;
 import com.netflix.hollow.core.schema.HollowListSchema;
@@ -42,12 +43,14 @@ public class FlatRecordDumper {
     
     private FlatRecord record;
 
+    @Impure
     public FlatRecordDumper(HollowWriteStateEngine dumpTo) {
         this.ordinalMapping = new HashMap<>();
         this.writeRecords = new HashMap<>();
         this.stateEngine = dumpTo;
     }
     
+    @Impure
     public void dump(FlatRecord record) {
         this.record = record;
         this.ordinalMapping.clear();
@@ -67,6 +70,7 @@ public class FlatRecordDumper {
         }
     }
     
+    @Impure
     private int copyRecord(HollowSchema recordSchema, HollowSchema engineSchema, int currentRecordPointer, int currentRecordOrdinal) {
         switch(recordSchema.getSchemaType()) {
         case OBJECT:
@@ -82,6 +86,7 @@ public class FlatRecordDumper {
         }
     }
     
+    @Impure
     private int copyListRecord(HollowListSchema engineSchema, int currentRecordPointer, int currentRecordOrdinal) {
         HollowListWriteRecord rec = engineSchema != null ? (HollowListWriteRecord)getWriteRecord(engineSchema) : null;
         
@@ -106,6 +111,7 @@ public class FlatRecordDumper {
         return currentRecordPointer;
     }
     
+    @Impure
     private int copySetRecord(HollowSetSchema engineSchema, int currentRecordPointer, int currentRecordOrdinal) {
         HollowSetWriteRecord rec = engineSchema != null ? (HollowSetWriteRecord)getWriteRecord(engineSchema) : null;
         
@@ -133,6 +139,7 @@ public class FlatRecordDumper {
         return currentRecordPointer;
     }
     
+    @Impure
     private int copyMapRecord(HollowMapSchema engineSchema, int currentRecordPointer, int currentRecordOrdinal) {
         HollowMapWriteRecord rec = engineSchema != null ? (HollowMapWriteRecord)getWriteRecord(engineSchema) : null;
         
@@ -164,6 +171,7 @@ public class FlatRecordDumper {
         return currentRecordPointer;
     }
     
+    @Impure
     private int copyObjectRecord(HollowObjectSchema recordSchema, HollowObjectSchema engineSchema, int currentRecordPointer, int currentRecordOrdinal) {
         HollowObjectWriteRecord rec = engineSchema != null ? (HollowObjectWriteRecord)getWriteRecord(engineSchema) : null;
         
@@ -183,6 +191,7 @@ public class FlatRecordDumper {
         return currentRecordPointer;
     }
     
+    @Impure
     private int copyObjectField(HollowObjectWriteRecord rec, String fieldName, FieldType fieldType, int currentRecordPointer) {
         switch(fieldType) {
         case BOOLEAN:
@@ -283,6 +292,7 @@ public class FlatRecordDumper {
         
     }
     
+    @Impure
     private HollowWriteRecord getWriteRecord(HollowSchema schema) {
         HollowWriteRecord rec = writeRecords.get(schema.getName());
         

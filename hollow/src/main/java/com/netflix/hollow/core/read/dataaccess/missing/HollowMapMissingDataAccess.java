@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.dataaccess.missing;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.sampling.HollowMapSampler;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
@@ -35,87 +38,105 @@ public class HollowMapMissingDataAccess implements HollowMapTypeDataAccess {
     private final HollowDataAccess dataAccess;
     private final String typeName;
 
+    @SideEffectFree
     public HollowMapMissingDataAccess(HollowDataAccess dataAccess, String typeName) {
         this.dataAccess = dataAccess;
         this.typeName = typeName;
     }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         return dataAccess;
     }
 
+    @Impure
     @Override
     public HollowMapSchema getSchema() {
         return (HollowMapSchema) missingDataHandler().handleSchema(typeName);
     }
 
+    @Impure
     @Override
     public int size(int ordinal) {
         return missingDataHandler().handleMapSize(typeName, ordinal);
     }
 
+    @Impure
     @Override
     public int get(int ordinal, int keyOrdinal) {
         return missingDataHandler().handleMapGet(typeName, ordinal, keyOrdinal, keyOrdinal);
     }
 
+    @Impure
     @Override
     public int get(int ordinal, int keyOrdinal, int hashCode) {
         return missingDataHandler().handleMapGet(typeName, ordinal, keyOrdinal, hashCode);
     }
     
+    @Impure
     @Override
     public int findKey(int ordinal, Object... hashKey) {
         return missingDataHandler().handleMapFindKey(typeName, ordinal, hashKey);
     }
 
+    @Impure
     @Override
     public int findValue(int ordinal, Object... hashKey) {
         return missingDataHandler().handleMapFindValue(typeName, ordinal, hashKey);
     }
 
+    @Impure
     @Override
     public long findEntry(int ordinal, Object... hashKey) {
         return missingDataHandler().handleMapFindEntry(typeName, ordinal, hashKey);
     }
 
+    @Impure
     @Override
     public HollowMapEntryOrdinalIterator potentialMatchOrdinalIterator(int ordinal, int hashCode) {
         return missingDataHandler().handleMapPotentialMatchOrdinalIterator(typeName, ordinal, hashCode);
     }
 
+    @Impure
     @Override
     public HollowMapEntryOrdinalIterator ordinalIterator(int ordinal) {
         return missingDataHandler().handleMapOrdinalIterator(typeName, ordinal);
     }
 
+    @Pure
     @Override
     public long relativeBucket(int ordinal, int bucketIndex) {
         throw new UnsupportedOperationException();
     }
 
+    @Impure
     private MissingDataHandler missingDataHandler() {
         return dataAccess.getMissingDataHandler();
     }
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         throw new UnsupportedOperationException("No HollowTypeReadState exists for " + typeName);
     }
 
+    @SideEffectFree
     @Override
     public void setSamplingDirector(HollowSamplingDirector director) {
     }
     
+    @SideEffectFree
     @Override
     public void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director) {
     }
 
+    @SideEffectFree
     @Override
     public void ignoreUpdateThreadForSampling(Thread t) {
     }
 
+    @Pure
     @Override
     public HollowSampler getSampler() {
         return HollowMapSampler.NULL_SAMPLER;

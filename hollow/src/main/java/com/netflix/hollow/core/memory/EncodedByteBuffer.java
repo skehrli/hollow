@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.memory;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.encoding.BlobByteBuffer;
 import com.netflix.hollow.core.read.HollowBlobInput;
 import java.io.IOException;
@@ -28,10 +31,12 @@ public class EncodedByteBuffer implements VariableLengthData {
     private BlobByteBuffer bufferView;
     private long size;
 
+    @SideEffectFree
     public EncodedByteBuffer() {
         this.size = 0;
     }
 
+    @Impure
     @Override
     public byte get(long index) {
         if (index >= this.size) {
@@ -47,6 +52,7 @@ public class EncodedByteBuffer implements VariableLengthData {
      * This is achieved by initializing a {@code BlobByteBuffer} that is a view on the underlying {@code BlobByteBuffer}
      * and advancing the position of the underlying buffer by <i>length</i> bytes.
      */
+    @Impure
     @Override
     public void loadFrom(HollowBlobInput in, long length) throws IOException {
         BlobByteBuffer buffer = in.getBuffer();
@@ -57,16 +63,19 @@ public class EncodedByteBuffer implements VariableLengthData {
         in.seek(in.getFilePointer() + length);
     }
 
+    @SideEffectFree
     @Override
     public void copy(ByteData src, long srcPos, long destPos, long length) {
         throw new UnsupportedOperationException("Operation not supported in shared-memory mode");
     }
 
+    @SideEffectFree
     @Override
     public void orderedCopy(VariableLengthData src, long srcPos, long destPos, long length) {
         throw new UnsupportedOperationException("Operation not supported in shared-memory mode");
     }
 
+    @Pure
     @Override
     public long size() {
         return size;

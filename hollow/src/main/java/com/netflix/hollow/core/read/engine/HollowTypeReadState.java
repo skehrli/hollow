@@ -16,6 +16,9 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.core.memory.MemoryMode;
 import com.netflix.hollow.core.memory.encoding.GapEncodedVariableLengthIntegerReader;
@@ -43,6 +46,7 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
     protected final HollowSchema schema;
     protected HollowTypeStateListener[] stateListeners;
 
+    @SideEffectFree
     public HollowTypeReadState(HollowReadStateEngine stateEngine, MemoryMode memoryMode, HollowSchema schema) {
         this.stateEngine = stateEngine;
         this.memoryMode = memoryMode;
@@ -54,6 +58,7 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
      * Add a {@link HollowTypeStateListener} to this type.
      * @param listener the listener to add
      */
+    @Impure
     public void addListener(HollowTypeStateListener listener) {
         HollowTypeStateListener[] newListeners = Arrays.copyOf(stateListeners, stateListeners.length + 1);
         newListeners[newListeners.length - 1] = listener;
@@ -64,6 +69,7 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
      * Remove a specific {@link HollowTypeStateListener} from this type.
      * @param listener the listener to remove
      */
+    @Impure
     public void removeListener(HollowTypeStateListener listener) {
         if (stateListeners.length == 0)
             return;
@@ -76,6 +82,7 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
     /**
      * @return all {@link HollowTypeStateListener}s currently associated with this type.
      */
+    @Pure
     public HollowTypeStateListener[] getListeners() {
         return stateListeners;
     }
@@ -86,6 +93,7 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
      * null if none is currently attached.
      * @param <T> the type of the listener
      */
+    @Pure
     @SuppressWarnings("unchecked")
     public <T extends HollowTypeStateListener> T getListener(Class<T> listenerClazz) {
         for (HollowTypeStateListener listener : stateListeners) {
@@ -102,6 +110,8 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
      * WARNING: Do not modify the returned BitSet.
      * @return the bit containing the currently populated ordinals
      */
+    @Pure
+    @Impure
     public BitSet getPopulatedOrdinals() {
         return getListener(PopulatedOrdinalListener.class).getPopulatedOrdinals();
     }
@@ -112,6 +122,8 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
      * WARNING: Do not modify the returned BitSet.
      * @return the bit containing the previously populated ordinals
      */
+    @Pure
+    @Impure
     public BitSet getPreviousOrdinals() {
         return getListener(PopulatedOrdinalListener.class).getPreviousOrdinals();
     }
@@ -119,16 +131,21 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
     /**
      * @return The maximum ordinal currently populated in this type state.
      */
+    @Pure
     public abstract int maxOrdinal();
 
+    @Impure
     public abstract void readSnapshot(HollowBlobInput in, ArraySegmentRecycler recycler, int numShards) throws IOException;
 
+    @Impure
     public abstract void applyDelta(HollowBlobInput in, HollowSchema deltaSchema, ArraySegmentRecycler memoryRecycler, int deltaNumShards) throws IOException;
 
+    @Pure
     public HollowSchema getSchema() {
         return schema;
     }
 
+    @Pure
     @Override
     public HollowDataAccess getDataAccess() {
         return stateEngine;
@@ -137,10 +154,12 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
     /**
      * @return the {@link HollowReadStateEngine} which this type state belongs to.
      */
+    @Pure
     public HollowReadStateEngine getStateEngine() {
         return stateEngine;
     }
 
+    @Impure
     protected void notifyListenerAboutDeltaChanges(GapEncodedVariableLengthIntegerReader removals, GapEncodedVariableLengthIntegerReader additions, int shardNumber, int numShards) {
         for(HollowTypeStateListener stateListener : stateListeners) {
             removals.reset();
@@ -161,18 +180,23 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
         }
     }
 
+    @Pure
     public abstract HollowSampler getSampler();
 
+    @Impure
     protected abstract void invalidate();
 
+    @Impure
     public HollowChecksum getChecksum(HollowSchema withSchema) {
         HollowChecksum cksum = new HollowChecksum();
         applyToChecksum(cksum, withSchema);
         return cksum;
     }
 
+    @Impure
     protected abstract void applyToChecksum(HollowChecksum checksum, HollowSchema withSchema);
 
+    @Pure
     @Override
     public HollowTypeReadState getTypeState() {
         return this;
@@ -181,16 +205,22 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
     /**
      * @return an approximate accounting of the current heap footprint occupied by this type state.
      */
+    @Pure
+    @Impure
     public abstract long getApproximateHeapFootprintInBytes();
     
     /**
      * @return an approximate accounting of the current cost of the "ordinal holes" in this type state.
      */
+    @Pure
+    @Impure
     public abstract long getApproximateHoleCostInBytes();
 
     /**
      * @return an approximate accounting of the current heap footprint occupied by each shard of this type state.
      */
+    @Pure
+    @Impure
     public long getApproximateShardSizeInBytes() {
         return getApproximateHeapFootprintInBytes() / numShards();
     }
@@ -198,16 +228,23 @@ public abstract class HollowTypeReadState implements HollowTypeDataAccess {
     /**
      * @return The number of shards into which this type is split.  Sharding is transparent, so this has no effect on normal usage.
      */
+    @Pure
     public abstract int numShards();
 
+    @Pure
     public abstract ShardsHolder getShardsVolatile();
 
+    @Impure
     public abstract void updateShardsVolatile(HollowTypeReadStateShard[] shards);
 
+    @Pure
     public abstract HollowTypeDataElements[] createTypeDataElements(int len);
 
+    @SideEffectFree
+    @Impure
     public abstract HollowTypeReadStateShard createTypeReadStateShard(HollowSchema schema, HollowTypeDataElements dataElements, int shardOrdinalShift);
 
+    @Impure
     public void destroyOriginalDataElements(HollowTypeDataElements dataElements) {
         dataElements.destroy();
         if (dataElements.encodedRemovals != null) {

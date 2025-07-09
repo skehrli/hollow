@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.engine.map;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.FixedLengthData;
 import com.netflix.hollow.core.memory.FixedLengthDataFactory;
 import com.netflix.hollow.core.memory.MemoryMode;
@@ -46,22 +48,29 @@ public class HollowMapTypeDataElements extends HollowTypeDataElements {
     int emptyBucketKeyValue;
     long totalNumberOfBuckets;
 
+    @SideEffectFree
+    @Impure
     public HollowMapTypeDataElements(ArraySegmentRecycler memoryRecycler) {
         this(MemoryMode.ON_HEAP, memoryRecycler);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowMapTypeDataElements(MemoryMode memoryMode, ArraySegmentRecycler memoryRecycler) {
         super(memoryMode, memoryRecycler);
     }
 
+    @Impure
     void readSnapshot(HollowBlobInput in) throws IOException {
         readFromInput(in, false);
     }
 
+    @Impure
     void readDelta(HollowBlobInput in) throws IOException {
         readFromInput(in,true);
     }
 
+    @Impure
     private void readFromInput(HollowBlobInput in, boolean isDelta) throws IOException {
         maxOrdinal = VarInt.readVInt(in);
 
@@ -83,6 +92,7 @@ public class HollowMapTypeDataElements extends HollowTypeDataElements {
         entryData = FixedLengthDataFactory.get(in, memoryMode, memoryRecycler);
     }
 
+    @Impure
     static void discardFromInput(HollowBlobInput in, int numShards, boolean isDelta) throws IOException {
         if(numShards > 1)
             VarInt.readVInt(in); /// max ordinal
@@ -109,32 +119,39 @@ public class HollowMapTypeDataElements extends HollowTypeDataElements {
         }
     }
 
+    @Impure
     public void applyDelta(HollowMapTypeDataElements fromData, HollowMapTypeDataElements deltaData) {
         new HollowMapDeltaApplicator(fromData, deltaData, this).applyDelta();
     }
 
+    @Impure
     @Override
     public void destroy() {
         FixedLengthDataFactory.destroy(mapPointerAndSizeData, memoryRecycler);
         FixedLengthDataFactory.destroy(entryData, memoryRecycler);
     }
 
+    @Impure
     long getStartBucket(int ordinal) {
         return ordinal == 0 ? 0 : mapPointerAndSizeData.getElementValue((long)(ordinal - 1) * bitsPerFixedLengthMapPortion, bitsPerMapPointer);
     }
 
+    @Impure
     long getEndBucket(int ordinal) {
         return mapPointerAndSizeData.getElementValue((long)ordinal * bitsPerFixedLengthMapPortion, bitsPerMapPointer);
     }
 
+    @Impure
     int getBucketKeyByAbsoluteIndex(long absoluteBucketIndex) {
         return (int)entryData.getElementValue(absoluteBucketIndex * bitsPerMapEntry, bitsPerKeyElement);
     }
 
+    @Impure
     int getBucketValueByAbsoluteIndex(long absoluteBucketIndex) {
         return (int)entryData.getElementValue((absoluteBucketIndex * bitsPerMapEntry) + bitsPerKeyElement, bitsPerValueElement);
     }
 
+    @Impure
     void copyBucketsFrom(long startBucket, HollowMapTypeDataElements src, long srcStartBucket, long srcEndBucket) {
         if (bitsPerKeyElement == src.bitsPerKeyElement && bitsPerValueElement == src.bitsPerValueElement) {
             // fast path can bulk copy buckets. emptyBucketKeyValue is same since bitsPerKeyElement is the same

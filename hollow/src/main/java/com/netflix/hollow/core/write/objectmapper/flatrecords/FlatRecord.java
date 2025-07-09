@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write.objectmapper.flatrecords;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.memory.ByteData;
 import com.netflix.hollow.core.memory.encoding.VarInt;
@@ -35,6 +37,7 @@ public class FlatRecord {
     final int dataEndByte;
     final RecordPrimaryKey recordPrimaryKey;
 
+    @Impure
     public FlatRecord(ByteData recordData, HollowSchemaIdentifierMapper schemaIdMapper) {
         this.data = recordData;
         this.schemaIdMapper = schemaIdMapper;
@@ -78,6 +81,7 @@ public class FlatRecord {
         }
     }
     
+    @Impure
     public byte[] toArray() {
         byte[] arr = new byte[(int)data.length()];
         
@@ -88,10 +92,13 @@ public class FlatRecord {
         return arr;
     }
 
+    @Pure
+    @Impure
     public long size() {
         return data.length();
     }
 
+    @Impure
     private Object readPrimaryKeyField(int location, FieldType fieldType) {
         /// assumption: primary key fields are never null
         switch (fieldType) {
@@ -144,6 +151,7 @@ public class FlatRecord {
 
     }
     
+    @Pure
     public RecordPrimaryKey getRecordPrimaryKey() {
         return recordPrimaryKey;
     }

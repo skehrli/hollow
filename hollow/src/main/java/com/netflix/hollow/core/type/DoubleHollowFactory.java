@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.type;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.api.objects.provider.HollowFactory;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
@@ -23,11 +24,13 @@ import com.netflix.hollow.core.type.delegate.DoubleDelegateCachedImpl;
 
 public class DoubleHollowFactory extends HollowFactory<HDouble> {
 
+    @Impure
     @Override
     public HDouble newHollowObject(HollowTypeDataAccess dataAccess, HollowTypeAPI typeAPI, int ordinal) {
         return new HDouble(((DoubleTypeAPI)typeAPI).getDelegateLookupImpl(), ordinal);
     }
 
+    @Impure
     @Override
     public HDouble newCachedHollowObject(HollowTypeDataAccess dataAccess, HollowTypeAPI typeAPI, int ordinal) {
         return new HDouble(new DoubleDelegateCachedImpl((DoubleTypeAPI)typeAPI, ordinal), ordinal);

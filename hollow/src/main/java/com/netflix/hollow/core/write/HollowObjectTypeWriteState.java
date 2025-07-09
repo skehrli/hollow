@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.ByteData;
 import com.netflix.hollow.core.memory.ByteDataArray;
 import com.netflix.hollow.core.memory.ThreadSafeBitSet;
@@ -45,14 +47,17 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
     private ByteDataArray deltaAddedOrdinals[];
     private ByteDataArray deltaRemovedOrdinals[];
 
+    @Impure
     public HollowObjectTypeWriteState(HollowObjectSchema schema) {
         this(schema, -1);
     }
 
+    @Impure
     public HollowObjectTypeWriteState(HollowObjectSchema schema, int numShards) {
         super(schema, numShards);
     }
 
+    @Pure
     @Override
     public HollowObjectSchema getSchema() {
         return (HollowObjectSchema)schema;
@@ -65,6 +70,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
      * Postcondition: We are writing the previously added objects to a FastBlob.
      *
      */
+    @Impure
     @Override
     public void prepareForWrite(boolean canReshard) {
         super.prepareForWrite(canReshard);
@@ -74,6 +80,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         gatherShardingStats(maxOrdinal, canReshard);
     }
 
+    @Impure
     private void gatherFieldStats() {
         fieldStats = new FieldStatistics(getSchema());
         for(int i=0;i<=maxOrdinal;i++) {
@@ -82,6 +89,8 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         fieldStats.completeCalculations();
     }
 
+    @Pure
+    @Impure
     @Override
     protected int typeStateNumShards(int maxOrdinal) {
         long projectedSizeOfType = ((long)fieldStats.getNumBitsPerRecord() * (maxOrdinal + 1)) / 8;
@@ -94,6 +103,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         return targetNumShards;
     }
 
+    @Impure
     private void discoverObjectFieldStatisticsForRecord(FieldStatistics fieldStats, int ordinal) {
         if(currentCyclePopulated.get(ordinal) || previousCyclePopulated.get(ordinal)) {
             long pointer = ordinalMap.getPointerForData(ordinal);
@@ -104,6 +114,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     private long discoverObjectFieldStatisticsForField(FieldStatistics fieldStats, long pointer, int fieldIndex) {
         ByteData data = ordinalMap.getByteData().getUnderlyingArray();
 
@@ -148,14 +159,17 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         return pointer;
     }
 
+    @Impure
     private void addFixedLengthFieldRequiredBits(FieldStatistics fieldStats, int fieldIndex, int numBits) {
         fieldStats.addFixedLengthFieldRequiredBits(fieldIndex, numBits);
     }
 
+    @Impure
     private void addVarLengthFieldSizeInBytes(FieldStatistics fieldStats, int fieldIndex, int numBytes) {
         fieldStats.addVarLengthFieldSize(fieldIndex, numBytes);
     }
 
+    @Impure
     @Override
     public void prepareForNextCycle() {
         super.prepareForNextCycle();
@@ -163,6 +177,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         fieldStats = null;
     }
 
+    @Impure
     @Override
     public void calculateSnapshot() {
         int numBitsPerRecord = fieldStats.getNumBitsPerRecord();
@@ -189,6 +204,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     public void writeSnapshot(DataOutputStream os) throws IOException {
         LOG.log(Level.FINE, String.format("Writing snapshot with num shards = %s, revNumShards = %s, max shard ordinals = %s", numShards, revNumShards, Arrays.toString(maxShardOrdinal)));
         /// for unsharded blobs, support pre v2.1.0 clients
@@ -209,6 +225,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         recordBitOffset = null;
     }
 
+    @Impure
     private void writeSnapshotShard(DataOutputStream os, int shardNumber) throws IOException {
         /// 1) shard max ordinal
         VarInt.writeVInt(os, maxShardOrdinal[shardNumber]);
@@ -234,6 +251,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     public void calculateDelta(ThreadSafeBitSet fromCyclePopulated, ThreadSafeBitSet toCyclePopulated, boolean isReverse) {
         int numShards = this.numShards;
@@ -286,6 +304,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     @Override
     public void writeCalculatedDelta(DataOutputStream os, boolean isReverse, int[] maxShardOrdinal) throws IOException {
         int numShards = this.numShards;
@@ -312,6 +331,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         recordBitOffset = null;
     }
 
+    @Impure
     private void writeCalculatedDeltaShard(DataOutputStream os, int shardNumber, int[] maxShardOrdinal) throws IOException {
 
         /// 1) max ordinal
@@ -345,6 +365,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
     }
 
     /// here we need to add the offsets for the variable-length field endings, as they will be read as the start position for the following record.
+    @Impure
     private void addNullRecord(int ordinal, long recordBitOffset, FixedLengthElementArray fixedLengthLongArray, ByteDataArray varLengthByteArrays[]) {
         for(int fieldIndex=0; fieldIndex < getSchema().numFields(); fieldIndex++) {
             if(getSchema().getFieldType(fieldIndex) == FieldType.STRING || getSchema().getFieldType(fieldIndex) == FieldType.BYTES) {
@@ -356,6 +377,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     private void addRecord(int ordinal, long recordBitOffset, FixedLengthElementArray fixedLengthLongArray, ByteDataArray varLengthByteArrays[]) {
         long pointer = ordinalMap.getPointerForData(ordinal);
 
@@ -364,6 +386,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         }
     }
 
+    @Impure
     private long addRecordField(long readPointer, long recordBitOffset, int fieldIndex, FixedLengthElementArray fixedLengthLongArray, ByteDataArray varLengthByteArrays[]) {
         FieldType fieldType = getSchema().getFieldType(fieldIndex);
         long fieldBitOffset = recordBitOffset + fieldStats.getFieldBitOffset(fieldIndex);
@@ -425,6 +448,7 @@ public class HollowObjectTypeWriteState extends HollowTypeWriteState {
         return readPointer;
     }
 
+    @Impure
     private ByteDataArray getByteArray(ByteDataArray buffers[], int index) {
         if(buffers[index] == null) {
             buffers[index] = new ByteDataArray(WastefulRecycler.DEFAULT_INSTANCE);

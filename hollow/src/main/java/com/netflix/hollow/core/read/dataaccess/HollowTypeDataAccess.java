@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.dataaccess;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.sampling.HollowSampler;
 import com.netflix.hollow.api.sampling.HollowSamplingDirector;
 import com.netflix.hollow.core.read.engine.HollowTypeReadState;
@@ -31,25 +33,32 @@ public interface HollowTypeDataAccess {
     /**
      * @return The {@link HollowDataAccess} for the dataset this type belongs to.
      */
+    @Pure
     HollowDataAccess getDataAccess();
 
     /**
      * @return the {@link HollowSchema} for this type.
      */
+    @Impure
     HollowSchema getSchema();
 
+    @Impure
     void setSamplingDirector(HollowSamplingDirector director);
     
+    @Impure
     void setFieldSpecificSamplingDirector(HollowFilterConfig fieldSpec, HollowSamplingDirector director);
     
+    @Impure
     void ignoreUpdateThreadForSampling(Thread t);
 
+    @Impure
     HollowSampler getSampler();
 
     /**
      * Optional operation
      * @return the read state
      */
+    @Impure
     HollowTypeReadState getTypeState();
 
 }

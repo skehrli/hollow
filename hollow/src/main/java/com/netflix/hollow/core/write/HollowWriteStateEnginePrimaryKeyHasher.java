@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.write;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.index.key.PrimaryKey;
 import com.netflix.hollow.core.memory.ByteArrayOrdinalMap;
 import com.netflix.hollow.core.memory.SegmentedByteArray;
@@ -29,6 +30,7 @@ class HollowWriteStateEnginePrimaryKeyHasher {
     private final HollowObjectTypeWriteState typeStates[][];
     private final int[][] fieldPathIndexes;
 
+    @Impure
     public HollowWriteStateEnginePrimaryKeyHasher(PrimaryKey primaryKey, HollowWriteStateEngine writeEngine) {
         HollowWriteStateEngine stateEngine = writeEngine;
         HollowObjectTypeWriteState rootTypeWriteState = (HollowObjectTypeWriteState)writeEngine.getTypeState(primaryKey.getType());
@@ -49,6 +51,7 @@ class HollowWriteStateEnginePrimaryKeyHasher {
         }
     }
     
+    @Impure
     public int getRecordHash(int ordinal) {
         int hash = 0;
 
@@ -60,6 +63,7 @@ class HollowWriteStateEnginePrimaryKeyHasher {
         return hash;
     }
 
+    @Impure
     private int hashValue(int ordinal, int fieldIdx) {
         int lastFieldPath = fieldPathIndexes[fieldIdx].length - 1;
         for (int i = 0; i < lastFieldPath; i++) {
@@ -82,6 +86,7 @@ class HollowWriteStateEnginePrimaryKeyHasher {
         return HashCodes.hashInt(fieldHashCode(schema, fieldPosition, recordDataArray, offset));
     }
     
+    @Impure
     private long navigateToField(HollowObjectSchema schema, int fieldIdx, SegmentedByteArray data, long offset) {
         for(int i=0;i<fieldIdx;i++) {
             switch(schema.getFieldType(i)) {
@@ -111,6 +116,7 @@ class HollowWriteStateEnginePrimaryKeyHasher {
         return offset;
     }
     
+    @Impure
     private int fieldHashCode(HollowObjectSchema schema, int fieldIdx, SegmentedByteArray data, long offset) {
         switch(schema.getFieldType(fieldIdx)) {
         case INT:
@@ -149,6 +155,7 @@ class HollowWriteStateEnginePrimaryKeyHasher {
         }
     }
     
+    @Impure
     private int getNaturalStringHashCode(SegmentedByteArray data, long offset, int len) {
         int hashCode = 0;
         long endOffset = len + offset;

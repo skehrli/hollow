@@ -15,13 +15,17 @@
  *
  */
 package com.netflix.hollow.core.read.iterator;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 public class EmptyOrdinalIterator implements HollowOrdinalIterator {
 
     public static final EmptyOrdinalIterator INSTANCE = new EmptyOrdinalIterator();
 
+    @SideEffectFree
     private EmptyOrdinalIterator() { }
 
+    @Pure
     @Override
     public int next() {
         return NO_MORE_ORDINALS;

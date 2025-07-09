@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.index.traversal;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.dataaccess.HollowTypeDataAccess;
 import com.netflix.hollow.core.util.IntList;
 import java.util.Arrays;
@@ -41,16 +43,19 @@ abstract class HollowIndexerTraversalNode {
 
     private int currentMultiplyFieldMatchListPosition;
 
+    @Impure
     public HollowIndexerTraversalNode(HollowTypeDataAccess dataAccess, IntList[] fieldMatches) {
         this.dataAccess = dataAccess;
         this.fieldMatches = fieldMatches;
         this.children = new HashMap<String, HollowIndexerTraversalNode>();
     }
 
+    @Impure
     public void setIndexedFieldPosition(int indexedFieldPosition) {
         this.indexedFieldPosition = indexedFieldPosition;
     }
 
+    @Pure
     public int getIndexedFieldPosition() {
         return indexedFieldPosition;
     }
@@ -58,6 +63,7 @@ abstract class HollowIndexerTraversalNode {
     /**
      * @return the transitive child branch field positions
      */
+    @Impure
     public IntList setUpMultiplication() {
         this.shouldMultiplyBranchResults = shouldMultiplyBranchResults();
 
@@ -91,6 +97,7 @@ abstract class HollowIndexerTraversalNode {
         return branchFieldPositions;
     }
 
+    @Impure
     public void traverse(int ordinal) {
         if(childFirstFieldMap.length == 0) {
             doTraversal(ordinal);
@@ -106,11 +113,13 @@ abstract class HollowIndexerTraversalNode {
         }
     }
 
+    @Impure
     public void prepareMultiply() {
         if(childFirstFieldMap.length > 0)
             this.currentMultiplyFieldMatchListPosition = fieldMatches[childFirstFieldMap[0]].size();
     }
 
+    @Impure
     public int doMultiply() {
         if(shouldMultiplyBranchResults) {
 
@@ -161,8 +170,10 @@ abstract class HollowIndexerTraversalNode {
     }
 
 
+    @Impure
     public abstract int doTraversal(int ordinal);
 
+    @Pure
     protected abstract HollowTypeDataAccess dataAccess();
 
     /**
@@ -170,18 +181,23 @@ abstract class HollowIndexerTraversalNode {
      *
      * Implementations of this method should set up data structures necessary for fast traversal of children.
      */
+    @Impure
     protected abstract void setUpChildren();
 
+    @Pure
     protected abstract boolean followingChildrenMultipliesTraversal();
 
+    @Pure
     HollowIndexerTraversalNode getChild(String name) {
         return children.get(name);
     }
 
+    @Impure
     void addChild(String name, HollowIndexerTraversalNode child) {
         children.put(name, child);
     }
 
+    @Impure
     private boolean shouldMultiplyBranchResults() {
         if(children.size() > 1) {
             for(Map.Entry<String, HollowIndexerTraversalNode> entry : children.entrySet()) {
@@ -193,6 +209,7 @@ abstract class HollowIndexerTraversalNode {
         return false;
     }
 
+    @Impure
     private boolean branchMayProduceMoreThanOneMatch() {
         if(!children.isEmpty() && followingChildrenMultipliesTraversal())
             return true;

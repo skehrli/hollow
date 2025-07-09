@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.index;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.memory.encoding.FixedLengthElementArray;
 import com.netflix.hollow.core.memory.encoding.FixedLengthMultipleOccurrenceElementArray;
 import com.netflix.hollow.core.memory.pool.ArraySegmentRecycler;
@@ -63,6 +65,7 @@ class TST {   // ternary search tree
      * @param caseSensitive controls whether indexing and querying should be case sensitive
      * @param memoryRecycler   to reuse arrays from memory pool
      */
+    @Impure
     TST(long estimatedMaxNodes, int estimatedMaxStringDuplicates, int maxOrdinalValue, boolean caseSensitive,
         ArraySegmentRecycler memoryRecycler) {
         // best guess, hard limit
@@ -91,11 +94,13 @@ class TST {   // ternary search tree
     }
 
     // tell memory recycler to use these long array on next long array request from memory ONLY AFTER swap is called on memory recycler
+    @Impure
     void recycleMemory(ArraySegmentRecycler memoryRecycler) {
         nodes.destroy(memoryRecycler);
         ordinalSet.destroy();
     }
 
+    @Pure
     private long getChildOffset(NodeType nodeType) {
         long offset;
         if (nodeType.equals(NodeType.Left)) offset = leftChildOffset;
@@ -104,33 +109,40 @@ class TST {   // ternary search tree
         return offset;
     }
 
+    @Impure
     private long getChildIndex(long currentNode, NodeType nodeType) {
         long offset = getChildOffset(nodeType);
         return nodes.getElementValue((currentNode * bitsPerNode) + offset, bitsForChildPointer);
     }
 
+    @Impure
     private void setChildIndex(long currentNode, NodeType nodeType, long indexForNode) {
         long offset = getChildOffset(nodeType);
         nodes.setElementValue((currentNode * bitsPerNode) + offset, bitsForChildPointer, indexForNode);
     }
 
+    @Impure
     private void setKey(long index, char ch) {
         nodes.setElementValue(index * bitsPerNode, bitsPerKey, ch);
     }
 
+    @Impure
     private long getKey(long nodeIndex) {
         return nodes.getElementValue(nodeIndex * bitsPerNode, bitsPerKey);
     }
 
+    @Impure
     private boolean isEndNode(long nodeIndex) {
         return nodes.getElementValue((nodeIndex * bitsPerNode) + isEndFlagOffset, 1) == 1;
     }
 
+    @Impure
     private void addOrdinal(long nodeIndex, long ordinal) {
         ordinalSet.addElement(nodeIndex, ordinal);
         nodes.setElementValue((nodeIndex * bitsPerNode) + isEndFlagOffset, 1, 1);
     }
 
+    @Impure
     List<Integer> getOrdinals(long nodeIndex) {
         if (nodeIndex < 0) {
             return Collections.EMPTY_LIST;
@@ -143,6 +155,7 @@ class TST {   // ternary search tree
      * Insert into ternary search tree for the given key and ordinal.
      * Case sensitivity is specified at the time of index initialization.  nulls and empty strings are not supported.
      */
+    @Impure
     void insert(String key, int ordinal) {
         if (key == null) throw new IllegalArgumentException("Null key cannot be indexed");
         if (key.length() == 0) throw new IllegalArgumentException("Empty string cannot be indexed");
@@ -197,6 +210,7 @@ class TST {   // ternary search tree
      *
      * @return index of the node corresponding to longest match with a given prefix, -1 if no match or input was null or empty string
      */
+    @Impure
     long findLongestMatch(String prefix) {
         long nodeIndex = -1;
         if (prefix == null || prefix.length() == 0) {
@@ -241,6 +255,7 @@ class TST {   // ternary search tree
      *
      * @return index of the node corresponding to the last character of the key, or -1 if not found or input was null or empty string.
      */
+    @Impure
     long findNodeWithKey(String key) {
         long index = -1;
         if (key == null || key.length() == 0) {
@@ -273,6 +288,7 @@ class TST {   // ternary search tree
         return index;
     }
 
+    @Impure
     boolean contains(String key) {
         long nodeIndex = findNodeWithKey(key);
         return nodeIndex >= 0 && isEndNode(nodeIndex);
@@ -283,6 +299,7 @@ class TST {   // ternary search tree
      * Case sensitivity of matches is specified at the time of index initialization. A prefix of empty string "" will
      * return all ordinals indexed in the tree.
      */
+    @Impure
     HollowOrdinalIterator findKeysWithPrefix(String prefix) {
         if (prefix == null){
             throw new IllegalArgumentException("Cannot findKeysWithPrefix null prefix");
@@ -329,6 +346,7 @@ class TST {   // ternary search tree
         return new HollowOrdinalIterator() {
             private Iterator<Integer> it = ordinals.iterator();
 
+            @Impure
             @Override
             public int next() {
                 if (it.hasNext()) return it.next();
@@ -344,6 +362,7 @@ class TST {   // ternary search tree
      * upto O(n) search time complexity.
      * @return the max depth of the tree
      */
+    @Pure
     long getMaxDepth() {
         return maxDepth;
     }
@@ -353,6 +372,7 @@ class TST {   // ternary search tree
      * under utilized.
      * @return no. of populated nodes in prefix tree
      */
+    @Pure
     long getEmptyNodes() {
         return maxNodes - indexTracker;
     }
@@ -363,6 +383,7 @@ class TST {   // ternary search tree
      * insertion order of records.
      * @return no. of populated nodes in prefix tree
      */
+    @Pure
     long getNumNodes() {
         return indexTracker;
     }
@@ -374,6 +395,7 @@ class TST {   // ternary search tree
      * of records.
      * @return max node capacity of underlying prefix tree
      */
+    @Pure
     long getMaxNodes() {
         return maxNodes;
     }
@@ -383,6 +405,7 @@ class TST {   // ternary search tree
      * each node of the tree reserves space to reference multiple records.
      * @return no. of elements that can be referenced from a single node of the tree
      */
+    @Pure
     int getMaxElementsPerNode() {
         return ordinalSet.getMaxElementsPerNode();
     }
@@ -391,6 +414,8 @@ class TST {   // ternary search tree
      * Returns the approx heap footprint of the prefix tree
      * @return approx heap footprint in bytes
      */
+    @Pure
+    @Impure
     long approxHeapFootprintInBytes() {
         return nodes.approxHeapFootprintInBytes()
                 + ordinalSet.approxHeapFootprintInBytes();

@@ -15,6 +15,7 @@
  *
  */
 package com.netflix.hollow.core.write.objectmapper;
+import org.checkerframework.dataflow.qual.Pure;
 
 /**
  * @deprecated Use the @HollowInline annotation with a Boolean field instead. 
@@ -24,6 +25,7 @@ public enum NullablePrimitiveBoolean {
     TRUE,
     FALSE;
 
+    @Pure
     public boolean getBooleanValue() {
         return this == TRUE;
     }

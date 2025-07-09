@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowListSchema;
 import com.netflix.hollow.core.schema.HollowMapSchema;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
@@ -13,12 +15,16 @@ import java.util.Map;
  * An abstraction that allows for the traversal of a flat record from the root type to a specific sub-path.
  */
 public interface FlatRecordTraversalNode {
+  @Pure
   int getOrdinal();
 
+  @Pure
   HollowSchema getSchema();
 
+  @Impure
   void setCommonSchema(Map<String, HollowObjectSchema> commonSchema);
 
+  @Impure
   default FlatRecordTraversalNode createNode(FlatRecordOrdinalReader reader, int ordinal) {
     HollowSchema schema = reader.readSchema(ordinal);
     switch (schema.getSchemaType()) {

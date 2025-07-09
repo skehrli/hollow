@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.objects.HollowRecord;
 import java.util.Set;
 
@@ -43,6 +45,7 @@ public interface HollowObjectHashCodeFinder {
      * @param objectToHash the object to hash
      * @return the hash code
      */
+    @Impure
     int hashCode(Object objectToHash);
     
     /**
@@ -58,14 +61,18 @@ public interface HollowObjectHashCodeFinder {
      * @param objectToHash the object to hash
      * @return the hash code
      */
+    @Pure
     int hashCode(String typeName, int ordinal, Object objectToHash);
     
     /**
      * @return the set of types which have hash codes defined (i.e. hash codes which are not simply each record's ordinal)
      */
+    @Pure
     Set<String> getTypesWithDefinedHashCodes();
     
 
+    @Pure
+    @Impure
     @Deprecated
     int hashCode(int ordinal, Object objectToHash);
 

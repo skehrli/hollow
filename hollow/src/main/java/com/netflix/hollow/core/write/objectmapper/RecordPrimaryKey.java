@@ -16,30 +16,37 @@
  */
 package com.netflix.hollow.core.write.objectmapper;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.Arrays;
 
 public class RecordPrimaryKey {
     private final String type;
     private final Object[] key;
     
+    @SideEffectFree
     public RecordPrimaryKey(String type, Object[] key) {
         this.type = type;
         this.key = key;
     }
     
+    @Pure
     public String getType() {
         return type;
     }
     
+    @Pure
     public Object[] getKey() {
         return key;
     }
 
+    @Pure
     @Override
     public int hashCode() {
         return 31 * type.hashCode() + Arrays.hashCode(key);
     }
 
+    @Pure
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof RecordPrimaryKey) {
@@ -49,6 +56,7 @@ public class RecordPrimaryKey {
         return false;
     }
 
+    @SideEffectFree
     @Override
     public String toString() {
         return type + ": " + Arrays.toString(key);

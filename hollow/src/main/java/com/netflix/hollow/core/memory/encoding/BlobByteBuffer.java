@@ -1,5 +1,7 @@
 package com.netflix.hollow.core.memory.encoding;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
 
 import java.io.IOException;
@@ -33,10 +35,12 @@ public final class BlobByteBuffer {
 
     private long position;              // within index 0 to capacity-1 in the underlying ByteBuffer
 
+    @Impure
     private BlobByteBuffer(long capacity, int shift, int mask, ByteBuffer[] spine) {
         this(capacity, shift, mask, spine, 0);
     }
 
+    @Impure
     private BlobByteBuffer(long capacity, int shift, int mask, ByteBuffer[] spine, long position) {
 
         if (!spine[0].order().equals(ByteOrder.BIG_ENDIAN)) {
@@ -59,6 +63,7 @@ public final class BlobByteBuffer {
      * The returned buffer's capacity, shift, mark, spine, and position will be identical to those of this buffer.
      * @return a new {@code BlobByteBuffer} which is view on the current {@code BlobByteBuffer}
      */
+    @Impure
     public BlobByteBuffer duplicate() {
         return new BlobByteBuffer(this.capacity, this.shift, this.mask, this.spine, this.position);
     }
@@ -72,6 +77,7 @@ public final class BlobByteBuffer {
      * @return BlobByteBuffer containing an array of {@code MappedByteBuffer}s that mmap-ed the entire file channel
      * @throws IOException
      */
+    @Impure
     public static BlobByteBuffer mmapBlob(FileChannel channel, int singleBufferCapacity) throws IOException {
         long size = channel.size();
         if (size == 0) {
@@ -114,6 +120,7 @@ public final class BlobByteBuffer {
      * Return position in bytes.
      * @return position in bytes
      */
+    @Pure
     public long position() {
         return this.position;
     }
@@ -123,6 +130,7 @@ public final class BlobByteBuffer {
      * @param position the byte index to set position to
      * @return new position in bytes
      */
+    @Impure
     public BlobByteBuffer position(long position) {
         if (position > capacity || position < 0)
             throw new IllegalArgumentException("invalid position; position=" + position + " capacity=" + capacity);
@@ -136,6 +144,7 @@ public final class BlobByteBuffer {
      * @return byte at the given index
      * @throws IndexOutOfBoundsException if index out of bounds of the backing buffer
      */
+    @Impure
     public byte getByte(long index) throws BufferUnderflowException {
         if (index < capacity) {
             int spineIndex = (int)(index >>> (shift));
@@ -157,6 +166,7 @@ public final class BlobByteBuffer {
      * @param startByteIndex byte index (from offset 0 in the backing BlobByteBuffer) at which to start reading long value
      * @return long value
      */
+    @Impure
     public long getLong(long startByteIndex) throws BufferUnderflowException {
 
         int alignmentOffset = (int)((startByteIndex - this.position()) % Long.BYTES);
@@ -184,6 +194,7 @@ public final class BlobByteBuffer {
      * @param boundary index of the next 8-byte aligned byte
      * @return position in buffer
      */
+    @Pure
     private long bigEndian(long index, long boundary) {
         long result;
         if (index < boundary) {

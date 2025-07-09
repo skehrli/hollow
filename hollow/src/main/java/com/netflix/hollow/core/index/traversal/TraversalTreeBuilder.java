@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.index.traversal;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.read.dataaccess.HollowCollectionTypeDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowDataAccess;
 import com.netflix.hollow.core.read.dataaccess.HollowListTypeDataAccess;
@@ -43,6 +45,7 @@ class TraversalTreeBuilder {
     private final HollowTypeDataAccess[] fieldTypeDataAccess;
     private final int[] fieldSchemaPositions;
 
+    @Impure
     public TraversalTreeBuilder(HollowDataAccess dataAccess, String type, String[] fieldPaths) {
         this.dataAccess = dataAccess;
         this.type = type;
@@ -54,18 +57,22 @@ class TraversalTreeBuilder {
         this.fieldSchemaPositions = new int[fieldPaths.length];
     }
 
+    @Pure
     public IntList[] getFieldMatchLists() {
         return fieldMatchLists;
     }
 
+    @Pure
     public HollowTypeDataAccess[] getFieldTypeDataAccesses() {
         return fieldTypeDataAccess;
     }
 
+    @Pure
     public int[] getFieldSchemaPositions() {
         return fieldSchemaPositions;
     }
 
+    @Impure
     public HollowIndexerTraversalNode buildTree() {
         HollowTypeDataAccess rootTypeDataAccess = dataAccess.getTypeDataAccess(type);
         HollowIndexerTraversalNode rootNode = createTypeNode(rootTypeDataAccess);
@@ -130,6 +137,7 @@ class TraversalTreeBuilder {
     }
 
 
+    @Impure
     private HollowIndexerTraversalNode createChildNode(HollowTypeDataAccess typeDataAccess, String childName) {
         if(typeDataAccess instanceof HollowObjectTypeDataAccess) {
             HollowObjectTypeDataAccess objectAccess = (HollowObjectTypeDataAccess) typeDataAccess;
@@ -157,6 +165,7 @@ class TraversalTreeBuilder {
         throw new IllegalArgumentException("I can't create a child node for a " + typeDataAccess.getClass());
     }
 
+    @Impure
     private HollowTypeDataAccess getChildDataAccess(HollowTypeDataAccess typeDataAccess, String childName) {
         if(typeDataAccess instanceof HollowObjectTypeDataAccess) {
             HollowObjectSchema schema = (HollowObjectSchema) typeDataAccess.getSchema();
@@ -175,6 +184,7 @@ class TraversalTreeBuilder {
         throw new IllegalArgumentException("I can't create a child node for a " + typeDataAccess.getClass());
     }
 
+    @Impure
     private HollowIndexerTraversalNode createTypeNode(HollowTypeDataAccess typeDataAccess) {
         if(typeDataAccess instanceof HollowObjectTypeDataAccess)
             return new HollowIndexerObjectTraversalNode((HollowObjectTypeDataAccess) typeDataAccess, fieldMatchLists);

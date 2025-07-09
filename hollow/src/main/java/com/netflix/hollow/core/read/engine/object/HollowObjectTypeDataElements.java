@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.read.engine.object;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.netflix.hollow.core.memory.FixedLengthData;
 import com.netflix.hollow.core.memory.FixedLengthDataFactory;
 import com.netflix.hollow.core.memory.MemoryMode;
@@ -51,10 +53,14 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
     private int bitsPerUnfilteredField[];
     private boolean unfilteredFieldIsIncluded[];
 
+    @SideEffectFree
+    @Impure
     public HollowObjectTypeDataElements(HollowObjectSchema schema, ArraySegmentRecycler memoryRecycler) {
         this(schema, MemoryMode.ON_HEAP, memoryRecycler);
     }
 
+    @SideEffectFree
+    @Impure
     public HollowObjectTypeDataElements(HollowObjectSchema schema, MemoryMode memoryMode, ArraySegmentRecycler memoryRecycler) {
         super(memoryMode, memoryRecycler);
         varLengthData = new VariableLengthData[schema.numFields()];
@@ -64,14 +70,17 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         this.schema = schema;
     }
 
+    @Impure
     void readSnapshot(HollowBlobInput in, HollowObjectSchema unfilteredSchema) throws IOException {
         readFromInput(in, false, unfilteredSchema);
     }
 
+    @Impure
     void readDelta(HollowBlobInput in) throws IOException {
         readFromInput(in, true, schema);
     }
 
+    @Impure
     void readFromInput(HollowBlobInput in, boolean isDelta, HollowObjectSchema unfilteredSchema) throws IOException {
         maxOrdinal = VarInt.readVInt(in);
 
@@ -88,6 +97,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         readVarLengthData(in, unfilteredSchema);
     }
 
+    @Impure
     private void removeExcludedFieldsFromFixedLengthData() {
         if(bitsPerField.length < bitsPerUnfilteredField.length) {
             long numBitsRequired = (long)bitsPerRecord * (maxOrdinal + 1);
@@ -116,6 +126,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         }
     }
 
+    @Impure
     private void readFieldStatistics(HollowBlobInput in, HollowObjectSchema unfilteredSchema) throws IOException {
         bitsPerRecord = 0;
 
@@ -140,6 +151,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
     }
 
 
+    @Impure
     private void readVarLengthData(HollowBlobInput in, HollowObjectSchema unfilteredSchema) throws IOException {
         int filteredFieldIdx = 0;
 
@@ -160,6 +172,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         }
     }
 
+    @Impure
     static void discardFromInput(HollowBlobInput in, HollowObjectSchema schema, int numShards, boolean isDelta) throws IOException {
         if(numShards > 1)
             VarInt.readVInt(in); // max ordinal
@@ -191,10 +204,12 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         }
     }
 
+    @Impure
     void applyDelta(HollowObjectTypeDataElements fromData, HollowObjectTypeDataElements deltaData) {
         new HollowObjectDeltaApplicator(fromData, deltaData, this).applyDelta();
     }
 
+    @Impure
     @Override
     public void destroy() {
         FixedLengthDataFactory.destroy(fixedLengthData, memoryRecycler);
@@ -204,6 +219,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         }
     }
 
+    @Impure
     static long varLengthStartByte(HollowObjectTypeDataElements from, int ordinal, int fieldIdx) {
         if(ordinal == 0)
             return 0;
@@ -215,6 +231,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         return startByte;
     }
 
+    @Impure
     static long varLengthEndByte(HollowObjectTypeDataElements from, int ordinal, int fieldIdx) {
         int numBitsForField = from.bitsPerField[fieldIdx];
         long currentBitOffset = ((long)from.bitsPerRecord * ordinal) + from.bitOffsetPerField[fieldIdx];
@@ -223,6 +240,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         return endByte;
     }
 
+    @Impure
     static long varLengthSize(HollowObjectTypeDataElements from, int ordinal, int fieldIdx) {
         int numBitsForField = from.bitsPerField[fieldIdx];
         long fromBitOffset = ((long)from.bitsPerRecord*ordinal) + from.bitOffsetPerField[fieldIdx];
@@ -231,6 +249,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         return fromEndByte - fromStartByte;
     }
 
+    @Impure
     static void copyRecord(HollowObjectTypeDataElements to, int toOrdinal, HollowObjectTypeDataElements from, int fromOrdinal, long[] currentWriteVarLengthDataPointers) {
         for(int fieldIndex=0;fieldIndex<to.schema.numFields();fieldIndex++) {
             long currentReadFixedLengthStartBit = ((long)fromOrdinal * from.bitsPerRecord) + from.bitOffsetPerField[fieldIndex];
@@ -262,6 +281,7 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         }
     }
 
+    @Impure
     static void writeNullField(HollowObjectTypeDataElements target, int fieldIndex, long currentWriteFixedLengthStartBit, long[] currentWriteVarLengthDataPointers) {
         if(target.varLengthData[fieldIndex] != null) {
             writeNullVarLengthField(target, fieldIndex, currentWriteFixedLengthStartBit, currentWriteVarLengthDataPointers);
@@ -270,11 +290,13 @@ public class HollowObjectTypeDataElements extends HollowTypeDataElements {
         }
     }
 
+    @Impure
     static void writeNullVarLengthField(HollowObjectTypeDataElements target, int fieldIndex, long currentWriteFixedLengthStartBit, long[] currentWriteVarLengthDataPointers) {
         long writeValue = (1L << (target.bitsPerField[fieldIndex] - 1)) | currentWriteVarLengthDataPointers[fieldIndex];
         target.fixedLengthData.setElementValue(currentWriteFixedLengthStartBit, target.bitsPerField[fieldIndex], writeValue);
     }
 
+    @Impure
     static void writeNullFixedLengthField(HollowObjectTypeDataElements target, int fieldIndex, long currentWriteFixedLengthStartBit) {
         target.fixedLengthData.setElementValue(currentWriteFixedLengthStartBit, target.bitsPerField[fieldIndex], target.nullValueForField[fieldIndex]);
     }

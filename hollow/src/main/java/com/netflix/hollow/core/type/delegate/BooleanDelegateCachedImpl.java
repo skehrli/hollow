@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.type.delegate;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.api.custom.HollowTypeAPI;
 import com.netflix.hollow.api.objects.delegate.HollowCachedDelegate;
 import com.netflix.hollow.api.objects.delegate.HollowObjectAbstractDelegate;
@@ -28,11 +30,13 @@ public class BooleanDelegateCachedImpl extends HollowObjectAbstractDelegate impl
     private final Boolean value;
     private BooleanTypeAPI typeAPI;
 
+    @Impure
     public BooleanDelegateCachedImpl(BooleanTypeAPI typeAPI, int ordinal) {
         this.value = typeAPI.getValueBoxed(ordinal);
         this.typeAPI = typeAPI;
     }
 
+    @Pure
     @Override
     public boolean getValue(int ordinal) {
         if(value == null)
@@ -40,26 +44,31 @@ public class BooleanDelegateCachedImpl extends HollowObjectAbstractDelegate impl
         return value.booleanValue();
     }
 
+    @Pure
     @Override
     public Boolean getValueBoxed(int ordinal) {
         return value;
     }
 
+    @Impure
     @Override
     public HollowObjectSchema getSchema() {
         return typeAPI.getTypeDataAccess().getSchema();
     }
 
+    @Impure
     @Override
     public HollowObjectTypeDataAccess getTypeDataAccess() {
         return typeAPI.getTypeDataAccess();
     }
 
+    @Pure
     @Override
     public BooleanTypeAPI getTypeAPI() {
         return typeAPI;
     }
 
+    @Impure
     @Override
     public void updateTypeAPI(HollowTypeAPI typeAPI) {
         this.typeAPI = (BooleanTypeAPI) typeAPI;

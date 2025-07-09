@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine.set;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.netflix.hollow.core.HollowConstants.ORDINAL_NONE;
 
 import com.netflix.hollow.core.memory.encoding.HashCodes;
@@ -34,6 +35,7 @@ public class PotentialMatchHollowSetOrdinalIterator implements HollowOrdinalIter
     private final int numBuckets;
     private int currentBucket;
 
+    @Impure
     public PotentialMatchHollowSetOrdinalIterator(int setOrdinal, HollowSetTypeDataAccess dataAccess, int hashCode) {
         this.setOrdinal = setOrdinal;
         this.dataAccess = dataAccess;
@@ -41,6 +43,7 @@ public class PotentialMatchHollowSetOrdinalIterator implements HollowOrdinalIter
         this.currentBucket = HashCodes.hashInt(hashCode) & (numBuckets - 1);
     }
 
+    @Impure
     @Override
     public int next() {
         int currentBucketValue;

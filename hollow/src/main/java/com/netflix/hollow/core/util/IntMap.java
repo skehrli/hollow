@@ -16,6 +16,8 @@
  */
 package com.netflix.hollow.core.util;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.Arrays;
 
 /**
@@ -27,6 +29,7 @@ public class IntMap {
     private final int values[];
     private int size;
 
+    @Impure
     public IntMap(int numEntries) {
         int arraySize = 1 << 32 - Integer.numberOfLeadingZeros((((numEntries + 1) * 4) / 3) - 1);
         keys = new int[arraySize];
@@ -34,10 +37,13 @@ public class IntMap {
         Arrays.fill(keys, -1);
     }
 
+    @Pure
     public int size() {
         return size;
     }
 
+    @Pure
+    @Impure
     public int get(int key) {
         int bucket = hashKey(key) % keys.length;
         while (keys[bucket] != -1) {
@@ -50,6 +56,7 @@ public class IntMap {
         return -1;
     }
 
+    @Impure
     public void put(int key, int value) {
         int bucket = hashKey(key) % keys.length;
         while (keys[bucket] != -1) {
@@ -67,6 +74,7 @@ public class IntMap {
         size++;
     }
 
+    @Pure
     private int hashKey(int key) {
       key = ~key + (key << 15);
       key = key ^ (key >>> 12);
@@ -77,6 +85,7 @@ public class IntMap {
       return key & Integer.MAX_VALUE;
     }
 
+    @Impure
     public IntMapEntryIterator iterator() {
         return new IntMapEntryIterator();
     }
@@ -84,6 +93,7 @@ public class IntMap {
     public class IntMapEntryIterator {
         private int currentEntry = -1;
 
+        @Impure
         public boolean next() {
             while(++currentEntry < keys.length) {
                 if(keys[currentEntry] != -1)
@@ -92,10 +102,12 @@ public class IntMap {
             return false;
         }
 
+        @Pure
         public int getKey() {
             return keys[currentEntry];
         }
 
+        @Pure
         public int getValue() {
             return values[currentEntry];
         }
