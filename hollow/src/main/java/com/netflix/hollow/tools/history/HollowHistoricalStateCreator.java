@@ -356,7 +356,12 @@ public class HollowHistoricalStateCreator {
             });
 
             HollowBlobInput hbi = HollowBlobInput.serial(in);
-            reader.readSnapshot(hbi);
+            try {
+                reader.readSnapshot(hbi);
+            } catch (IOException e) {
+                hbi.close();
+                throw e;
+            }
         } catch (Exception e) {
             pipeException = e;
         }
