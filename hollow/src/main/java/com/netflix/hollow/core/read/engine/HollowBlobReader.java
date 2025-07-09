@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.core.read.engine;
 
+import org.checkerframework.checker.mustcall.qual.Owning;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
@@ -91,7 +92,12 @@ public class HollowBlobReader {
     @Impure
     public void readSnapshot(InputStream is) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
-        readSnapshot(hbi);
+        try {
+            readSnapshot(hbi);
+        } catch (IOException e) {
+            hbi.close();
+            throw e;
+        }
     }
 
     /**
@@ -101,7 +107,7 @@ public class HollowBlobReader {
      * @throws IOException if the snapshot could not be read
      */
     @Impure
-    public void readSnapshot(HollowBlobInput in) throws IOException {
+    public void readSnapshot(@Owning HollowBlobInput in) throws IOException {
         readSnapshot(in, new HollowFilterConfig(true));
     }
 
@@ -120,7 +126,12 @@ public class HollowBlobReader {
     @Deprecated
     public void readSnapshot(InputStream is, HollowFilterConfig filter) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
-        readSnapshot(hbi, (TypeFilter) filter);
+        try {
+            readSnapshot(hbi, (TypeFilter) filter);
+        } catch (IOException e) {
+            hbi.close();
+            throw e;
+        }
     }
 
     /**
@@ -135,7 +146,12 @@ public class HollowBlobReader {
     @Impure
     public void readSnapshot(InputStream is, TypeFilter filter) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
-        readSnapshot(hbi, filter);
+        try {
+            readSnapshot(hbi, filter);
+        } catch (IOException e) {
+            hbi.close();
+            throw e;
+        }
     }
 
     /**
@@ -148,17 +164,22 @@ public class HollowBlobReader {
      * @throws IOException if the snapshot could not be read
      */
     @Impure
-    public void readSnapshot(HollowBlobInput in, TypeFilter filter) throws IOException {
-        readSnapshot(in, null, filter);
+    public void readSnapshot(@Owning HollowBlobInput in, TypeFilter filter) throws IOException {
+        try {
+            readSnapshot(in, null, filter);
+        } catch (IOException e) {
+            in.close();
+            throw e;
+        }
     }
 
     @Impure
-    public void readSnapshot(HollowBlobInput in, OptionalBlobPartInput optionalParts) throws IOException {
+    public void readSnapshot(@Owning HollowBlobInput in, OptionalBlobPartInput optionalParts) throws IOException {
         readSnapshot(in, optionalParts, new HollowFilterConfig(true));
     }
 
     @Impure
-    public void readSnapshot(HollowBlobInput in, OptionalBlobPartInput optionalParts, TypeFilter filter) throws IOException {
+    public void readSnapshot(@Owning HollowBlobInput in, @Owning OptionalBlobPartInput optionalParts, TypeFilter filter) throws IOException {
         validateMemoryMode(in.getMemoryMode());
         Map<String, HollowBlobInput> optionalPartInputs = null;
         if(optionalParts != null)
@@ -203,6 +224,8 @@ public class HollowBlobReader {
         notifyEndUpdate();
 
         stateEngine.afterInitialization();
+        in.close();
+        optionalParts.close();
     }
 
     /**
@@ -217,7 +240,12 @@ public class HollowBlobReader {
     @Impure
     public void applyDelta(InputStream in) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(in);
-        applyDelta(hbi);
+        try {
+            applyDelta(hbi);
+        } catch (IOException e) {
+            hbi.close();
+            throw e;
+        }
     }
 
     /**
@@ -230,12 +258,12 @@ public class HollowBlobReader {
      * @throws IOException if the delta could not be applied
      */
     @Impure
-    public void applyDelta(HollowBlobInput in) throws IOException {
+    public void applyDelta(@Owning HollowBlobInput in) throws IOException {
         applyDelta(in, null);
     }
 
     @Impure
-    public void applyDelta(HollowBlobInput in, OptionalBlobPartInput optionalParts) throws IOException {
+    public void applyDelta(@Owning HollowBlobInput in, @Owning OptionalBlobPartInput optionalParts) throws IOException {
         validateMemoryMode(in.getMemoryMode());
         Map<String, HollowBlobInput> optionalPartInputs = null;
         if(optionalParts != null)
@@ -274,10 +302,12 @@ public class HollowBlobReader {
         log.info("TYPES: " + typeNames);
 
         notifyEndUpdate();
+        in.close();
+        optionalParts.close();
     }
 
     @Impure
-    private HollowBlobHeader readHeader(HollowBlobInput in, boolean isDelta) throws IOException {
+    private HollowBlobHeader readHeader(@Owning HollowBlobInput in, boolean isDelta) throws IOException {
         HollowBlobHeader header = headerReader.readHeader(in);
 
         if(isDelta && header.getOriginRandomizedTag() != stateEngine.getCurrentRandomizedTag())
