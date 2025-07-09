@@ -20,6 +20,8 @@ import org.checkerframework.framework.qual.EnsuresQualifier;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.checker.collectionownership.qual.CollectionFieldDestructor;
+import org.checkerframework.checker.mustcall.qual.CreatesMustCallFor;
 import org.checkerframework.checker.mustcall.qual.InheritableMustCall;
 import com.netflix.hollow.core.memory.MemoryMode;
 import java.io.BufferedInputStream;
@@ -53,6 +55,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
 
     @Impure
+    @CreatesMustCallFor("this")
     public void addInput(String partName, InputStream in) {
         streamsToClose.add(in);
         inputsByPartName.put(partName, in);
@@ -67,6 +70,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
     
     @Impure
+    @CreatesMustCallFor("this")
     public InputStream getInputStream(String partName) throws IOException {
         Object o = inputsByPartName.get(partName);
         if(o instanceof File) {
@@ -83,6 +87,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
     
     @Impure
+    @CreatesMustCallFor("this")
     public Map<String, HollowBlobInput> getInputsByPartName(MemoryMode mode) throws IOException {
         Map<String, HollowBlobInput> map = new HashMap<>(inputsByPartName.size());
         
@@ -95,6 +100,7 @@ public class OptionalBlobPartInput implements Closeable {
     }
     
     @Impure
+    @CreatesMustCallFor("this")
     public Map<String, InputStream> getInputStreamsByPartName() throws IOException {
         Map<String, InputStream> map = new HashMap<>(inputsByPartName.size());
         
@@ -105,7 +111,7 @@ public class OptionalBlobPartInput implements Closeable {
         return map;
     }
 
-    @EnsuresQualifier(expression="this.streamsToClose", qualifier=org.checkerframework.checker.collectionownership.qual.OwningCollectionWithoutObligation.class)
+    @CollectionFieldDestructor("streamsToClose")
     @Impure
     @Override
     public void close() throws IOException {
