@@ -1,13 +1,43 @@
 buildscript {
-  repositories { mavenCentral() }
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
 }
 
 plugins {
   id 'com.netflix.nebula.netflixoss' version '11.6.0'
+  id 'org.checkerframework' version '0.6.56' apply false
 }
+
+// To use a locally-built Checker Framework, run gradle with "-PcfLocal".
 
 subprojects {
   apply plugin: 'nebula.netflixoss'
+  
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
+
+  if (!project.hasProperty("noCF")) {
+    apply plugin: 'org.checkerframework'
+
+    if (project.hasProperty("cfLocal")) {
+      def cfHome = String.valueOf(System.getenv("CHECKERFRAMEWORK"))
+      dependencies {
+        compileOnly files(cfHome + "/checker/dist/checker-qual.jar")
+        testCompileOnly files(cfHome + "/checker/dist/checker-qual.jar")
+        checkerFramework files(cfHome + "/checker/dist/checker.jar")
+      }
+    }
+
+    checkerFramework {
+      checkers = [
+        'org.checkerframework.checker.resourceleak.ResourceLeakChecker'
+      ]
+    }
+  }
 
   java {
     toolchain {
@@ -23,8 +53,4 @@ subprojects {
   }
 
   group = 'com.netflix.hollow'
-
-  repositories {
-    mavenCentral()
-  }
 }
