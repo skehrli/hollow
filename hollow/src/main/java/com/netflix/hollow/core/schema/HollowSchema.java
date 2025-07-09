@@ -93,7 +93,11 @@ public abstract class HollowSchema {
     @Impure
     public static HollowSchema readFrom(InputStream is) throws IOException {
         HollowBlobInput hbi = HollowBlobInput.serial(is);
-        return readFrom(hbi);
+        try {
+            return readFrom(hbi);
+        } finally {
+            hbi.close();
+        }
     }
 
     @Impure
