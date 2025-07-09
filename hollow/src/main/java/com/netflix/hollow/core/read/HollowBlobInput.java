@@ -1,9 +1,13 @@
 package com.netflix.hollow.core.read;
 
+import org.checkerframework.checker.mustcall.qual.CreatesMustCallFor;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
-import org.checkerframework.checker.mustcall.qual.InheritableMustCall;
+import org.checkerframework.checker.mustcall.qual.MustCallAlias;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
+import org.checkerframework.checker.mustcall.qual.Owning;
+import org.checkerframework.checker.calledmethods.qual.EnsuresCalledMethods;
 import static com.netflix.hollow.core.memory.MemoryMode.ON_HEAP;
 import static com.netflix.hollow.core.memory.MemoryMode.SHARED_MEMORY_LAZY;
 import static com.netflix.hollow.core.memory.encoding.BlobByteBuffer.MAX_SINGLE_BUFFER_CAPACITY;
@@ -24,16 +28,16 @@ import java.nio.channels.FileChannel;
  * This class provides an abstraction to help navigate between use of DataInputStream or RandomAccessFile
  * as the underlying resource for Hollow Producer/Consumer Blob to support the different memory modes.
  */
-@InheritableMustCall("close")
 public class HollowBlobInput implements Closeable {
     private final MemoryMode memoryMode;
 
-    private Object input;
+    private final @Owning Closeable input;
     private BlobByteBuffer buffer;
 
     @SideEffectFree
-    private HollowBlobInput(MemoryMode memoryMode) {
+    private @MustCallAlias HollowBlobInput(MemoryMode memoryMode, @Owning @MustCallAlias Closeable input) {
         this.memoryMode = memoryMode;
+        this.input = input;
     }
 
     @Pure
@@ -72,6 +76,7 @@ public class HollowBlobInput implements Closeable {
      * @throws IOException if the Hollow Blob Input couldn't be initialized
      */
     @Impure
+    @CreatesMustCallFor("#2")
     public static HollowBlobInput modeBasedSelector(MemoryMode mode, OptionalBlobPartInput input, String partName) throws IOException {
         if (mode.equals(ON_HEAP)) {
             return serial(input.getInputStream(partName));
@@ -99,12 +104,16 @@ public class HollowBlobInput implements Closeable {
      * Useful for testing with custom buffer capacity
      */
     @Impure
-    public static HollowBlobInput randomAccess(File f,int singleBufferCapacity) throws IOException {
-        HollowBlobInput hbi = new HollowBlobInput(SHARED_MEMORY_LAZY);
+    public static HollowBlobInput randomAccess(File f, int singleBufferCapacity) throws IOException {
         RandomAccessFile raf = new RandomAccessFile(f, "r");
-        hbi.input = raf;
-        FileChannel channel = ((RandomAccessFile) hbi.input).getChannel();
-        hbi.buffer = BlobByteBuffer.mmapBlob(channel, singleBufferCapacity);
+        HollowBlobInput hbi = new HollowBlobInput(SHARED_MEMORY_LAZY, raf);
+        FileChannel channel = raf.getChannel();
+        try {
+            hbi.buffer = BlobByteBuffer.mmapBlob(channel, singleBufferCapacity);
+        } catch (IOException e) {
+            hbi.close();
+            throw e;
+        }
         return hbi;
     }
 
@@ -125,9 +134,8 @@ public class HollowBlobInput implements Closeable {
      * @return a serial access HollowBlobInput object
      */
     @Impure
-    public static HollowBlobInput serial(InputStream is) {
-        HollowBlobInput hbi = new HollowBlobInput(ON_HEAP);
-        hbi.input = new DataInputStream(is);
+    public static HollowBlobInput serial(@Owning InputStream is) {
+        HollowBlobInput hbi = new HollowBlobInput(ON_HEAP, new DataInputStream(is));
         return hbi;
     }
 
@@ -315,18 +323,15 @@ public class HollowBlobInput implements Closeable {
      */
     @Impure
     @Override
+    @EnsuresCalledMethods(value="input", methods="close")
     public void close() throws IOException {
-        if (input instanceof RandomAccessFile) {
-            ((RandomAccessFile) input).close();
-        } else if (input instanceof DataInputStream) {
-            ((DataInputStream) input).close();
-        } else {
-            throw new UnsupportedOperationException("Unknown Hollow Blob Input type");
+        if (input != null) {
+            input.close();
         }
     }
 
     @Pure
-    public Object getInput() {
+    public @NotOwning Object getInput() {
         return input;
     }
 
