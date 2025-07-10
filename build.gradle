@@ -10,8 +10,6 @@ plugins {
   id 'org.checkerframework' version '0.6.56' apply false
 }
 
-// To use a locally-built Checker Framework, run gradle with "-PcfLocal".
-
 subprojects {
   apply plugin: 'nebula.netflixoss'
   
@@ -53,4 +51,11 @@ subprojects {
   }
 
   group = 'com.netflix.hollow'
+}
+
+project(':hollow').afterEvaluate { subproject ->
+    subproject.checkerFramework {
+      // only check hollow-core
+      extraJavacArgs.add("-AonlyFiles=.*/com/netflix/hollow/core/.*")
+    }
 }
