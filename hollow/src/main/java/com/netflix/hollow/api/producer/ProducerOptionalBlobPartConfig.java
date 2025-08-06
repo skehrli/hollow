@@ -16,6 +16,7 @@
  */
 package com.netflix.hollow.api.producer;
 
+import org.checkerframework.checker.mustcall.qual.NotOwning;
 import com.netflix.hollow.api.consumer.HollowConsumer;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -162,7 +163,7 @@ public class ProducerOptionalBlobPartConfig {
             return types;
         }
         
-        public DataOutputStream getStream() {
+        public @NotOwning DataOutputStream getStream() {
             return stream;
         }
     }

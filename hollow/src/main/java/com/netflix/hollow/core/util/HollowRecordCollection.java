@@ -18,6 +18,7 @@ package com.netflix.hollow.core.util;
 
 import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
 import org.checkerframework.checker.collectionownership.qual.PolyOwningCollection;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
 import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Impure;
@@ -41,13 +42,15 @@ public abstract class HollowRecordCollection<T> extends AbstractCollection<T> {
             private int ordinal = populatedOrdinals.nextSetBit(0);
 
             @Pure
+            @SuppressWarnings("collectionownership:override.receiver")
             public boolean hasNext() {
                 return ordinal != -1;
             }
 
             @Impure
             @Override
-            public T next() {
+            @SuppressWarnings("collectionownership:override.receiver")
+            public @NotOwning T next() {
                 T t = getForOrdinal(ordinal);
                 ordinal = populatedOrdinals.nextSetBit(ordinal + 1);
                 return t;
@@ -66,7 +69,7 @@ public abstract class HollowRecordCollection<T> extends AbstractCollection<T> {
     public int size(@NotOwningCollection HollowRecordCollection<T> this) {
         return populatedOrdinals.cardinality();
     }
-    
+
     @Pure
     protected abstract T getForOrdinal(int ordinal);
 

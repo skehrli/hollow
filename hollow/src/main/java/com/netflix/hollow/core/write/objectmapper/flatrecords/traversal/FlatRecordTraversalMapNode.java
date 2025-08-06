@@ -1,6 +1,7 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
 import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowMapSchema;
@@ -58,12 +59,14 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
         return new AbstractSet<Entry<FlatRecordTraversalNode, FlatRecordTraversalNode>>() {
             @Impure
             @Override
+            @SuppressWarnings("collectionownership:override.receiver")
             public Iterator<Entry<FlatRecordTraversalNode, FlatRecordTraversalNode>> iterator() {
                 return new EntrySetIteratorImpl<>();
             }
 
             @Pure
             @Override
+            @SuppressWarnings("collectionownership:override.receiver")
             public int size() {
                 return keyOrdinals.length;
             }
@@ -80,13 +83,13 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
 
         @Pure
         @Override
-        public boolean hasNext(@NotOwningCollection FlatRecordTraversalMapNode.EntrySetIteratorImpl<K, V> this) {
+        public boolean hasNext(@NotOwningCollection EntrySetIteratorImpl<K, V> this) {
             return index < keyOrdinals.length;
         }
 
         @Impure
         @Override
-        public Entry<K, V> next(@NotOwningCollection FlatRecordTraversalMapNode.EntrySetIteratorImpl<K, V> this) {
+        public @NotOwning Entry<K, V> next(@NotOwningCollection EntrySetIteratorImpl<K, V> this) {
             if (index >= keyOrdinals.length) {
                 throw new IllegalStateException("No more elements");
             }
@@ -107,7 +110,7 @@ public class FlatRecordTraversalMapNode extends AbstractMap<FlatRecordTraversalN
 
                 @Impure
                 @Override
-                public V getValue() {
+                public @NotOwning V getValue() {
                     if (valueOrdinal == -1) {
                         return null;
                     }

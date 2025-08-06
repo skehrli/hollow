@@ -1,6 +1,7 @@
 package com.netflix.hollow.core.write.objectmapper.flatrecords.traversal;
 
 import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
 import com.netflix.hollow.core.schema.HollowListSchema;
@@ -69,7 +70,7 @@ public class FlatRecordTraversalListNode extends AbstractList<FlatRecordTraversa
 
   @Impure
   @Override
-  public FlatRecordTraversalNode get(@NotOwningCollection FlatRecordTraversalListNode this, int index) {
+  public @NotOwning FlatRecordTraversalNode get(@NotOwningCollection FlatRecordTraversalListNode this, int index) {
     if (index >= elementOrdinals.length) {
       throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + elementOrdinals.length);
     }

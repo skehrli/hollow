@@ -16,6 +16,7 @@
 package com.netflix.hollow.core.util;
 
 import org.checkerframework.checker.collectionownership.qual.NotOwningCollection;
+import org.checkerframework.checker.mustcall.qual.NotOwning;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
@@ -62,7 +63,7 @@ public class BitSetIterator implements Iterator<Integer> {
 
     @Impure
     @Override
-    public Integer next(@NotOwningCollection BitSetIterator this) {
+    public @NotOwning Integer next(@NotOwningCollection BitSetIterator this) {
         if (!hasNext())
             return null;
 
